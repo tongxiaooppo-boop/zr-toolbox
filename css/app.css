@@ -86,3 +86,7 @@ td:first-child,th:first-child{text-align:left}
 .chart .legend{display:flex;gap:14px;font-size:13px;color:var(--muted);margin-top:4px}
 .chart .key::before{content:"";display:inline-block;width:14px;height:3px;margin-right:4px;vertical-align:middle;background:currentColor}
 .chart .key.s0{color:var(--accent)}.chart .key.s1{color:var(--muted)}.chart .key.s2{color:var(--warn)}
+
+/* ⑧ 回本計算：淨值紀錄欄位 */
+.field textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font-size:16px;resize:vertical}
+.field textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}

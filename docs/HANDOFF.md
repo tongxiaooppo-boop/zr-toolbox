@@ -1,8 +1,8 @@
 # zr-toolbox 交接檔
 
 - 現行版本：決策 2026-11-08（[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)）；框架 **2026-11-08 v3**（[FRAMEWORK.md](FRAMEWORK.md)）
-- 狀態：**Gate 1 完成**（2026-11-08，Codex sol 一輪過，Opus 只改一個標籤）。PROOF_CMD 實測：tests 45／pass 45／fail 0／todo 0；smoke pages 4 全過。
-- **Gate 2 拆兩輪**（FRAMEWORK v3）。**2a（⑥⑧）任務書已派**：[collab/to-codex.md](../collab/to-codex.md) v1；`lineChart` 已由 Opus 實作，⑥⑧ 圖解已畫好核對；預期 tests 46 全過、smoke pages 6。2b（④⑪）待 2a 驗收後。
+- 狀態：**Gate 2a 完成**（2026-11-08，⑥⑧，Codex sol 一輪過，Opus 只修 ⑥ 刻度「+0%」）。PROOF_CMD 實測：tests 46 全過；smoke pages 6 全過。Gate 1（⑫③）同日完成。
+- 下一步＝**Gate 2b（④ 質押壓測、⑪ 曝險倍數）**：牽涉金額，開工前 Opus 先畫 2 張圖、補鎖數字的測試、寫任務書；結果卡附 `disclaimer('executable')`。
 - **Codex 面板環境限制**（Gate 1 發現）：PowerShell 擋 `npm.ps1`，要用 `npm.cmd`；沙箱裡 `npm run smoke` 開不了無頭 Chrome 會卡住。任務書的 PROOF_CMD 改成：Codex 只跑 `npm.cmd test`，smoke 由 Opus 跑。
 - 驗收指令：`npm test && npm run smoke`（現行預期見上方狀態）。
 - 使用者 2026-11-08 補充：工具箱分四大類（正二教學／正二變種／正二槓桿／其他股票計算機，含融資等原 v2 項目），**每個工具都要圖文解說，圖由 sol 畫**（流程見 FRAMEWORK.md 第 5 節）。① 不另做白話版計算機，⑪ 擔任白話版（FRAMEWORK.md 第 8 節）。
