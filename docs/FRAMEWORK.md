@@ -81,11 +81,11 @@ scripts/smoke.mjs          冒煙測試（無頭 Chrome，逐頁按「帶入範�
 |---|---|---|---|
 | 0 | 本文件、core 全部純函式＋40 項測試、UI 元件（含 `figure`）、分組首頁、樣板工具 ②（含第一張 sol 圖解）、冒煙測試 | Opus | 見上 |
 | 1 | ⑫ 辭典（18 個必備詞，見 `tests/registry.test.js` 的 `REQUIRED`；頁面可依 `#id` 定位、上方有關鍵字篩選）＋ ③ 定期配比再平衡（股版／債版分組選模板，註明同名不同配置；不收「預期年化 x 倍大盤」） | 訂閱 Codex sol（面板＋md） | `npm test`：fail 0、todo 0；smoke：pages 4 全過 |
-| 2 | ④ 質押壓測（還款／補擔保兩種分開顯示、130% 寫「多數券商契約，以契約為準」、結果附 `executable` 免責）、⑥ 複利偏離、⑧ 回撤、⑪ 曝險倍數 | Sonnet | smoke：pages 8 全過 |
-| 3 | ① 原計算機教程（依**線上版**欄位）、FinMind token 申請教學、PWA（manifest、sw、新版提示）、部署 | Sonnet＋Opus | smoke 全過＋手機實機看一次 |
-| 4 | 其他股票計算機：⑤ 融資維持率、⑦ 定期定額／年化報酬、⑨ 交易成本、⑩ 股息殖利率與除權息（開工前 Opus 先定 core 簽名與測試預期值） | Sonnet | smoke 全過 |
+| 2 | ④ 質押壓測（還款／補擔保兩種分開顯示、130% 寫「多數券商契約，以契約為準」、結果附 `executable` 免責）、⑥ 複利偏離、⑧ 回撤、⑪ 曝險倍數 | 訂閱 Codex sol | smoke：pages 8 全過 |
+| 3 | ① 原計算機教程（依**線上版**欄位）、FinMind token 申請教學、PWA（manifest、sw、新版提示）、部署 | 訂閱 Codex sol＋Opus（部署） | smoke 全過＋手機實機看一次 |
+| 4 | 其他股票計算機：⑤ 融資維持率、⑦ 定期定額／年化報酬、⑨ 交易成本、⑩ 股息殖利率與除權息（開工前 Opus 先定 core 簽名與測試預期值） | 訂閱 Codex sol | smoke 全過 |
 
-每個 Gate 的圖解由 Opus 派 sol 畫、Opus 驗；寫頁面的外包只負責用 `figure()` 放進去。
+執行者使用者 2026-11-08 指定為訂閱 Codex sol（面板不能用時改 Sonnet），派工流程見 HANDOFF.md。每個 Gate 的圖解由 Opus 派免費 sol 畫、Opus 驗；寫頁面的外包只負責用 `figure()` 放進去。
 
 圖表（⑥ 需要兩條淨值線）於 Gate 2 開工前由 Opus 在 `components.js` 補 `lineChart` 簽名，不在本版。
 
