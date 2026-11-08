@@ -21,12 +21,14 @@
 ## 使用者已定（2026-11-08）
 
 1. 原計算機線上版：https://tongxiaooppo-boop.github.io/zr-calc/ （GitHub `tongxiaooppo-boop/zr-calc`，public，main，最後 push 2026-11-04）。
-   - **線上 index.html 與本機 `D:\ok\zr-calc\index.html`、`D:\ok\zr-calc2\index.html` 都不同**（本機版多了研究頁連結等未上線修改）。Gate 3 改原計算機時，從 GitHub main 重新 clone，以線上版為準，不要拿本機副本推上去。
-2. 部署：工具箱**獨立部署**（新 repo／新 Pages），原計算機網址不動，只在原頁頂端加工具箱入口。
+3. **舊案完全不改**（使用者 2026-11-08）：不改 `tongxiaooppo-boop/zr-calc` repo、不在原頁加入口或導覽。原決策 D3（原頁加導覽、ⓘ、副標）與原頁的 token 402 處理、PWA 更新提示**作廢**。
+   - 工具 ① 改為在工具箱內做：(a) 原計算機逐欄教程（對照線上版欄位：持股、正二、現金與負債、目標 Beta、口徑、允許借款、FinMind token），工具箱可以單向連到原頁；(b) 是否另做同公式的白話版計算機（含 token 402 教學）→ Gate 0 時由 Opus 提案、使用者拍板。
+   - 教程以**線上版**欄位為準（本機 `D:\ok\zr-calc\index.html`、`D:\ok\zr-calc2\index.html` 都和線上不同，不能當依據）。
+   - FinMind token 申請教學（免費會員每小時 600 次）放在工具箱內。
 
 ## Gate 規劃（草案，Gate 0 時定死）
 
 - Gate 0（Opus）：目錄、共用 UI 元件（卡片、ⓘ 術語小卡、範例鈕、固定免責區）、各工具純函式簽名、測試名稱與預期值、PROOF_CMD。
 - Gate 1：首頁＋術語辭典＋工具 ②③（沿用 research-model）。
 - Gate 2：工具 ④⑪⑥⑧。
-- Gate 3：原計算機導覽、token 402 教學、PWA 更新提示（改的是原 repo）。
+- Gate 3：工具 ①（原計算機教程＋可能的白話版）、FinMind token 教學、工具箱自己的 PWA 更新提示。
