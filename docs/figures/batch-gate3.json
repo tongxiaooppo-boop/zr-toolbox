@@ -1,0 +1,1 @@
+{ "jobs": [ { "promptFile": "calc-guide-map.md", "model": "gpt-6.1-sol", "effort": "high", "out": "../../img/calc-guide/map.svg" } ] }

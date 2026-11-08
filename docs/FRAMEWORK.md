@@ -1,6 +1,6 @@
 # zr-toolbox 框架（Gate 0 定稿）
 
-- 版本：**2026-11-08 v3**（v2＝加入圖解流程、首頁四大分組、Gate 4；v3＝`components.js` 新增 `lineChart`、Gate 2 拆 2a／2b、Codex 只跑單元測試）。改介面要改這份並升版，所有還寫舊行為的段落一起改。
+- 版本：**2026-11-08 v4**（v2＝加入圖解流程、首頁四大分組、Gate 4；v3＝`components.js` 新增 `lineChart`、Gate 2 拆 2a／2b、Codex 只跑單元測試；v4＝PWA 定案（network-first、不做新版提示）、頁殼加 manifest／`pwa.js`、Gate 3 拆 3a／3b、① 文案放 `js/data/calcGuide.js`）。改介面要改這份並升版，所有還寫舊行為的段落一起改。
 - 依據：[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)、[HANDOFF.md](HANDOFF.md)。
 
 ## 1. 技術約定
@@ -9,19 +9,23 @@
 - 所有連結用相對路徑（部署在 GitHub Pages 的 `/<repo>/` 底下也能用）。
 - 手機優先：390px 寬不得水平捲動（冒煙測試會檢查）。
 - 不用 `innerHTML` 組畫面，一律用 `js/ui/components.js` 的 `h()` 與元件（防 XSS、樣式一致）。
-- 不用 localStorage 存計算輸入（v1 不做）；只有 Gate 3 的 FinMind token 會存。
+- 不用 localStorage 存計算輸入（v1 不做）。工具箱本身不抓 FinMind（token 教學只教原計算機怎麼用），所以也不存 token；`finmind.js` 留給日後要抓股價的工具。
+- PWA：network-first（有網路永遠拿新版，離線用最後看過的版本），所以**不做新版提示**、不用維護快取版本號（使用者 2026-11-08 授權 Opus 定）。
 
 ## 2. 目錄與模組邊界
 
 ```
 index.html                 首頁（捷徑＋卡片），內容由 js/pages/home.js 依 js/data/tools.js 產生
-tools/<id>.html            每個工具一頁，只是殼：<main id="app"> ＋ 載入 ../js/pages/<id>.js
+tools/<id>.html            每個工具一頁，只是殼：<main id="app"> ＋ 載入 ../js/pages/<id>.js ＋ manifest 連結與 ../js/pwa.js（照抄 tools/pledge.html；tests/pwa.test.js 會檢查）
 css/app.css                全站唯一樣式檔
 img/<id>/*.svg             各工具的圖解（sol 畫，Opus 驗數字）
 docs/figures/<id>-<名>.md  每張圖給 sol 的繪圖提示（留存，改圖時改這份重畫）
 js/core/*.js               純函式：不碰 DOM、不碰網路。所有公式只在這裡。
 js/data/tools.js           分組 GROUPS＋卡片清單（id、編號、group、標題、一句話、href、gate、status、terms）
 js/data/glossary.js        術語辭典資料（欄位見檔頭註解）
+js/data/calcGuide.js       ① 原計算機逐欄教程＋FinMind token 教學文案（Opus 寫，頁面只排版）
+js/pwa.js                  每頁載入，註冊 sw.js
+sw.js、manifest.webmanifest、icon-192.png、icon-512.png   PWA（根目錄）
 js/ui/components.js        共用 UI 元件（簽名見檔頭註解；Gate 0 定死，v3 加 lineChart）
 js/pages/<id>.js           各工具頁：組欄位 → 呼叫 core → 顯示結果。不寫公式。
 tests/*.test.js            node:test 單元測試
@@ -41,7 +45,7 @@ scripts/smoke.mjs          冒煙測試（無頭 Chrome，逐頁按「帶入範�
 | decay.js | `simulateDaily(indexReturns, {leverage=2, dailyCost=0})` → `{indexPath, leveredPath, indexTotal, leveredTotal, naive, gap}`；`makeScenario('chop'|'trend', days, size)` | ⑥ | 新 |
 | drawdown.js | `recoveryGain(d)`、`maxDrawdown(values)` → `{mdd, peakIndex, troughIndex}`、`yearsToRecover(d, r)` | ⑧ | 新 |
 | exposure.js | `exposureNow({positions:[{value,beta}], cash, debt})` → `{assets, net, exposure, assetBasis, netBasis, leverageRatio}`；`betaPlan(p)` | ⑪（及 ① 教程對照） | betaPlan 為 research-model 移植 |
-| finmind.js | `finmindAction({status, usedToken, retried})` → `{action, message}` | Gate 3 token 處理 | 新 |
+| finmind.js | `finmindAction({status, usedToken, retried})` → `{action, message}` | 日後抓股價的工具（v1 工具箱不抓 FinMind） | 新 |
 
 **單位規約**：core 一律用小數，不用百分比數字——比例、跌幅、利率、維持率都是小數（利率 3%＝`0.03`、追繳線 130%＝`1.3`、跌 30%＝`0.3`、權重 40%＝`0.4`）；金額為新台幣元；`days` 為日曆天整數。頁面欄位讓使用者輸入百分比數字（例 130），**頁面自己除以 100** 再傳進 core，顯示時用 `fmtPct`。
 
@@ -83,7 +87,8 @@ scripts/smoke.mjs          冒煙測試（無頭 Chrome，逐頁按「帶入範�
 | 1 | ⑫ 辭典（18 個必備詞，見 `tests/registry.test.js` 的 `REQUIRED`；頁面可依 `#id` 定位、上方有關鍵字篩選）＋ ③ 定期配比再平衡（股版／債版分組選模板，註明同名不同配置；不收「預期年化 x 倍大盤」） | 訂閱 Codex sol（面板＋md） | `npm test`：fail 0、todo 0；smoke：pages 4 全過 |
 | 2a | ⑥ 複利偏離（用 `lineChart`）、⑧ 回撤 | 訂閱 Codex sol | tests 46 全過；smoke pages 6 全過 |
 | 2b | ④ 質押壓測（還款／補擔保兩種分開顯示、130% 寫「多數券商契約，以契約為準」、結果附 `executable` 免責）、⑪ 曝險倍數 | 訂閱 Codex sol | tests 48 全過；smoke：pages 8 全過 |
-| 3 | ① 原計算機教程（依**線上版**欄位）、FinMind token 申請教學、PWA（manifest、sw、新版提示）、部署 | 訂閱 Codex sol＋Opus（部署） | smoke 全過＋手機實機看一次 |
+| 3a | ① 原計算機教程（依**線上版**欄位，文案 `calcGuide.js`）＋FinMind token 申請教學（同頁 `#token`） | 訂閱 Codex sol | tests 51 全過；smoke pages 9 全過 |
+| 3b | PWA（Opus 已做：manifest、network-first sw、圖示）、部署（新 repo、Pages、公開前檢查） | Opus | smoke 全過＋手機實機看一次 |
 | 4 | 其他股票計算機：⑤ 融資維持率、⑦ 定期定額／年化報酬、⑨ 交易成本、⑩ 股息殖利率與除權息（開工前 Opus 先定 core 簽名與測試預期值） | 訂閱 Codex sol | smoke 全過 |
 
 執行者使用者 2026-11-08 指定為訂閱 Codex sol（面板不能用時改 Sonnet），派工流程見 HANDOFF.md。每個 Gate 的圖解由 Opus 派免費 sol 畫、Opus 驗；寫頁面的外包只負責用 `figure()` 放進去。

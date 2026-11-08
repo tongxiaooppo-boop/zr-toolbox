@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 496" role="img" aria-labelledby="svg-title svg-desc">
+  <title id="svg-title">原計算器與⑪欄位對照</title>
+  <desc id="svg-desc">原正二平衡計算器的四個區塊，分別對應工具箱⑪「我現在等於幾倍大盤」的欄位，箭頭表示資料要填到哪裡。兩邊填入相同範例，都會得到需買進正二 NT$ 1,300,000 的答案。</desc>
+
+  <style>
+    svg {
+      font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif;
+    }
+    text { fill: #1c2330; }
+    .column-title { font-size: 16px; font-weight: 700; }
+    .label { font-size: 13px; font-weight: 600; }
+    .small { font-size: 12px; }
+    .muted { fill: #6b7482; }
+    .box { fill: none; stroke-width: 1.5; }
+    .source { stroke: #2563eb; }
+    .target { stroke: #9aa3b2; }
+    .rule { stroke: #c9ced6; }
+    .arrow { fill: none; stroke: #2563eb; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .example-title { font-size: 15px; font-weight: 700; }
+    .example-line { font-size: 13px; }
+    .result { fill: #b45309; font-size: 15px; font-weight: 700; }
+    .danger { fill: #b91c1c; }
+    .safe { fill: #15803d; }
+
+    @media (prefers-color-scheme: dark) {
+      text { fill: #e8ebf0; }
+      .muted { fill: #9aa3b2; }
+      .source { stroke: #6ea0ff; }
+      .target { stroke: #6b7482; }
+      .rule { stroke: #3a4250; }
+      .arrow { stroke: #6ea0ff; }
+      .result { fill: #fbbf24; }
+      .danger { fill: #f87171; }
+      .safe { fill: #4ade80; }
+    }
+  </style>
+
+  <text class="column-title" x="12" y="30">原計算器</text>
+  <text class="column-title" x="198" y="30">⑪ 對應</text>
+
+  <rect class="box source" x="12" y="48" width="150" height="64" rx="10"/>
+  <text class="label" x="22" y="74">1. 持股（不含正二）</text>
+  <text class="small muted" x="22" y="96">每檔：股數 × 現價</text>
+  <path class="arrow" d="M169 80 H190 M185 75 L190 80 L185 85"/>
+  <rect class="box target" x="198" y="48" width="150" height="64" rx="10"/>
+  <text class="label" x="208" y="74">股票市值</text>
+  <text class="small muted" x="208" y="96">各檔加總</text>
+
+  <rect class="box source" x="12" y="124" width="150" height="64" rx="10"/>
+  <text class="label" x="22" y="150">2. 正二 ETF</text>
+  <text class="small muted" x="22" y="172">預設 00685L</text>
+  <path class="arrow" d="M169 156 H190 M185 151 L190 156 L185 161"/>
+  <rect class="box target" x="198" y="124" width="150" height="64" rx="10"/>
+  <text class="label" x="208" y="161">正二市值</text>
+
+  <rect class="box source" x="12" y="200" width="150" height="64" rx="10"/>
+  <text class="label" x="22" y="226">3. 現金與負債</text>
+  <text class="small muted" x="22" y="248">現金合計、負債合計</text>
+  <path class="arrow" d="M169 232 H190 M185 227 L190 232 L185 237"/>
+  <rect class="box target" x="198" y="200" width="150" height="64" rx="10"/>
+  <text class="label" x="208" y="237">現金、借款</text>
+
+  <rect class="box source" x="12" y="276" width="150" height="64" rx="10"/>
+  <text class="label" x="22" y="302">4. 目標</text>
+  <text class="small muted" x="22" y="324">目標 B、Beta 口徑</text>
+  <path class="arrow" d="M169 308 H190 M185 303 L190 308 L185 313"/>
+  <rect class="box target" x="198" y="276" width="150" height="64" rx="10"/>
+  <text class="label" x="208" y="313">目標倍數、倍數怎麼算</text>
+
+  <rect class="box rule" x="12" y="358" width="336" height="104" rx="10"/>
+  <text class="example-title" x="24" y="382">兩邊都按『範例』</text>
+  <text class="small" x="24" y="404">股票 1,000 萬、現金 200 萬、負債 300 萬，目標 1.4</text>
+  <text class="example-line" x="24" y="425">淨資產 900 萬 → 正二要 130 萬</text>
+  <text class="result" x="24" y="448">需買進正二 NT$ 1,300,000</text>
+
+  <text class="small muted" x="12" y="484">原計算器能填多檔明細；⑪ 只收加總，答案相同。</text>
+</svg>

@@ -1,8 +1,8 @@
 # zr-toolbox 交接檔
 
-- 現行版本：決策 2026-11-08（[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)）；框架 **2026-11-08 v3**（[FRAMEWORK.md](FRAMEWORK.md)）
+- 現行版本：決策 2026-11-08（[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)）；框架 **2026-11-08 v4**（[FRAMEWORK.md](FRAMEWORK.md)）
 - 狀態：**Gate 2 全部完成**（2026-11-08）。2b（④⑪）Codex sol 一輪過、Opus 未修改；PROOF_CMD 實測：tests 48 全過；smoke pages 8 全過。2a（⑥⑧）、Gate 1（⑫③）同日完成。
-- 下一步＝**Gate 3**（① 原計算機逐欄教程〔依線上版欄位〕、FinMind token 申請教學、PWA 與新版提示、部署到新 repo）。建議開新對話；開工前 Opus 先抓線上版欄位、定 PWA 檔案邊界、畫 ① 的圖、寫任務書。部署前照全域規則做公開前檢查。
+- 進行中＝**Gate 3a**（① 逐欄教程＋token 教學）：Opus 已準備好文案 `js/data/calcGuide.js`（依線上版程式碼逐欄核對）、圖 `img/calc-guide/map.svg`、測試（tests 51）、任務書 `collab/to-codex.md` v1。PWA（3b 前半）Opus 已做完：manifest、network-first `sw.js`、圖示、所有頁殼。下一步＝使用者在 Codex 面板派 3a → Opus 驗收（tests 51、smoke pages 9）→ 3b 部署（新 repo 名稱與公開需使用者確認）。
 - **Codex 面板環境限制**（Gate 1 發現）：PowerShell 擋 `npm.ps1`，要用 `npm.cmd`；沙箱裡 `npm run smoke` 開不了無頭 Chrome 會卡住。任務書的 PROOF_CMD 改成：Codex 只跑 `npm.cmd test`，smoke 由 Opus 跑。
 - 驗收指令：`npm test && npm run smoke`（現行預期見上方狀態）。
 - 使用者 2026-11-08 補充：工具箱分四大類（正二教學／正二變種／正二槓桿／其他股票計算機，含融資等原 v2 項目），**每個工具都要圖文解說，圖由 sol 畫**（流程見 FRAMEWORK.md 第 5 節）。① 不另做白話版計算機，⑪ 擔任白話版（FRAMEWORK.md 第 8 節）。
