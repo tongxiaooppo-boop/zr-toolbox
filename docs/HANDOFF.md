@@ -1,7 +1,7 @@
 # zr-toolbox 交接檔
 
 - 現行版本：決策 2026-11-08（[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)）；框架 **2026-11-08 v2**（[FRAMEWORK.md](FRAMEWORK.md)）
-- 狀態：**Gate 0 完成**（2026-11-08）。下一步＝Gate 1（⑫ 辭典＋③ 定期配比再平衡，Sonnet）。
+- 狀態：**Gate 0 完成**（2026-11-08）。下一步＝Gate 1（⑫ 辭典＋③ 定期配比再平衡），**由訂閱 Codex sol 寫**（使用者 2026-11-08 指定；還有一張重置券）。
 - 驗收指令：`npm test && npm run smoke`。Gate 0 預期 tests 44／pass 43／fail 0／todo 1；smoke pages 2 全過。
 - 使用者 2026-11-08 補充：工具箱分四大類（正二教學／正二變種／正二槓桿／其他股票計算機，含融資等原 v2 項目），**每個工具都要圖文解說，圖由 sol 畫**（流程見 FRAMEWORK.md 第 5 節）。① 不另做白話版計算機，⑪ 擔任白話版（FRAMEWORK.md 第 8 節）。
 
@@ -29,10 +29,20 @@
    - 教程以**線上版**欄位為準（本機 `D:\ok\zr-calc\index.html`、`D:\ok\zr-calc2\index.html` 都和線上不同，不能當依據）。
    - FinMind token 申請教學（免費會員每小時 600 次）放在工具箱內。
 
+## 派工方式（使用者 2026-11-08 指定）
+
+- Gate 1 起寫程式一律派**訂閱 Codex sol**，走 VS Code 右側 Codex 面板＋md（命令列沙箱壞，`codex-stage.sh` 暫不能用）：
+  1. Opus 寫 `collab/to-codex.md`（任務書：要讀的檔案、要改的檔案、照抄的樣板 `js/pages/trigger5050.js`、PROOF_CMD 與預期輸出、回報欄位），commit 到 master。
+  2. 請使用者在面板打：「讀 collab/to-codex.md 照做，完成寫 collab/from-codex.md」。
+  3. 使用者說做完 → Opus 讀回報、看 `git diff`、自己重跑 `npm test && npm run smoke`，修正最多 2 輪。
+- 直接在本專案目錄做，不複製 repo。面板不能用或使用者不在 → 改派 Sonnet 子代理。
+- 圖解不在任務書裡：Opus 派免費 sol 一次問答畫好、核對完放進 `img/<id>/`，Codex 只用 `figure()` 放進頁面。
+- 一次一個 Gate，每輪約 3 步；Codex 不得改 `js/core`、測試預期值、`components.js` 介面，覺得要改就停下寫進回報。
+
 ## Gate 規劃（定稿見 FRAMEWORK.md 第 7 節）
 
 - Gate 0 ✅（Opus）：core 全部純函式已實作（research-model 移植＋新寫），40 項單元測試＋4 項資料一致性測試；共用 UI 元件；首頁；工具 ② 已完成並當樣板；冒煙測試 `scripts/smoke.mjs`。
-- Gate 1：⑫ 術語辭典（18 個必備詞）＋ ③ 定期配比再平衡。
+- Gate 1（Codex sol）：⑫ 術語辭典（18 個必備詞）＋ ③ 定期配比再平衡。
 - Gate 2：④⑥⑧⑪（開工前 Opus 補 `lineChart` 簽名）。
 - Gate 3：①、FinMind token 教學、PWA 與更新提示、部署（新 repo；免費 GitHub Pages 需 public repo，公開前照全域規則檢查）。
 - Gate 4：⑤ 融資維持率、⑦ 定期定額／CAGR、⑨ 交易成本、⑩ 股息殖利率（原決策列 v2，使用者 2026-11-08 納入）。
