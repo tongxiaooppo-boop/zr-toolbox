@@ -67,3 +67,10 @@ td:first-child,th:first-child{text-align:left}
 /* 固定免責區：每個工具頁最後一個元素 */
 .disclaimer{margin-top:20px;padding-top:10px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
 .disclaimer p{margin:4px 0}
+
+/* ⑫ 術語辭典、③ 定期配比再平衡 */
+.glossary-filter{width:100%}
+.glossary-item{padding:10px 0;border-bottom:1px solid var(--line);scroll-margin-top:16px}
+.glossary-item.flash{background:var(--soft)}
+.trade-table{width:100%;font-size:14px;table-layout:fixed;overflow-wrap:anywhere}
+.trade-table th,.trade-table td{padding:6px 4px}

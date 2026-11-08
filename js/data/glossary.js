@@ -13,7 +13,7 @@ export const GLOSSARY = Object.freeze([
     plain: '正二追求的是「每一天」漲跌為大盤的 2 倍，不是一段時間的 2 倍。',
     detail: '因為每天重新槓桿，連續幾天下來的報酬會偏離「大盤報酬 × 2」。盤整來回震盪時通常比 2 倍差，單邊行情時可能比 2 倍好。',
     example: '例：大盤第一天 +10%、第二天 −10%，大盤共 −1%，正二約 −4%，不是 −2%。',
-    related: ['rebalance']
+    related: ['rebalance', 'volatility-decay', 'tracking-error']
   },
   {
     id: 'rebalance', term: '再平衡', aka: ['配回'],
@@ -27,7 +27,112 @@ export const GLOSSARY = Object.freeze([
     plain: '上次配回各半時的正二價格，之後漲跌幅都跟它比。',
     detail: '每做完一次配回，就把當時的價格記成新的基準價。這個工具不會幫你記，請自己記下來。',
     example: '例：上次配回時正二 100 元，現在 150 元，相對基準 +50%。',
-    related: ['rebalance']
+    related: ['rebalance', 'closing-price']
+  },
+  {
+    id: 'beta', term: 'Beta', aka: ['β'],
+    plain: '這一部分跟著大盤一起漲跌的程度。',
+    detail: '本工具箱用近似值：原型（大盤 ETF）1、正二 2、現金與美債 0，美債 0 是簡化。這是教學用近似，不是統計算出來的值。',
+    example: '例：正二 Beta 2，大盤某天漲 1%，正二那天約漲 2%。',
+    related: ['exposure', 'daily-2x']
+  },
+  {
+    id: 'exposure', term: '曝險', aka: ['曝險金額', 'Beta 曝險'],
+    plain: '你手上的錢，有多少會跟著大盤漲跌。',
+    detail: '會跟著大盤漲跌的金額，算法是各部位市值乘以 Beta，再全部加總。',
+    example: '例：持股 1,000 萬（Beta 1）＋正二 130 萬（Beta 2）＝曝險 1,260 萬。',
+    related: ['beta', 'basis', 'net-assets']
+  },
+  {
+    id: 'net-assets', term: '淨資產', aka: ['自有資金'],
+    plain: '把借來的錢扣掉後，真正屬於自己的錢。',
+    detail: '總資產是持股加上現金；再扣掉借款，才是自己的錢。',
+    example: '例：持股 1,000 萬＋現金 200 萬－借款 300 萬＝淨資產 900 萬。',
+    related: ['exposure', 'leverage-ratio']
+  },
+  {
+    id: 'basis', term: '口徑', aka: ['淨資產口徑', '總資產口徑'],
+    plain: '算幾倍時，選哪個數字當分母。',
+    detail: '算「幾倍大盤」時，淨資產口徑＝曝險÷淨資產；總資產口徑＝曝險÷總資產。原計算機有「口徑」欄位。',
+    example: '例：曝險 1,000 萬、淨資產 900 萬、總資產 1,200 萬，淨資產口徑約 1.11 倍、總資產口徑約 0.83 倍。',
+    related: ['exposure', 'net-assets']
+  },
+  {
+    id: 'leverage-ratio', term: '資產槓桿', aka: [],
+    plain: '手上全部的錢，是自己那份錢的幾倍。',
+    detail: '總資產÷淨資產，用來看借了多少錢，和曝險倍數不是同一件事。',
+    example: '例：總資產 1,200 萬、淨資產 900 萬，資產槓桿約 1.33 倍；再用 130 萬現金買正二後，淨資產口徑曝險是 1.4 倍，資產槓桿仍約 1.33 倍。',
+    related: ['net-assets', 'basis']
+  },
+  {
+    id: 'volatility-decay', term: '波動耗損', aka: ['複利偏離'],
+    plain: '每天重設倍數，累積結果會偏離整段漲跌的兩倍。',
+    detail: '每天重新槓桿會造成偏離。單邊趨勢時偏離可能是正的，不能用固定耗損率表示。',
+    example: '例：大盤先漲 10% 再跌約 9.09% 會回到原點，理想每日 2 倍卻約虧 1.82%。',
+    related: ['daily-2x', 'tracking-error']
+  },
+  {
+    id: 'tracking-error', term: '追蹤誤差', aka: [],
+    plain: '實際每天的漲跌，和原本要跟上的目標差多少。',
+    detail: '正二實際每日漲跌和「指數×2」有差距，來源有費用、期貨等衍生工具，以及基金曝險不是每天剛好 200%。元大 00631L 揭露曝險範圍為 180%–220%。',
+    example: '例：假設某天臺灣 50 漲 1%，理想是 +2%，正二實際 +1.9%，差的 0.1 個百分點就是追蹤誤差。',
+    related: ['daily-2x', 'premium-discount']
+  },
+  {
+    id: 'premium-discount', term: '折溢價', aka: ['溢價', '折價'],
+    plain: '買賣價格比每一份真正值的錢，高了或低了多少。',
+    detail: 'ETF 市價和淨值（每單位真正值多少）的差，就是折溢價。市價高於淨值叫溢價，低於叫折價；溢價時買進等於多付。',
+    example: '例：淨值 100 元、市價 101 元，溢價 1%。',
+    related: ['tracking-error']
+  },
+  {
+    id: 'maintenance-ratio', term: '維持率', aka: ['擔保維持率'],
+    plain: '押給券商的東西現在值多少，除以連利息在內欠的錢。',
+    detail: '擔保品現在算多少錢，除以借款（含利息），就是維持率。',
+    example: '例：持股算 100 萬、借 60 萬，維持率約 166.67%；持股跌 30% 後約 116.67%。',
+    related: ['margin-call', 'pledge']
+  },
+  {
+    id: 'margin-call', term: '追繳', aka: ['斷頭前通知'],
+    plain: '押的東西不夠值錢了，要限時還錢或多押一些。',
+    detail: '維持率跌破追繳線，就要在期限內還款或補擔保，否則可能被賣掉擔保品。追繳線多數券商契約是 130%，以你的契約為準（新光證券 2024.03 公開版為低於 130% 通知、166% 解除）。還款和補擔保擇一，需要的金額不一樣。',
+    example: '例：維持率 116.67% 低於 130%，收到追繳。',
+    related: ['maintenance-ratio', 'pledge']
+  },
+  {
+    id: 'pledge', term: '質押', aka: ['不限用途借貸', '股票質押'],
+    plain: '把持股押給券商，換成一筆借來的錢。',
+    detail: '股票還是你的，但借款期間不能隨意賣。借來的錢拿去買正二，下跌時擔保品和正二會一起跌。',
+    example: '例：持股 100 萬借 60 萬，維持率約 166.67%。',
+    related: ['maintenance-ratio', 'margin-call']
+  },
+  {
+    id: 'drawdown', term: '回撤', aka: ['最大回撤', 'MDD'],
+    plain: '從前一個高點往下跌了多少。',
+    detail: '回撤是從前一個高點往下跌的幅度；最大回撤是一段期間裡最大的那次。',
+    example: '例：從 120 萬跌到 84 萬，回撤 30%。',
+    related: ['recovery-gain']
+  },
+  {
+    id: 'recovery-gain', term: '回本漲幅', aka: [],
+    plain: '跌下來之後，要再漲多少才能回到原來的錢。',
+    detail: '跌了 d 之後要漲 d÷(1−d) 才回本，跌越多要漲越多。',
+    example: '例：跌 30% 要漲約 42.9%；跌 50% 要漲 100%。',
+    related: ['drawdown']
+  },
+  {
+    id: 'closing-price', term: '收盤價', aka: [],
+    plain: '當天最後成交的價格。',
+    detail: '台股 13:30 收盤，13:25–13:30 是收盤集合競價。本工具箱算漲跌用收盤價就夠。',
+    example: '例：某天正二收盤 150 元，相對基準價 100 元是 +50%。',
+    related: ['base-price']
+  },
+  {
+    id: 'finmind-token', term: 'FinMind token', aka: ['API token'],
+    plain: '查台股資料時用的通行證，像密碼一樣要保密。',
+    detail: 'FinMind 是提供台股資料的免費服務；註冊免費會員拿到 token，每小時可查 600 次。超過次數會被擋（回應碼 402）；token 像密碼，不要貼給別人。',
+    example: '例：一天查 20 檔股價，用免費會員 token 綽綽有餘。',
+    related: ['closing-price']
   }
 ]);
 

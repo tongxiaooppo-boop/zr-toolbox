@@ -36,6 +36,6 @@ test('glossary: entries complete, plain line ≤ 40 chars, related ids exist', (
 const REQUIRED = ['beta', 'exposure', 'net-assets', 'basis', 'leverage-ratio', 'rebalance', 'daily-2x', 'base-price',
   'volatility-decay', 'tracking-error', 'premium-discount', 'maintenance-ratio', 'margin-call', 'pledge',
   'drawdown', 'recovery-gain', 'closing-price', 'finmind-token'];
-test('glossary: required terms for v1 are present', { todo: 'Gate 1' }, () => {
+test('glossary: required terms for v1 are present', () => {
   for (const id of REQUIRED) assert.ok(TERM_BY_ID[id], id);
 });
