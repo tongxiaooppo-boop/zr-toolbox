@@ -28,8 +28,11 @@ export function pledgeStress(p, decline) {
   const safeRaw = stressedCollateral / (p.safety * (1 + k)) - p.debt;
   const investment = p.newDebt * p.investRatio;
   const referencePrice = p.call * stressedDebt / (p.shares * p.collateralQ);
+  // nowRatio：不跌、只算到期利息的維持率；callDrop：從目前股價跌多少會低於追繳線（沒借款時為 1）
+  const nowRatio = stressedDebt > 0 ? collateral / stressedDebt : Infinity;
+  const callDrop = 1 - referencePrice / p.price;
   return {
-    collateral, k, stressedDebt, stressedCollateral, ratio, called, target, repay, topup, needed,
+    collateral, k, nowRatio, callDrop, stressedDebt, stressedCollateral, ratio, called, target, repay, topup, needed,
     extra: Math.max(0, needed - p.reserve), safeRaw, safeNew: Math.max(0, Math.min(p.credit, safeRaw)),
     overCredit: p.newDebt > p.credit, investment, uninvested: p.newDebt - investment,
     buyShares: Math.floor(investment / p.purchasePrice), referencePrice,

@@ -37,7 +37,7 @@ scripts/smoke.mjs          冒煙測試（無頭 Chrome，逐頁按「帶入範�
 | format.js | `parseNum(text)`、`fmtMoney(n)`、`fmtPct(n, digits=1)`、`fmtX(n, digits=2)` | 全部 | 新 |
 | trigger.js | `checkTrigger({basePrice, nowPrice, threshold=.5})` → `{change, hit, direction}`；`split5050({lever, cash})` → `{total, target, leverTrade, cashAfter}` | ② | 新（research.js 的頁內邏輯抽出） |
 | rebalance.js | `TEMPLATES`（7 個：5050、6040、532/442/433 股版、532/442 債版）；`dueDate(last, months)`；`rebalance({template, holdings[3], contribution, fee, months, last, asOf})` → `{total, targets, trades, due, ready, exposure}` | ③ | research-model 移植＋模板擴充 |
-| pledge.js | `pledgeStress(p, decline)`（欄位見檔頭；`remedy: 'repay'|'collateral'`）；`pledgeTable(p, declines)` | ④ | research-model `stress()` 移植 |
+| pledge.js | `pledgeStress(p, decline)`（欄位見檔頭；`remedy: 'repay'|'collateral'`；Gate 2b 加回傳 `nowRatio`、`callDrop`）；`pledgeTable(p, declines)` | ④ | research-model `stress()` 移植 |
 | decay.js | `simulateDaily(indexReturns, {leverage=2, dailyCost=0})` → `{indexPath, leveredPath, indexTotal, leveredTotal, naive, gap}`；`makeScenario('chop'|'trend', days, size)` | ⑥ | 新 |
 | drawdown.js | `recoveryGain(d)`、`maxDrawdown(values)` → `{mdd, peakIndex, troughIndex}`、`yearsToRecover(d, r)` | ⑧ | 新 |
 | exposure.js | `exposureNow({positions:[{value,beta}], cash, debt})` → `{assets, net, exposure, assetBasis, netBasis, leverageRatio}`；`betaPlan(p)` | ⑪（及 ① 教程對照） | betaPlan 為 research-model 移植 |
@@ -82,7 +82,7 @@ scripts/smoke.mjs          冒煙測試（無頭 Chrome，逐頁按「帶入範�
 | 0 | 本文件、core 全部純函式＋40 項測試、UI 元件（含 `figure`）、分組首頁、樣板工具 ②（含第一張 sol 圖解）、冒煙測試 | Opus | 見上 |
 | 1 | ⑫ 辭典（18 個必備詞，見 `tests/registry.test.js` 的 `REQUIRED`；頁面可依 `#id` 定位、上方有關鍵字篩選）＋ ③ 定期配比再平衡（股版／債版分組選模板，註明同名不同配置；不收「預期年化 x 倍大盤」） | 訂閱 Codex sol（面板＋md） | `npm test`：fail 0、todo 0；smoke：pages 4 全過 |
 | 2a | ⑥ 複利偏離（用 `lineChart`）、⑧ 回撤 | 訂閱 Codex sol | tests 46 全過；smoke pages 6 全過 |
-| 2b | ④ 質押壓測（還款／補擔保兩種分開顯示、130% 寫「多數券商契約，以契約為準」、結果附 `executable` 免責）、⑪ 曝險倍數 | 訂閱 Codex sol | smoke：pages 8 全過 |
+| 2b | ④ 質押壓測（還款／補擔保兩種分開顯示、130% 寫「多數券商契約，以契約為準」、結果附 `executable` 免責）、⑪ 曝險倍數 | 訂閱 Codex sol | tests 48 全過；smoke：pages 8 全過 |
 | 3 | ① 原計算機教程（依**線上版**欄位）、FinMind token 申請教學、PWA（manifest、sw、新版提示）、部署 | 訂閱 Codex sol＋Opus（部署） | smoke 全過＋手機實機看一次 |
 | 4 | 其他股票計算機：⑤ 融資維持率、⑦ 定期定額／年化報酬、⑨ 交易成本、⑩ 股息殖利率與除權息（開工前 Opus 先定 core 簽名與測試預期值） | 訂閱 Codex sol | smoke 全過 |
 

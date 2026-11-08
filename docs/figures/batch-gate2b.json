@@ -1,0 +1,4 @@
+{ "jobs": [
+  { "promptFile": "pledge-call-line.md", "model": "gpt-6.1-sol", "effort": "high", "out": "../../img/pledge/call-line.svg" },
+  { "promptFile": "exposure-buy-to-1.4.md", "model": "gpt-6.1-sol", "effort": "high", "out": "../../img/exposure/buy-to-1.4.svg" }
+] }

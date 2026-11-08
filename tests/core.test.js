@@ -5,7 +5,7 @@ import { parseNum, fmtMoney, fmtPct, fmtX } from '../js/core/format.js';
 import { checkTrigger, split5050 } from '../js/core/trigger.js';
 import { TEMPLATES, rebalance } from '../js/core/rebalance.js';
 import { pledgeStress, pledgeTable } from '../js/core/pledge.js';
-import { exposureNow } from '../js/core/exposure.js';
+import { exposureNow, betaPlan } from '../js/core/exposure.js';
 import { simulateDaily, makeScenario } from '../js/core/decay.js';
 import { recoveryGain, maxDrawdown, yearsToRecover } from '../js/core/drawdown.js';
 import { finmindAction } from '../js/core/finmind.js';
@@ -76,6 +76,15 @@ test('pledge ④: table covers 10–50% and marks margin calls from −40%', () 
   assert.deepEqual(rows.map(r => r.called), [false, false, false, true, true]);
   assert.throws(() => pledgeStress({ ...pdf, remedy: 'cash' }, .3));
 });
+test('pledge ④ page example: 200% now, call below NT$65 (−35%), repay/collateral per row', () => {
+  const rows = pledgeTable(pdf);
+  close(rows[0].nowRatio, 2); close(rows[0].referencePrice, 65); close(rows[0].callDrop, .35);
+  assert.deepEqual(rows.map(r => Math.round(r.ratio * 100)), [180, 160, 140, 120, 100]);
+  assert.deepEqual(rows.map(r => Math.round(r.repay)), [0, 0, 62500, 125000, 187500]);
+  assert.deepEqual(rows.map(r => Math.round(r.topup)), [0, 0, 100000, 200000, 300000]);
+  const free = pledgeStress({ ...pdf, debt: 0 }, .1);
+  assert.equal(free.nowRatio, Infinity); assert.equal(free.called, false); close(free.callDrop, 1);
+});
 
 test('exposure ⑪: current exposure on both bases', () => {
   const r = exposureNow({ positions: [{ value: 10000000, beta: 1 }], cash: 2000000, debt: 3000000 });
@@ -86,6 +95,14 @@ test('exposure ⑪: after buying 1.3m leveraged ETF the net basis is 1.4', () =>
   const r = exposureNow({ positions: [{ value: 10000000, beta: 1 }, { value: 1300000, beta: 2 }], cash: 700000, debt: 3000000 });
   close(r.netBasis, 1.4);
   assert.ok(Number.isNaN(exposureNow({ positions: [{ value: 1, beta: 1 }], cash: 0, debt: 2 }).netBasis));
+});
+test('exposure ⑪ page example: 1.11x now, buy 1.3m to reach 1.4x net, 0.7m cash left', () => {
+  const now = exposureNow({ positions: [{ value: 10000000, beta: 1 }, { value: 0, beta: 2 }], cash: 2000000, debt: 3000000 });
+  assert.equal(now.netBasis.toFixed(2), '1.11'); assert.equal(now.assetBasis.toFixed(2), '0.83'); assert.equal(now.leverageRatio.toFixed(2), '1.33');
+  const r = betaPlan({ ordinary: 10000000, ordinaryBeta: 1, lever: 0, leverBeta: 2, cash: 2000000, debt: 3000000, target: 1.4, minCash: 0, basis: 'net', allowBorrow: false });
+  assert.equal(r.possible, true); close(r.delta, 1300000); close(r.borrow, 0); close(r.cashAfter, 700000); close(r.debtAfter, 3000000); close(r.achieved, 1.4);
+  const short = betaPlan({ ordinary: 10000000, ordinaryBeta: 1, lever: 0, leverBeta: 2, cash: 2000000, debt: 3000000, target: 2, minCash: 0, basis: 'net', allowBorrow: false });
+  assert.equal(short.possible, false); close(short.shortage, 2000000);
 });
 
 test('decay ⑥: +10% then −10% loses 1% on index but 4% on 2x', () => {
