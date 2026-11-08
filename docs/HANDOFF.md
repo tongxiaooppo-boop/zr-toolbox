@@ -1,7 +1,9 @@
 # zr-toolbox 交接檔
 
-- 現行版本：決策 2026-11-08（[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)）
-- 狀態：**已定案，尚未開工**。下一步＝Opus 定框架（Gate 0）。
+- 現行版本：決策 2026-11-08（[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)）；框架 **2026-11-08 v1**（[FRAMEWORK.md](FRAMEWORK.md)）
+- 狀態：**Gate 0 完成**（2026-11-08）。下一步＝Gate 1（⑫ 辭典＋③ 定期配比再平衡，Sonnet）。
+- 驗收指令：`npm test && npm run smoke`。Gate 0 預期 tests 44／pass 43／fail 0／todo 1；smoke pages 2 全過。
+- 待使用者拍板：工具 ①（b）白話版計算機——Opus 建議不另做，由 ⑪ 擔任（理由見 FRAMEWORK.md 第 7 節）。
 
 ## 這是什麼
 
@@ -27,9 +29,9 @@
    - 教程以**線上版**欄位為準（本機 `D:\ok\zr-calc\index.html`、`D:\ok\zr-calc2\index.html` 都和線上不同，不能當依據）。
    - FinMind token 申請教學（免費會員每小時 600 次）放在工具箱內。
 
-## Gate 規劃（草案，Gate 0 時定死）
+## Gate 規劃（定稿見 FRAMEWORK.md 第 6 節）
 
-- Gate 0（Opus）：目錄、共用 UI 元件（卡片、ⓘ 術語小卡、範例鈕、固定免責區）、各工具純函式簽名、測試名稱與預期值、PROOF_CMD。
-- Gate 1：首頁＋術語辭典＋工具 ②③（沿用 research-model）。
-- Gate 2：工具 ④⑪⑥⑧。
-- Gate 3：工具 ①（原計算機教程＋可能的白話版）、FinMind token 教學、工具箱自己的 PWA 更新提示。
+- Gate 0 ✅（Opus）：core 全部純函式已實作（research-model 移植＋新寫），40 項單元測試＋4 項資料一致性測試；共用 UI 元件；首頁；工具 ② 已完成並當樣板；冒煙測試 `scripts/smoke.mjs`。
+- Gate 1：⑫ 術語辭典（18 個必備詞）＋ ③ 定期配比再平衡。
+- Gate 2：④⑥⑧⑪（開工前 Opus 補 `lineChart` 簽名）。
+- Gate 3：①、FinMind token 教學、PWA 與更新提示、部署（新 repo；免費 GitHub Pages 需 public repo，公開前照全域規則檢查）。
