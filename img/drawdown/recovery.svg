@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 506" role="img" aria-labelledby="chart-title chart-desc">
+  <title id="chart-title">跌越深，回本要漲得越多</title>
+  <desc id="chart-desc">上方以 100 萬跌 50% 變成 50 萬、再漲 100% 回到 100 萬為例。下方用同一比例尺，依序比較跌幅 10%、20%、30%、40%、50%，以及回本要漲的 11.1%、25%、42.9%、66.7%、100%。</desc>
+  <style>
+    svg {
+      font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif;
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+    .text { fill: #1c2330; }
+    .secondary { fill: #6b7482; }
+    .gain { fill: #2563eb; }
+    .loss { fill: #b91c1c; }
+    .amount { fill: #9aa3b2; }
+    .accent { fill: #b45309; }
+    .line { fill: none; stroke: #c9ced6; stroke-width: 1; }
+    .heading { font-size: 16px; font-weight: 700; }
+    .section { font-size: 15px; font-weight: 700; }
+    .value { font-size: 14px; font-weight: 600; }
+    .center { text-anchor: middle; }
+    @media (prefers-color-scheme: dark) {
+      .text { fill: #e8ebf0; }
+      .secondary { fill: #9aa3b2; }
+      .gain { fill: #6ea0ff; }
+      .loss { fill: #f87171; }
+      .amount { fill: #6b7482; }
+      .accent { fill: #fbbf24; }
+      .line { stroke: #3a4250; }
+    }
+  </style>
+
+  <text class="text heading" x="18" y="27">跌越深，回本要漲得越多</text>
+  <text class="secondary" x="18" y="49">跌下來後，要漲比跌幅更多才能回本。</text>
+
+  <g class="center">
+    <text class="text value" x="50" y="86">100 萬</text>
+    <text class="text value" x="180" y="130">50 萬</text>
+    <text class="text value" x="310" y="86">100 萬</text>
+
+    <rect class="amount" x="32" y="96" width="36" height="88" rx="2"/>
+    <rect class="amount" x="162" y="140" width="36" height="44" rx="2"/>
+    <rect class="amount" x="292" y="96" width="36" height="88" rx="2"/>
+
+    <text class="loss" x="115" y="150">−50%</text>
+    <path class="loss" d="M78 161 H145 V157 L152 163 L145 169 V165 H78 Z"/>
+
+    <text class="gain" x="245" y="150">+100% 才回本</text>
+    <path class="gain" d="M208 161 H275 V157 L282 163 L275 169 V165 H208 Z"/>
+
+    <path class="line" d="M20 184 H340"/>
+    <text class="secondary" x="50" y="204">原本金額</text>
+    <text class="secondary" x="180" y="204">跌後金額</text>
+    <text class="secondary" x="310" y="204">回到原本</text>
+  </g>
+
+  <path class="line" d="M18 220 H342"/>
+  <text class="text section" x="18" y="245">跌幅與回本要漲的幅度</text>
+  <text x="18" y="268"><tspan class="loss">■</tspan><tspan class="secondary"> 跌幅　</tspan><tspan class="gain">■</tspan><tspan class="secondary"> 回本要漲</tspan></text>
+
+  <g class="center">
+    <rect class="loss" x="24" y="415" width="16" height="13"/>
+    <rect class="gain" x="56" y="413.57" width="16" height="14.43"/>
+    <text class="loss" x="32" y="407">10%</text>
+    <text class="gain" x="64" y="405.57">11.1%</text>
+
+    <rect class="loss" x="90" y="402" width="16" height="26"/>
+    <rect class="gain" x="122" y="395.5" width="16" height="32.5"/>
+    <text class="loss" x="98" y="394">20%</text>
+    <text class="gain" x="130" y="387.5">25%</text>
+
+    <rect class="loss" x="156" y="389" width="16" height="39"/>
+    <rect class="gain" x="188" y="372.23" width="16" height="55.77"/>
+    <text class="loss" x="164" y="381">30%</text>
+    <text class="gain" x="196" y="364.23">42.9%</text>
+
+    <rect class="loss" x="222" y="376" width="16" height="52"/>
+    <rect class="gain" x="254" y="341.29" width="16" height="86.71"/>
+    <text class="loss" x="230" y="368">40%</text>
+    <text class="gain" x="262" y="333.29">66.7%</text>
+
+    <rect class="loss" x="288" y="363" width="16" height="65"/>
+    <rect class="gain" x="320" y="298" width="16" height="130"/>
+    <text class="loss" x="296" y="355">50%</text>
+    <text class="gain" x="328" y="290">100%</text>
+
+    <path class="line" d="M18 428 H342"/>
+    <text class="secondary" x="48" y="450">跌 10%</text>
+    <text class="secondary" x="114" y="450">跌 20%</text>
+    <text class="secondary" x="180" y="450">跌 30%</text>
+    <text class="secondary" x="246" y="450">跌 40%</text>
+    <text class="secondary" x="312" y="450">跌 50%</text>
+  </g>
+
+  <path class="line" d="M18 466 H342"/>
+  <text class="accent" x="18" y="489">跌 50% 後，就算每年賺 10%，也要大約 7.3 年才回本。</text>
+</svg>

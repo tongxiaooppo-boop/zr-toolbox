@@ -122,6 +122,11 @@ test('drawdown ⑧: years to recover 50% at 10% a year', () => {
   close(yearsToRecover(.5, .1), 7.272540897341713);
 });
 
+test('figures ⑥⑧: numbers printed on decay and drawdown figures', () => {
+  close(simulateDaily(makeScenario('trend', 10, Math.pow(1.01, 10) - 1)).naive, 0.20924425082240905);
+  close(recoveryGain(.3), 3 / 7); close(recoveryGain(.4), 2 / 3);
+  assert.equal(yearsToRecover(.5, .1).toFixed(1), '7.3');
+});
 test('edge: huge or infinite inputs are rejected instead of producing Infinity', () => {
   assert.ok(Number.isNaN(parseNum('9'.repeat(400))));
   assert.equal(fmtPct(1e308), '—');

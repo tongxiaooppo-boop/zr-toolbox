@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 520" role="img" aria-labelledby="title desc">
+  <title id="title">正二是每天兩倍，不是整段報酬兩倍</title>
+  <desc id="desc">來回震盪時，大盤從100漲到110再跌到99，正二從100漲到120再跌到96；整段兩倍應是負2%，正二實際負4%。連續10天每天上漲1%時，大盤上漲10.5%，整段兩倍是20.9%，正二實際上漲21.9%。</desc>
+  <style>
+    svg {
+      font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif;
+    }
+    text { font-size: 12px; }
+    .ink { fill: #1c2330; }
+    .muted { fill: #6b7482; }
+    .lev-text, .lev-fill { fill: #2563eb; }
+    .market-text, .market-fill { fill: #9aa3b2; }
+    .accent { fill: #b45309; }
+    .lev-line { stroke: #2563eb; }
+    .market-line { stroke: #9aa3b2; }
+    .rule { stroke: #c9ced6; }
+    .comparison-fill { fill: #c9ced6; }
+    .series {
+      fill: none;
+      stroke-width: 2.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .heading { font-size: 15px; font-weight: 700; }
+    .title { font-size: 16px; font-weight: 700; }
+    .number { font-size: 14px; font-weight: 600; }
+    .rate { font-size: 13px; font-weight: 600; }
+    @media (prefers-color-scheme: dark) {
+      .ink { fill: #e8ebf0; }
+      .muted { fill: #9aa3b2; }
+      .lev-text, .lev-fill { fill: #6ea0ff; }
+      .market-text, .market-fill { fill: #9aa3b2; }
+      .accent { fill: #fbbf24; }
+      .lev-line { stroke: #6ea0ff; }
+      .market-line { stroke: #9aa3b2; }
+      .rule { stroke: #3a4250; }
+      .comparison-fill { fill: #3a4250; }
+    }
+  </style>
+
+  <text x="16" y="25" class="ink title">正二的 2 倍，是「每一天」</text>
+  <text x="16" y="48" class="muted">連續幾天，不等於「整段大盤報酬 × 2」。</text>
+
+  <text x="16" y="80" class="ink heading">來回震盪：比 2 倍差</text>
+
+  <g aria-label="圖例：正二為藍線，大盤為灰線">
+    <path d="M18 101 H34" class="series lev-line"/>
+    <text x="41" y="105" class="ink">正二</text>
+    <path d="M94 101 H110" class="series market-line"/>
+    <text x="117" y="105" class="ink">大盤</text>
+  </g>
+
+  <g aria-label="第0天至第2天的走勢">
+    <path d="M40 277 H314 M48 273 V281 M176 273 V281 M304 273 V281"
+          class="rule" fill="none"/>
+
+    <path d="M48 236 L176 191 L304 240.5" class="series market-line"/>
+    <path d="M48 236 L176 146 L304 254" class="series lev-line"/>
+
+    <circle cx="48" cy="236" r="5" class="lev-fill"/>
+    <circle cx="48" cy="236" r="2.5" class="market-fill"/>
+    <circle cx="176" cy="146" r="3.5" class="lev-fill"/>
+    <circle cx="176" cy="191" r="3.5" class="market-fill"/>
+    <circle cx="304" cy="254" r="3.5" class="lev-fill"/>
+    <circle cx="304" cy="240.5" r="3.5" class="market-fill"/>
+
+    <text x="48" y="218" text-anchor="middle" class="lev-text number">100</text>
+    <text x="48" y="261" text-anchor="middle" class="market-text number">100</text>
+    <text x="176" y="132" text-anchor="middle" class="lev-text number">120</text>
+    <text x="176" y="211" text-anchor="middle" class="market-text number">110</text>
+    <text x="316" y="265" class="lev-text number">96</text>
+    <text x="316" y="235" class="market-text number">99</text>
+
+    <text x="107" y="174" text-anchor="middle" class="lev-text rate">+20%</text>
+    <text x="107" y="232" text-anchor="middle" class="market-text rate">+10%</text>
+    <text x="242" y="178" text-anchor="middle" class="lev-text rate">−20%</text>
+    <text x="242" y="233" text-anchor="middle" class="market-text rate">−10%</text>
+
+    <text x="48" y="296" text-anchor="middle" class="muted">第 0 天</text>
+    <text x="176" y="296" text-anchor="middle" class="muted">第 1 天</text>
+    <text x="304" y="296" text-anchor="middle" class="muted">第 2 天</text>
+  </g>
+
+  <text x="16" y="320" class="ink">大盤共 −1%</text>
+  <text x="16" y="344" class="accent heading">整段×2 應是 −2%，實際 −4%</text>
+
+  <path d="M16 363 H344" class="rule" fill="none"/>
+
+  <text x="16" y="389" class="ink heading">單邊上漲：可能比 2 倍好</text>
+  <text x="16" y="411" class="muted">連續 10 天每天漲 1%</text>
+
+  <g aria-label="大盤、整段兩倍與正二實際報酬比較">
+    <text x="16" y="435" class="ink">大盤</text>
+    <rect x="112" y="424" width="64.2" height="10" rx="3" class="market-fill"/>
+    <text x="344" y="435" text-anchor="end" class="ink number">+10.5%</text>
+
+    <text x="16" y="457" class="ink">整段 × 2</text>
+    <rect x="112" y="446" width="127.9" height="10" rx="3" class="comparison-fill"/>
+    <text x="344" y="457" text-anchor="end" class="ink number">+20.9%</text>
+
+    <text x="16" y="479" class="lev-text">正二實際</text>
+    <rect x="112" y="468" width="134" height="10" rx="3" class="lev-fill"/>
+    <text x="344" y="479" text-anchor="end" class="lev-text number">+21.9%</text>
+  </g>
+
+  <text x="16" y="509" class="muted">理想化計算，未含費用與追蹤誤差。</text>
+</svg>

@@ -74,3 +74,15 @@ td:first-child,th:first-child{text-align:left}
 .glossary-item.flash{background:var(--soft)}
 .trade-table{width:100%;font-size:14px;table-layout:fixed;overflow-wrap:anywhere}
 .trade-table th,.trade-table td{padding:6px 4px}
+
+/* 折線圖 lineChart（Gate 2） */
+.chart{margin:8px 0}
+.chart svg{display:block;width:100%;height:auto}
+.chart .grid{stroke:var(--line);stroke-width:1}
+.chart .base{stroke:var(--muted);stroke-width:1;stroke-dasharray:4 4}
+.chart .tick{fill:var(--muted);font-size:12px}
+.chart .line{stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.chart .s0{stroke:var(--accent)}.chart .s1{stroke:var(--muted)}.chart .s2{stroke:var(--warn)}
+.chart .legend{display:flex;gap:14px;font-size:13px;color:var(--muted);margin-top:4px}
+.chart .key::before{content:"";display:inline-block;width:14px;height:3px;margin-right:4px;vertical-align:middle;background:currentColor}
+.chart .key.s0{color:var(--accent)}.chart .key.s1{color:var(--muted)}.chart .key.s2{color:var(--warn)}

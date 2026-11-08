@@ -1,6 +1,6 @@
 # zr-toolbox 框架（Gate 0 定稿）
 
-- 版本：**2026-11-08 v2**（Gate 0；v2＝加入圖解流程、首頁四大分組、Gate 4）。改介面要改這份並升版，所有還寫舊行為的段落一起改。
+- 版本：**2026-11-08 v3**（v2＝加入圖解流程、首頁四大分組、Gate 4；v3＝`components.js` 新增 `lineChart`、Gate 2 拆 2a／2b、Codex 只跑單元測試）。改介面要改這份並升版，所有還寫舊行為的段落一起改。
 - 依據：[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)、[HANDOFF.md](HANDOFF.md)。
 
 ## 1. 技術約定
@@ -22,7 +22,7 @@ docs/figures/<id>-<名>.md  每張圖給 sol 的繪圖提示（留存，改圖�
 js/core/*.js               純函式：不碰 DOM、不碰網路。所有公式只在這裡。
 js/data/tools.js           分組 GROUPS＋卡片清單（id、編號、group、標題、一句話、href、gate、status、terms）
 js/data/glossary.js        術語辭典資料（欄位見檔頭註解）
-js/ui/components.js        共用 UI 元件（簽名見檔頭註解，Gate 0 定死）
+js/ui/components.js        共用 UI 元件（簽名見檔頭註解；Gate 0 定死，v3 加 lineChart）
 js/pages/<id>.js           各工具頁：組欄位 → 呼叫 core → 顯示結果。不寫公式。
 tests/*.test.js            node:test 單元測試
 scripts/smoke.mjs          冒煙測試（無頭 Chrome，逐頁按「帶入範例」）
@@ -81,13 +81,16 @@ scripts/smoke.mjs          冒煙測試（無頭 Chrome，逐頁按「帶入範�
 |---|---|---|---|
 | 0 | 本文件、core 全部純函式＋40 項測試、UI 元件（含 `figure`）、分組首頁、樣板工具 ②（含第一張 sol 圖解）、冒煙測試 | Opus | 見上 |
 | 1 | ⑫ 辭典（18 個必備詞，見 `tests/registry.test.js` 的 `REQUIRED`；頁面可依 `#id` 定位、上方有關鍵字篩選）＋ ③ 定期配比再平衡（股版／債版分組選模板，註明同名不同配置；不收「預期年化 x 倍大盤」） | 訂閱 Codex sol（面板＋md） | `npm test`：fail 0、todo 0；smoke：pages 4 全過 |
-| 2 | ④ 質押壓測（還款／補擔保兩種分開顯示、130% 寫「多數券商契約，以契約為準」、結果附 `executable` 免責）、⑥ 複利偏離、⑧ 回撤、⑪ 曝險倍數 | 訂閱 Codex sol | smoke：pages 8 全過 |
+| 2a | ⑥ 複利偏離（用 `lineChart`）、⑧ 回撤 | 訂閱 Codex sol | tests 46 全過；smoke pages 6 全過 |
+| 2b | ④ 質押壓測（還款／補擔保兩種分開顯示、130% 寫「多數券商契約，以契約為準」、結果附 `executable` 免責）、⑪ 曝險倍數 | 訂閱 Codex sol | smoke：pages 8 全過 |
 | 3 | ① 原計算機教程（依**線上版**欄位）、FinMind token 申請教學、PWA（manifest、sw、新版提示）、部署 | 訂閱 Codex sol＋Opus（部署） | smoke 全過＋手機實機看一次 |
 | 4 | 其他股票計算機：⑤ 融資維持率、⑦ 定期定額／年化報酬、⑨ 交易成本、⑩ 股息殖利率與除權息（開工前 Opus 先定 core 簽名與測試預期值） | 訂閱 Codex sol | smoke 全過 |
 
 執行者使用者 2026-11-08 指定為訂閱 Codex sol（面板不能用時改 Sonnet），派工流程見 HANDOFF.md。每個 Gate 的圖解由 Opus 派免費 sol 畫、Opus 驗；寫頁面的外包只負責用 `figure()` 放進去。
 
-圖表（⑥ 需要兩條淨值線）於 Gate 2 開工前由 Opus 在 `components.js` 補 `lineChart` 簽名，不在本版。
+圖表：`lineChart` 已於 v3 由 Opus 實作（簽名見 `components.js` 檔頭），外包只呼叫、不改。
+
+**Codex 面板限制**：沙箱裡 PowerShell 擋 `npm.ps1`、無頭 Chrome 開不起來。任務書的 PROOF_CMD 給 Codex 的只有 `npm.cmd test`；`npm run smoke` 由 Opus 驗收時跑。
 
 ## 8. 工具 ①（b）白話版計算機：已定（2026-11-08）
 
