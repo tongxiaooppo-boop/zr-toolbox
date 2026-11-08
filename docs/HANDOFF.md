@@ -7,11 +7,17 @@
   1. 計算機：Gate 4 四個之外，加 ⑬ 人生槓桿體檢、⑭ 幾倍槓桿最划算（凱利）。歷史回測不做。
   2. 科普：「正二教學」組加圖文頁，含**大仁 50/50 對比 0050**——只顯示原文結果：2014/10/31–2022/05/26、起始 100 萬（正二 50 萬＋現金 50 萬）、漲跌超過 50% 配回、共 4 次（2017/06/03、2019/10/22、2020/11/09、2021/01/19）；50/50 期末 255.3 萬（+155.37%）、0050 期末 237.5 萬（+137.58%）。原文無年化與最大回撤、未說明費用與 0050 是否含息、第三次配回後現金前後寫 99.5 萬與 99.9 萬不一致 → 頁面標「原作者回測，工具箱未重算」並列這些限制。來源：letf.com.tw「50正2槓桿ETF搭配再平衡，輕鬆打敗0050」（資料庫 C01）。
   3. 朋友計算機：工具箱內做帶指導版（推翻 FRAMEWORK 第 8 節），算法照抄線上版、原頁不動。
-- 下一步＝**Gate 4**（⑤ 融資維持率、⑦ 定期定額／CAGR、⑨ 交易成本、⑩ 股息殖利率）：開工前 Opus 先定 core 簽名與測試預期值、畫圖、寫任務書。
-- **已部署**（2026-11-08，使用者同意公開）：https://tongxiaooppo-boop.github.io/zr-toolbox/ （GitHub `tongxiaooppo-boop/zr-toolbox`，public，Pages 來源 `master` 根目錄，MIT）。之後每個 Gate 驗收完 `git push` 就會更新。剩：手機實機看一次、加到主畫面試離線。
+- 下一步＝**Gate 4**（⑤ 融資維持率〔併融券、整戶維持率〕、⑦ 定期定額／CAGR、⑨ 交易成本、⑩ 股息殖利率）。新對話開工順序：
+  1. Opus 在 `js/core/` 新增 `margin.js`、`dca.js`、`cost.js`、`dividend.js` 純函式＋測試（含每頁範例數字的鎖定測試，照 Gate 2b 的 `pledge ④ page example` 寫法），更新 FRAMEWORK 第 3 節表格並升版 v5。
+  2. 每個工具一張圖：寫 `docs/figures/<id>-<名>.md`，用 `batch` 派免費 sol（`--sol --effort high`），無頭 Chrome 淺／深色截圖核對數字。
+  3. 四個工具量大，建議拆 4a（⑤⑨）、4b（⑦⑩）兩份任務書，各派一次 Codex 面板。
+  4. 驗收：`npm test` 數字、`npm run smoke`、讀頁面程式，過了 commit＋push。
+- Gate 7 備忘：線上版 `calc()` 原始碼直接抓 https://tongxiaooppo-boop.github.io/zr-calc/ （只讀）；與 ⑪ 的 4 處差異已寫在 `js/data/calcGuide.js` 的 `DIFFERENCES`，移植時要讓新版與線上版同輸入同輸出（寫比對測試），不是照 ⑪ 的行為。
+- 今天（2026-11-08）結束時：master＝origin/master，工作目錄乾淨；tests 51、smoke pages 9 全過；Codex 面板沒有進行中的任務（`collab/to-codex.md` 是已完成的 3a）。
+- **已部署**（2026-11-08，使用者同意公開）：https://tongxiaooppo-boop.github.io/zr-toolbox/ （GitHub `tongxiaooppo-boop/zr-toolbox`，public，Pages 來源 `master` 根目錄，MIT）。之後每個 Gate 驗收完 `git push` 就會更新（Pages 約 1 分鐘生效）。
 - **Codex 面板環境限制**（Gate 1 發現）：PowerShell 擋 `npm.ps1`，要用 `npm.cmd`；沙箱裡 `npm run smoke` 開不了無頭 Chrome 會卡住。任務書的 PROOF_CMD 改成：Codex 只跑 `npm.cmd test`，smoke 由 Opus 跑。
 - 驗收指令：`npm test && npm run smoke`（現行預期見上方狀態）。
-- 使用者 2026-11-08 補充：工具箱分四大類（正二教學／正二變種／正二槓桿／其他股票計算機，含融資等原 v2 項目），**每個工具都要圖文解說，圖由 sol 畫**（流程見 FRAMEWORK.md 第 5 節）。① 不另做白話版計算機，⑪ 擔任白話版（FRAMEWORK.md 第 8 節）。
+- 使用者 2026-11-08 補充：工具箱分四大類（正二教學／正二變種／正二槓桿／其他股票計算機，含融資等原 v2 項目），**每個工具都要圖文解說，圖由 sol 畫**（流程見 FRAMEWORK.md 第 5 節）。（「⑪ 擔任白話版、不另做」已被 Gate 7 推翻，見上方追加三件事。）
 
 ## 這是什麼
 
