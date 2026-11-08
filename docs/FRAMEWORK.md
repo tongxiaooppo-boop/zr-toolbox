@@ -79,7 +79,7 @@ scripts/smoke.mjs          冒煙測試（無頭 Chrome，逐頁按「帶入範�
 - **Gate 0 的 PROOF_CMD**：`npm test && npm run smoke`
   預期：`tests 44`、`pass 43`、`fail 0`、`todo 1`（辭典必備詞，Gate 1 解除）；`smoke pages 2 pass 2 fail 0`。
 
-## 7. Gate 規劃（定稿）
+## 7. Gate 規劃（⚠ 2026-11-08 晚使用者修正方向：改成逐步引導輸入，Gate 4 以後待重排，見 HANDOFF.md 開頭「方向修正」）
 
 | Gate | 內容 | 執行 | PROOF_CMD 預期 |
 |---|---|---|---|
