@@ -3,16 +3,18 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { TOOLS, SHORTCUTS } from '../js/data/tools.js';
+import { TOOLS, SHORTCUTS, GROUPS } from '../js/data/tools.js';
 import { GLOSSARY, TERM_BY_ID } from '../js/data/glossary.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 
 test('tools: ids unique and every ready tool has its html and page script', () => {
   assert.equal(new Set(TOOLS.map(t => t.id)).size, TOOLS.length);
+  for (const t of TOOLS) assert.ok(GROUPS.some(g => g.id === t.group), `${t.id} group`);
   for (const t of TOOLS.filter(t => t.status === 'ready')) {
     assert.ok(existsSync(root + t.href), t.href);
     assert.ok(existsSync(root + 'js/pages/' + t.id + '.js'), t.id);
+    assert.ok(existsSync(root + 'img/' + t.id), `${t.id} 缺圖解資料夾 img/${t.id}/`);
   }
 });
 test('tools: every term used by a tool exists in the glossary', () => {

@@ -11,6 +11,7 @@
 //   showResult(box, ...nodes) / showError(box, message)
 //   metric(label, value, tone)              結果數字塊；tone: 'ok'|'bad'|'warn'|undefined
 //   disclaimer(kind)                        固定免責區；kind: 'general' | 'executable'
+//   figure({ src, alt, caption })           圖解（img/<工具id>/*.svg）；alt 必填，caption 一句白話
 import { TERM_BY_ID } from '../data/glossary.js';
 import { parseNum } from '../core/format.js';
 
@@ -94,6 +95,11 @@ export function metric(label, value, tone) {
 
 export function showResult(box, ...nodes) { box.replaceChildren(...nodes.flat(Infinity));box.classList.remove('error'); }
 export function showError(box, message) { box.replaceChildren(h('p', {}, message)); box.classList.add('error'); }
+
+export function figure({ src, alt, caption }) {
+  if (!alt) throw new Error('figure 需要 alt');
+  return h('figure', { class: 'figure' }, h('img', { src, alt, loading: 'lazy' }), caption ? h('figcaption', {}, caption) : null);
+}
 
 const GENERAL = '僅供試算與教學，不構成投資建議。畫面上的預設數字是範例，不是建議值。';
 export function disclaimer(kind = 'general') {

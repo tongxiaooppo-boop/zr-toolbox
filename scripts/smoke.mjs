@@ -1,5 +1,5 @@
 // 冒煙測試：起靜態伺服器＋無頭 Chrome，檢查首頁與每個 status:'ready' 的工具頁。
-// 每頁檢查：無 JS 例外；有「帶入範例」鈕的頁面按下後 .result 有內容且不是錯誤；main 最後一個元素是 .disclaimer。
+// 每頁檢查：無 JS 例外；至少一張圖解且都載入成功；有「帶入範例」鈕的頁面按下後 .result 有內容且不是錯誤；main 最後一個元素是 .disclaimer。
 // 用法：npm run smoke（需要本機 Chrome 或 Edge；暫存 profile 放在 .smoke/，已 gitignore）
 import { createServer } from 'node:http';
 import { readFile, rm } from 'node:fs/promises';
@@ -59,6 +59,10 @@ await check('home', 'index.html', async () => {
 for (const t of TOOLS.filter(t => t.status === 'ready')) await check(t.id, t.href, async () => {
   const p = [];
   if (!await ev('document.querySelector("main > :last-child")?.classList.contains("disclaimer")')) p.push('main 最後一個元素不是 .disclaimer');
+  await ev('Promise.all([...document.querySelectorAll(".figure img")].map(i => (i.loading = "eager", i.decode().catch(() => {}))))'); await sleep(300);
+  const figs = await ev('[...document.querySelectorAll(".figure img")].map(i => i.naturalWidth > 0)');
+  if (!figs.length) p.push('沒有圖解（.figure）');
+  else if (figs.includes(false)) p.push('有圖解載入失敗');
   if (await ev('!!document.querySelector(".example-row button")')) {
     await ev('document.querySelector(".example-row button").click()'); await sleep(300);
     const text = await ev('document.querySelector(".result")?.innerText.trim()');

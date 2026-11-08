@@ -13,6 +13,7 @@ h2{font-size:17px;margin:0 0 8px}
 .site-sub{color:var(--muted);margin:0 0 16px}
 .shortcuts{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
 .shortcuts a{background:var(--soft);border-radius:999px;padding:6px 12px;text-decoration:none;font-size:14px}
+.group-title{font-size:16px;margin:20px 0 8px;color:var(--muted)}
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
 .tool-card{display:block;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;color:var(--text);text-decoration:none}
 .tool-card .no{color:var(--accent);font-weight:700;margin-right:6px}
@@ -57,6 +58,11 @@ button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
 table{width:100%;border-collapse:collapse;font-size:14px}
 td,th{padding:6px 4px;border-bottom:1px solid var(--line);text-align:right}
 td:first-child,th:first-child{text-align:left}
+
+/* 圖解 */
+.figure{margin:8px 0 12px}
+.figure img{display:block;width:100%;height:auto}
+.figure figcaption{color:var(--muted);font-size:13px;margin-top:4px}
 
 /* 固定免責區：每個工具頁最後一個元素 */
 .disclaimer{margin-top:20px;padding-top:10px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}

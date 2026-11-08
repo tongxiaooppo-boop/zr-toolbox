@@ -1,6 +1,6 @@
 # zr-toolbox 框架（Gate 0 定稿）
 
-- 版本：**2026-11-08 v1**（Gate 0）。改介面要改這份並升版，所有還寫舊行為的段落一起改。
+- 版本：**2026-11-08 v2**（Gate 0；v2＝加入圖解流程、首頁四大分組、Gate 4）。改介面要改這份並升版，所有還寫舊行為的段落一起改。
 - 依據：[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)、[HANDOFF.md](HANDOFF.md)。
 
 ## 1. 技術約定
@@ -17,8 +17,10 @@
 index.html                 首頁（捷徑＋卡片），內容由 js/pages/home.js 依 js/data/tools.js 產生
 tools/<id>.html            每個工具一頁，只是殼：<main id="app"> ＋ 載入 ../js/pages/<id>.js
 css/app.css                全站唯一樣式檔
+img/<id>/*.svg             各工具的圖解（sol 畫，Opus 驗數字）
+docs/figures/<id>-<名>.md  每張圖給 sol 的繪圖提示（留存，改圖時改這份重畫）
 js/core/*.js               純函式：不碰 DOM、不碰網路。所有公式只在這裡。
-js/data/tools.js           卡片清單（id、編號、標題、一句話、href、gate、status、terms）
+js/data/tools.js           分組 GROUPS＋卡片清單（id、編號、group、標題、一句話、href、gate、status、terms）
 js/data/glossary.js        術語辭典資料（欄位見檔頭註解）
 js/ui/components.js        共用 UI 元件（簽名見檔頭註解，Gate 0 定死）
 js/pages/<id>.js           各工具頁：組欄位 → 呼叫 core → 顯示結果。不寫公式。
@@ -54,32 +56,42 @@ scripts/smoke.mjs          冒煙測試（無頭 Chrome，逐頁按「帶入範�
 1. `toolHeader(tool)`（tool 從 `TOOLS` 依 id 取）
 2. 輸入卡：每個欄位 `numberField`／`selectField`，`label`＝正式名稱，`plain`＝一句白話副標，有術語就給 `termId`（ⓘ，一欄最多一顆）；卡片最後一個是 `exampleButton(values, update)`
 3. 結果卡：`<div class="result" aria-live="polite">`，`app` 的 `input` 事件即時重算；有缺欄位時顯示「填完 N 格就會算」；錯誤用 `showError(result, e.message)`
-4. 「怎麼讀」卡：2–3 段白話
+4. 「怎麼讀」卡：**先放至少一張圖解** `figure({src, alt, caption})`，再 2–3 段白話
 5. `disclaimer('general')`；**原計算機教程與 ⑪ 用 `disclaimer('executable')`**（決策補充 1：可執行不等於安全）
 
 做完一個工具：在 `tools.js` 把 `status` 改成 `'ready'`、填 `terms`；用到的術語必須已在 `glossary.js`。
 
-## 5. 測試與驗收
+## 5. 圖解（使用者 2026-11-08：每個工具都要圖文解說，圖交給 sol 畫）
+
+- 每個工具頁（含辭典）至少一張圖解，放 `img/<工具id>/`；冒煙測試檢查圖存在且載入成功。
+- 流程：寫繪圖提示 `docs/figures/<id>-<名>.md`（照抄 `trigger5050-split-5050.md` 的格式：要表達的事＋**寫死的數字**＋技術規格）→ 免費 sol 一次問答出 SVG（`ask-file.mts --sol --effort high`，可用 `batch` 一次多張）→ 存檔 → 無頭 Chrome 淺色／深色各截一張 → **Opus 對照 core 函式核對圖上每個數字**，錯就改提示重畫，最多 2 輪。
+- 圖上的數字必須和該頁「帶入範例」或 core 測試裡的數字一致，不准另編。
+- SVG 規格：`viewBox="0 0 360 H"`、不設 width/height、有 `<title>`／`<desc>`、顏色寫在內部 `<style>` 並含 `prefers-color-scheme: dark`、背景透明、最小字 12；禁止 script、foreignObject、外部資源、filter、動畫。色票見提示範本。
+
+## 6. 測試與驗收
 
 - 單元測試：`npm test`。預期值由 Opus 定，外包**不得改預期值或刪測試**；覺得預期值錯就停下回報。
 - 冒煙測試：`npm run smoke`（首頁卡片數、每個 ready 頁：無 JS 例外、範例按鈕有結果、免責區在最後、無水平捲動）。
 - **Gate 0 的 PROOF_CMD**：`npm test && npm run smoke`
   預期：`tests 44`、`pass 43`、`fail 0`、`todo 1`（辭典必備詞，Gate 1 解除）；`smoke pages 2 pass 2 fail 0`。
 
-## 6. Gate 規劃（定稿）
+## 7. Gate 規劃（定稿）
 
 | Gate | 內容 | 執行 | PROOF_CMD 預期 |
 |---|---|---|---|
-| 0 | 本文件、core 全部純函式＋40 項測試、UI 元件、首頁、樣板工具 ②、冒煙測試 | Opus | 見上 |
+| 0 | 本文件、core 全部純函式＋40 項測試、UI 元件（含 `figure`）、分組首頁、樣板工具 ②（含第一張 sol 圖解）、冒煙測試 | Opus | 見上 |
 | 1 | ⑫ 辭典（18 個必備詞，見 `tests/registry.test.js` 的 `REQUIRED`；頁面可依 `#id` 定位、上方有關鍵字篩選）＋ ③ 定期配比再平衡（股版／債版分組選模板，註明同名不同配置；不收「預期年化 x 倍大盤」） | Sonnet（文案初稿可先交 luna） | `npm test`：fail 0、todo 0；smoke：pages 4 全過 |
 | 2 | ④ 質押壓測（還款／補擔保兩種分開顯示、130% 寫「多數券商契約，以契約為準」、結果附 `executable` 免責）、⑥ 複利偏離、⑧ 回撤、⑪ 曝險倍數 | Sonnet | smoke：pages 8 全過 |
 | 3 | ① 原計算機教程（依**線上版**欄位）、FinMind token 申請教學、PWA（manifest、sw、新版提示）、部署 | Sonnet＋Opus | smoke 全過＋手機實機看一次 |
+| 4 | 其他股票計算機：⑤ 融資維持率、⑦ 定期定額／年化報酬、⑨ 交易成本、⑩ 股息殖利率與除權息（開工前 Opus 先定 core 簽名與測試預期值） | Sonnet | smoke 全過 |
+
+每個 Gate 的圖解由 Opus 派 sol 畫、Opus 驗；寫頁面的外包只負責用 `figure()` 放進去。
 
 圖表（⑥ 需要兩條淨值線）於 Gate 2 開工前由 Opus 在 `components.js` 補 `lineChart` 簽名，不在本版。
 
-## 7. 工具 ①（b）白話版計算機：Opus 提案（待使用者拍板）
+## 8. 工具 ①（b）白話版計算機：已定（2026-11-08）
 
-**建議：不另做同公式的白話版計算機，由工具 ⑪ 擔任白話版；① 只做逐欄教程。**
+使用者回覆：工具箱是四大類多個計算機（正二教學、正二變種、正二槓桿、其他股票計算機例如融資），全部都要圖文解說。據此定案：**不另做同公式的白話版計算機，由工具 ⑪ 擔任白話版；① 做逐欄圖文教程。** 理由：
 
 - 線上版和 `betaPlan` 公式相同，但行為有三處不同：多檔持股／多檔正二、「目標比重」觸發的完整重配模式、普通持股曝險已超過目標時線上版默默把正二設 0（`betaPlan` 回報「達不到」）。再做一個「同公式」版本，朋友會看到兩個計算機給出不同答案，反而更難懂。
 - ⑪ 已經是白話版：先回答「我現在等於幾倍大盤」（`exposureNow`），再回答「想調到 X 倍要買賣多少」（`betaPlan`，單一普通持股合計＋單一正二）。① 教程每欄附「在 ⑪ 對應哪一格」，並寫明上面三處差異，最後單向連到線上原頁。

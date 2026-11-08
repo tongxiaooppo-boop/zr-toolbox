@@ -1,9 +1,9 @@
 // 【樣板頁】後續每個工具頁照這個結構寫：
 //   1. toolHeader  2. 一張 card 放欄位（每個欄位：label＋白話副標＋需要時 ⓘ）＋帶入範例
 //   3. 結果區 .result（輸入變動即重算；錯誤用 showError，訊息直接用純函式丟出的中文）
-//   4. 結果下方一段「怎麼讀這個結果」白話 5. 最後 disclaimer
+//   4. 「怎麼讀」：先放圖解 figure（至少一張），再 2–3 段白話 5. 最後 disclaimer
 // 計算只呼叫 js/core 的純函式，頁面裡不寫公式。
-import { h, toolHeader, numberField, exampleButton, readNumbers, metric, showResult, showError, disclaimer } from '../ui/components.js';
+import { h, toolHeader, numberField, exampleButton, readNumbers, metric, showResult, showError, disclaimer, figure } from '../ui/components.js';
 import { checkTrigger, split5050 } from '../core/trigger.js';
 import { fmtMoney, fmtPct } from '../core/format.js';
 import { TOOLS } from '../data/tools.js';
@@ -42,6 +42,7 @@ app.append(
     exampleButton({ basePrice: 100, nowPrice: 150, lever: 150000, cash: 100000 }, update)),
   h('section', { class: 'card' }, h('h2', {}, '結果'), result),
   h('section', { class: 'card' }, h('h2', {}, '怎麼讀'),
+    figure({ src: '../img/trigger5050/split-5050.svg', alt: '50/50 配回圖解：正二漲到 +50% 時賣出 2.5 萬、跌到 −50% 時買進 2.5 萬，配回後兩邊相等。', caption: '同樣從正二、現金各 10 萬開始，漲到與跌到時各配回一次。' }),
     h('p', {}, '這是大仁 50/50 的做法：一半正二、一半現金。正二相對基準價漲或跌 50% 時，用當時的總額配回各半；沒到就不動。'),
     h('p', {}, '漲到時會賣掉一些正二收回現金；跌到時會拿現金補正二。跌到時補進去的錢，如果之後繼續跌，一樣會跟著跌。')),
   disclaimer('general'));

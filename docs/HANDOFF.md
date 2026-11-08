@@ -1,9 +1,9 @@
 # zr-toolbox 交接檔
 
-- 現行版本：決策 2026-11-08（[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)）；框架 **2026-11-08 v1**（[FRAMEWORK.md](FRAMEWORK.md)）
+- 現行版本：決策 2026-11-08（[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)）；框架 **2026-11-08 v2**（[FRAMEWORK.md](FRAMEWORK.md)）
 - 狀態：**Gate 0 完成**（2026-11-08）。下一步＝Gate 1（⑫ 辭典＋③ 定期配比再平衡，Sonnet）。
 - 驗收指令：`npm test && npm run smoke`。Gate 0 預期 tests 44／pass 43／fail 0／todo 1；smoke pages 2 全過。
-- 待使用者拍板：工具 ①（b）白話版計算機——Opus 建議不另做，由 ⑪ 擔任（理由見 FRAMEWORK.md 第 7 節）。
+- 使用者 2026-11-08 補充：工具箱分四大類（正二教學／正二變種／正二槓桿／其他股票計算機，含融資等原 v2 項目），**每個工具都要圖文解說，圖由 sol 畫**（流程見 FRAMEWORK.md 第 5 節）。① 不另做白話版計算機，⑪ 擔任白話版（FRAMEWORK.md 第 8 節）。
 
 ## 這是什麼
 
@@ -29,9 +29,10 @@
    - 教程以**線上版**欄位為準（本機 `D:\ok\zr-calc\index.html`、`D:\ok\zr-calc2\index.html` 都和線上不同，不能當依據）。
    - FinMind token 申請教學（免費會員每小時 600 次）放在工具箱內。
 
-## Gate 規劃（定稿見 FRAMEWORK.md 第 6 節）
+## Gate 規劃（定稿見 FRAMEWORK.md 第 7 節）
 
 - Gate 0 ✅（Opus）：core 全部純函式已實作（research-model 移植＋新寫），40 項單元測試＋4 項資料一致性測試；共用 UI 元件；首頁；工具 ② 已完成並當樣板；冒煙測試 `scripts/smoke.mjs`。
 - Gate 1：⑫ 術語辭典（18 個必備詞）＋ ③ 定期配比再平衡。
 - Gate 2：④⑥⑧⑪（開工前 Opus 補 `lineChart` 簽名）。
 - Gate 3：①、FinMind token 教學、PWA 與更新提示、部署（新 repo；免費 GitHub Pages 需 public repo，公開前照全域規則檢查）。
+- Gate 4：⑤ 融資維持率、⑦ 定期定額／CAGR、⑨ 交易成本、⑩ 股息殖利率（原決策列 v2，使用者 2026-11-08 納入）。

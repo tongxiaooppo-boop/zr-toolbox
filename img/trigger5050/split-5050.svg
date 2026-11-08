@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 520" role="img" aria-labelledby="chart-title chart-desc">
+  <title id="chart-title">大仁 50/50 觸發提醒：何時配回各半</title>
+  <desc id="chart-desc">起點為基準價 100 元，正二與現金各 10 萬：上半部漲至 150 元，合計 25 萬，賣出正二 2.5 萬後兩邊各 12.5 萬；下半部跌至 50 元，合計 15 萬，用現金買進正二 2.5 萬後兩邊各 7.5 萬。只有相對上次配回時的價格漲跌達 50% 才配回，並更新基準價；所有直條使用相同金額比例尺。</desc>
+
+  <style>
+    text {
+      font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif;
+      font-size: 12px;
+      fill: #1c2330;
+    }
+    .title { font-size: 16px; font-weight: 700; }
+    .section { font-size: 16px; font-weight: 700; }
+    .stage { font-size: 13px; font-weight: 600; }
+    .value { font-weight: 600; }
+    .secondary { fill: #6b7482; }
+    .stock { fill: #2563eb; }
+    .cash { fill: #9aa3b2; }
+    .accent { fill: #b45309; }
+    .strong { font-weight: 700; }
+    .line { fill: none; stroke: #c9ced6; stroke-width: 1; }
+    .arrow {
+      fill: none;
+      stroke: #b45309;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    @media (prefers-color-scheme: dark) {
+      text { fill: #e8ebf0; }
+      .secondary { fill: #9aa3b2; }
+      .stock { fill: #6ea0ff; }
+      .cash { fill: #6b7482; }
+      .accent { fill: #fbbf24; }
+      .line { stroke: #3a4250; }
+      .arrow { stroke: #fbbf24; }
+    }
+  </style>
+
+  <text x="16" y="23" class="title">大仁 50/50 觸發提醒</text>
+  <text x="16" y="45">一半正二、一半現金；相對基準價漲跌 50% 才配回。</text>
+  <text x="16" y="64" class="secondary">基準價＝上次配回時的價格；<tspan class="accent strong">沒到就不動。</tspan></text>
+  <text x="180" y="85" text-anchor="middle"><tspan class="stock">■</tspan> 正二　<tspan class="cash">■</tspan> 現金</text>
+
+  <g aria-label="漲到百分之五十的例子">
+    <text x="16" y="112" class="section">漲到 <tspan class="accent">+50%</tspan></text>
+
+    <g text-anchor="middle">
+      <text x="64" y="136" class="stage">起點</text>
+      <text x="176" y="136" class="stage">漲到</text>
+      <text x="298" y="136" class="stage">配回各半</text>
+
+      <text x="64" y="154" class="secondary">基準價 100 元</text>
+      <text x="176" y="154" class="secondary">正二 150 元</text>
+      <text x="298" y="154" class="accent">新基準價 150 元</text>
+    </g>
+
+    <path class="line" d="M24 264H104 M136 264H216 M256 264H340"/>
+
+    <rect x="31" y="204" width="22" height="60" rx="2" class="stock"/>
+    <rect x="75" y="204" width="22" height="60" rx="2" class="cash"/>
+    <rect x="143" y="174" width="22" height="90" rx="2" class="stock"/>
+    <rect x="187" y="204" width="22" height="60" rx="2" class="cash"/>
+    <rect x="265" y="189" width="22" height="75" rx="2" class="stock"/>
+    <rect x="309" y="189" width="22" height="75" rx="2" class="cash"/>
+
+    <g text-anchor="middle" class="value">
+      <text x="42" y="199" class="value">10 萬</text>
+      <text x="86" y="199" class="value">10 萬</text>
+      <text x="154" y="169" class="value">15 萬</text>
+      <text x="198" y="199" class="value">10 萬</text>
+      <text x="276" y="184" class="value">12.5 萬</text>
+      <text x="320" y="184" class="value">12.5 萬</text>
+    </g>
+
+    <text x="120" y="220" text-anchor="middle" class="accent strong">+50%</text>
+    <path class="arrow" d="M107 244H134 M129 239L134 244L129 249"/>
+
+    <g text-anchor="middle">
+      <text x="237" y="220" class="accent">賣出正二</text>
+      <text x="237" y="237" class="accent strong">2.5 萬</text>
+    </g>
+    <path class="arrow" d="M223 250H251 M246 245L251 250L246 255"/>
+
+    <text x="176" y="283" text-anchor="middle" class="secondary">合計 25 萬</text>
+  </g>
+
+  <path class="line" d="M16 300H344"/>
+
+  <g aria-label="跌到負百分之五十的例子">
+    <text x="16" y="324" class="section">跌到 <tspan class="accent">−50%</tspan></text>
+
+    <g text-anchor="middle">
+      <text x="64" y="348" class="stage">起點</text>
+      <text x="176" y="348" class="stage">跌到</text>
+      <text x="298" y="348" class="stage">配回各半</text>
+
+      <text x="64" y="366" class="secondary">基準價 100 元</text>
+      <text x="176" y="366" class="secondary">正二 50 元</text>
+      <text x="298" y="366" class="accent">新基準價 50 元</text>
+    </g>
+
+    <path class="line" d="M24 476H104 M136 476H216 M256 476H340"/>
+
+    <rect x="31" y="416" width="22" height="60" rx="2" class="stock"/>
+    <rect x="75" y="416" width="22" height="60" rx="2" class="cash"/>
+    <rect x="143" y="446" width="22" height="30" rx="2" class="stock"/>
+    <rect x="187" y="416" width="22" height="60" rx="2" class="cash"/>
+    <rect x="265" y="431" width="22" height="45" rx="2" class="stock"/>
+    <rect x="309" y="431" width="22" height="45" rx="2" class="cash"/>
+
+    <g text-anchor="middle">
+      <text x="42" y="411" class="value">10 萬</text>
+      <text x="86" y="411" class="value">10 萬</text>
+      <text x="154" y="441" class="value">5 萬</text>
+      <text x="198" y="411" class="value">10 萬</text>
+      <text x="276" y="426" class="value">7.5 萬</text>
+      <text x="320" y="426" class="value">7.5 萬</text>
+    </g>
+
+    <text x="120" y="432" text-anchor="middle" class="accent strong">−50%</text>
+    <path class="arrow" d="M107 456H134 M129 451L134 456L129 461"/>
+
+    <g text-anchor="middle">
+      <text x="237" y="442" class="accent">用現金</text>
+      <text x="237" y="458" class="accent">買進正二</text>
+      <text x="237" y="474" class="accent strong">2.5 萬</text>
+    </g>
+    <path class="arrow" d="M223 487H251 M246 482L251 487L246 492"/>
+
+    <text x="176" y="495" text-anchor="middle" class="secondary">合計 15 萬</text>
+  </g>
+</svg>
