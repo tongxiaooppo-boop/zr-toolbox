@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 520" role="img" aria-labelledby="chart-title chart-desc">
+  <title id="chart-title">532 股版：每六個月配回原比例</title>
+  <desc id="chart-desc">2026-05-08 配好原型（大盤 ETF）50%、正二 30%、現金 20%，不看漲跌，每 6 個月到期就用當時總額配回 5：3：2。到期日 2026-11-08，原型 45 萬、正二 21 萬、現金 20 萬，合計 86 萬；因正二跌比較多，比例跑掉，賣出原型 2 萬、買入正二 4.8 萬、用掉現金 2.8 萬後，成為原型 43 萬、正二 25.8 萬、現金 17.2 萬，合計仍是 86 萬。</desc>
+
+  <style>
+    svg {
+      font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif;
+    }
+    text {
+      fill: #1c2330;
+      font-size: 12px;
+    }
+    .title { font-size: 16px; font-weight: 700; }
+    .heading { font-size: 14px; font-weight: 700; }
+    .small-heading { font-size: 13px; font-weight: 700; }
+    .amount, .total { font-weight: 600; }
+    .muted { fill: #6b7482; }
+    .original { fill: #0f766e; }
+    .leveraged { fill: #2563eb; }
+    .cash { fill: #9aa3b2; }
+    .accent { fill: #b45309; }
+    .line {
+      fill: none;
+      stroke: #c9ced6;
+      stroke-width: 1;
+    }
+    .grid { stroke-dasharray: 3 4; opacity: 0.6; }
+    .arrow {
+      fill: none;
+      stroke: #b45309;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    @media (prefers-color-scheme: dark) {
+      text { fill: #e8ebf0; }
+      .muted { fill: #9aa3b2; }
+      .original { fill: #2dd4bf; }
+      .leveraged { fill: #6ea0ff; }
+      .cash { fill: #6b7482; }
+      .accent { fill: #fbbf24; }
+      .line { stroke: #3a4250; }
+      .arrow { stroke: #fbbf24; }
+    }
+  </style>
+
+  <text class="title" x="12" y="25">532 股版｜定期配比再平衡</text>
+  <text x="12" y="48">原型＝大盤 ETF；不看漲跌，只看時間。</text>
+  <text x="12" y="68">每 6 個月到期，用當時總額配回 5：3：2。</text>
+
+  <text x="180" y="91" text-anchor="middle">
+    <tspan class="original">■</tspan><tspan> 原型　</tspan><tspan class="leveraged">■</tspan><tspan> 正二　</tspan><tspan class="cash">■</tspan><tspan> 現金</tspan>
+  </text>
+
+  <path class="line" d="M99 110V474"/>
+
+  <text class="small-heading" x="9" y="121">半年前配好</text>
+  <text class="muted" x="9" y="141">2026-05-08</text>
+  <text class="muted" x="9" y="160">原始比例</text>
+
+  <path class="line" d="M84 151H104M100 147L104 151L100 155"/>
+
+  <text class="heading" x="109" y="121">到期日</text>
+  <text x="109" y="141">2026-11-08</text>
+  <text class="accent" x="109" y="160">現在</text>
+
+  <text class="heading" x="239" y="121">配回</text>
+  <text class="heading" x="239" y="142">5：3：2 後</text>
+  <text class="muted" x="239" y="161">回到原比例</text>
+
+  <g text-anchor="middle">
+    <text x="225" y="182">原型 <tspan class="accent">賣 2 萬</tspan></text>
+    <text x="225" y="202">正二 <tspan class="accent">買 4.8 萬</tspan></text>
+    <text x="225" y="222">現金 <tspan class="accent">用掉 2.8 萬</tspan></text>
+  </g>
+  <path class="arrow" d="M161 236H289M283 230L289 236L283 242"/>
+
+  <text class="muted" x="109" y="257">金額（萬）；兩組直條共用比例尺</text>
+
+  <path class="line grid" d="M108 305H348M108 365H348"/>
+  <path class="line" d="M8 425H90M108 425H216M236 425H348"/>
+
+  <g aria-label="半年前的配置比例">
+    <rect class="original" x="12" y="365" width="16" height="60" rx="2"/>
+    <rect class="leveraged" x="40" y="389" width="16" height="36" rx="2"/>
+    <rect class="cash" x="68" y="401" width="16" height="24" rx="2"/>
+    <g text-anchor="middle">
+      <text class="amount" x="20" y="357">50%</text>
+      <text class="amount" x="48" y="381">30%</text>
+      <text class="amount" x="76" y="393">20%</text>
+      <text x="20" y="446">原型</text>
+      <text x="48" y="446">正二</text>
+      <text x="76" y="446">現金</text>
+    </g>
+  </g>
+
+  <g aria-label="到期日：原型45萬、正二21萬、現金20萬">
+    <rect class="original" x="112" y="290" width="22" height="135" rx="2"/>
+    <rect class="leveraged" x="150" y="362" width="22" height="63" rx="2"/>
+    <rect class="cash" x="188" y="365" width="22" height="60" rx="2"/>
+    <g text-anchor="middle">
+      <text class="amount" x="123" y="282">45</text>
+      <text class="amount" x="161" y="354">21</text>
+      <text class="amount" x="199" y="357">20</text>
+      <text x="123" y="446">原型</text>
+      <text x="161" y="446">正二</text>
+      <text x="199" y="446">現金</text>
+      <text class="total" x="161" y="468">合計 86 萬</text>
+    </g>
+  </g>
+
+  <g aria-label="配回後：原型43萬、正二25.8萬、現金17.2萬">
+    <rect class="original" x="240" y="296" width="22" height="129" rx="2"/>
+    <rect class="leveraged" x="278" y="347.6" width="22" height="77.4" rx="2"/>
+    <rect class="cash" x="316" y="373.4" width="22" height="51.6" rx="2"/>
+    <g text-anchor="middle">
+      <text class="amount" x="251" y="288">43</text>
+      <text class="amount" x="289" y="339.6">25.8</text>
+      <text class="amount" x="327" y="365.4">17.2</text>
+      <text x="251" y="446">原型</text>
+      <text x="289" y="446">正二</text>
+      <text x="327" y="446">現金</text>
+      <text class="total" x="289" y="468">合計仍是 86 萬</text>
+    </g>
+  </g>
+
+  <text class="muted" x="180" y="490" text-anchor="middle">正二跌比較多，所以比例跑掉；配回後總額不變。</text>
+  <path class="line" d="M12 499H348"/>
+  <text class="muted" x="12" y="514" textLength="336" lengthAdjust="spacingAndGlyphs">股版＝原型／正二／現金；債版＝正二／美債／現金，同叫 532 但不是同一種配置。</text>
+</svg>

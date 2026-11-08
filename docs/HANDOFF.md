@@ -1,7 +1,8 @@
 # zr-toolbox 交接檔
 
 - 現行版本：決策 2026-11-08（[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)）；框架 **2026-11-08 v2**（[FRAMEWORK.md](FRAMEWORK.md)）
-- 狀態：**Gate 0 完成**（2026-11-08）。下一步＝Gate 1（⑫ 辭典＋③ 定期配比再平衡），**由訂閱 Codex sol 寫**（使用者 2026-11-08 指定；還有一張重置券）。
+- 狀態：**Gate 0 完成**（2026-11-08）。**Gate 1 任務書已派**：[collab/to-codex.md](../collab/to-codex.md) v1（2026-11-08），等訂閱 Codex sol 在面板做完寫 `collab/from-codex.md`。圖解兩張已由免費 sol 畫好、Opus 核對（`img/glossary/`、`img/rebalance/`）；③ 範例數字已鎖進 `tests/core.test.js`。
+- Gate 1 PROOF_CMD 預期：tests 45／pass 45／fail 0／todo 0；smoke pages 4 全過。
 - 驗收指令：`npm test && npm run smoke`。Gate 0 預期 tests 44／pass 43／fail 0／todo 1；smoke pages 2 全過。
 - 使用者 2026-11-08 補充：工具箱分四大類（正二教學／正二變種／正二槓桿／其他股票計算機，含融資等原 v2 項目），**每個工具都要圖文解說，圖由 sol 畫**（流程見 FRAMEWORK.md 第 5 節）。① 不另做白話版計算機，⑪ 擔任白話版（FRAMEWORK.md 第 8 節）。
 

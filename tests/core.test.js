@@ -52,6 +52,13 @@ test('rebalance ③: 442 bond version trades back to 40/40/20', () => {
   [72000, -48000, -24000].forEach((v, i) => close(r.trades[i], v));
   assert.equal(r.ready, false); assert.equal(r.due, '2026-11-08');
 });
+test('rebalance ③: page example and figure — 532 stock 45/21/20 → 43/25.8/17.2', () => {
+  const r = rebalance({ template: '532-stock', holdings: [450000, 210000, 200000], months: 6, last: '2026-05-08', asOf: '2026-11-08' });
+  close(r.total, 860000);
+  [430000, 258000, 172000].forEach((v, i) => close(r.targets[i], v));
+  [-20000, 48000, -28000].forEach((v, i) => close(r.trades[i], v));
+  assert.equal(r.ready, true); assert.equal(r.due, '2026-11-08'); close(r.exposure, 1.1);
+});
 test('rebalance ③: every template weight sums to 1', () => {
   for (const [id, t] of Object.entries(TEMPLATES)) close(t.weights.reduce((a, b) => a + b, 0), 1, 1e-12), assert.ok(t.name, id);
 });

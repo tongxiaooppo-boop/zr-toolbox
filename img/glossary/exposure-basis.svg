@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 520" role="img" aria-labelledby="title desc">
+  <title id="title">用同一個例子，看懂淨資產、曝險、口徑與資產槓桿</title>
+  <desc id="desc">持股 1,000 萬（跟大盤同步，Beta 1）、現金 200 萬、借款 300 萬，總資產為 1,200 萬，淨資產為 900 萬；兩根直條使用相同比例尺。曝險為 1,000 萬，以淨資產或總資產為口徑分別約為 1.11 倍及 0.83 倍大盤；資產槓桿約為 1.33 倍，與曝險倍數不同。</desc>
+  <style>
+    svg {
+      font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif;
+      font-size: 12px;
+    }
+    text { fill: #1c2330; }
+    .title { font-size: 16px; font-weight: 700; }
+    .heading { font-size: 13px; font-weight: 600; }
+    .math { font-size: 13px; }
+    .answer { font-weight: 700; }
+    .muted { fill: #6b7482; }
+    .stock { fill: #2563eb; }
+    .cash { fill: #9aa3b2; }
+    .equity { fill: #0f766e; }
+    .debt { fill: #b91c1c; }
+    .accent { fill: #b45309; }
+    .line { fill: none; stroke: #c9ced6; stroke-width: 1; }
+    .card { fill: none; stroke: #c9ced6; stroke-width: 1; }
+    @media (prefers-color-scheme: dark) {
+      text { fill: #e8ebf0; }
+      .muted { fill: #9aa3b2; }
+      .stock { fill: #6ea0ff; }
+      .cash { fill: #6b7482; }
+      .equity { fill: #2dd4bf; }
+      .debt { fill: #f87171; }
+      .accent { fill: #fbbf24; }
+      .line, .card { stroke: #3a4250; }
+    }
+  </style>
+
+  <text class="title" x="20" y="24">淨資產、曝險、口徑與資產槓桿</text>
+
+  <g aria-label="同一比例尺的資產與資金來源堆疊直條">
+    <text class="heading" x="20" y="46">我有的東西</text>
+    <text x="20" y="64">＝總資產 1,200 萬</text>
+    <text class="heading" x="192" y="46">這些錢從哪來</text>
+    <text x="192" y="64">合計 1,200 萬</text>
+
+    <rect class="stock" x="20" y="96" width="52" height="100"/>
+    <rect class="cash" x="20" y="76" width="52" height="20"/>
+    <text x="82" y="90">現金 200 萬</text>
+    <text x="82" y="137">持股 1,000 萬</text>
+    <text class="muted" x="82" y="154">Beta 1</text>
+    <text class="muted" x="82" y="171">跟大盤同步</text>
+
+    <rect class="equity" x="192" y="106" width="52" height="90"/>
+    <rect class="debt" x="192" y="76" width="52" height="30"/>
+    <text x="254" y="95">借款 300 萬</text>
+    <text x="254" y="147">淨資產 900 萬</text>
+    <text class="muted" x="254" y="165">（自己的錢）</text>
+
+    <path class="line" d="M20 196.5H340"/>
+  </g>
+
+  <text x="180" y="216" text-anchor="middle"><tspan class="stock">■</tspan><tspan> 持股　</tspan><tspan class="cash">■</tspan><tspan> 現金　</tspan><tspan class="equity">■</tspan><tspan> 淨資產　</tspan><tspan class="debt">■</tspan><tspan> 借款</tspan></text>
+
+  <g>
+    <rect class="card" x="16" y="230" width="328" height="56" rx="9"/>
+    <text class="heading" x="26" y="249">曝險<tspan class="muted">（跟著大盤漲跌的金額）</tspan></text>
+    <text class="math" x="26" y="272">＝持股 1,000 萬 × Beta 1<tspan class="answer"> ＝ 1,000 萬</tspan></text>
+  </g>
+
+  <g>
+    <rect class="card" x="16" y="292" width="328" height="56" rx="9"/>
+    <text class="heading" x="26" y="311">淨資產口徑</text>
+    <text class="math" x="26" y="334">＝曝險 1,000 萬 ÷ 淨資產 900 萬<tspan class="answer"> ≈ 1.11 倍大盤</tspan></text>
+  </g>
+
+  <g>
+    <rect class="card" x="16" y="354" width="328" height="56" rx="9"/>
+    <text class="heading" x="26" y="373">總資產口徑</text>
+    <text class="math" x="26" y="396">＝曝險 1,000 萬 ÷ 總資產 1,200 萬<tspan class="answer"> ≈ 0.83 倍大盤</tspan></text>
+  </g>
+
+  <g>
+    <text class="heading muted" x="20" y="431">資產槓桿</text>
+    <text class="muted" x="20" y="450">＝總資產 1,200 萬 ÷ 淨資產 900 萬 ≈ 1.33 倍</text>
+    <text class="muted" x="20" y="468">（和曝險倍數不是同一件事）</text>
+  </g>
+
+  <text class="accent" x="20" y="492">
+    <tspan x="20">同一個人，用不同口徑算出 1.11 倍和 0.83 倍；</tspan>
+    <tspan x="20" dy="18">比較前先問清楚是哪一種。</tspan>
+  </text>
+</svg>
