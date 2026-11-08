@@ -90,3 +90,8 @@ td:first-child,th:first-child{text-align:left}
 /* ⑧ 回本計算：淨值紀錄欄位 */
 .field textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font-size:16px;resize:vertical}
 .field textarea:focus{outline:2px solid var(--accent);outline-offset:-1px}
+
+/* ④ 質押壓力測試、⑪ 整體曝險：進階設定與追繳列 */
+.advanced{border-top:1px solid var(--line);margin:12px 0;padding:10px 0}
+.advanced summary{color:var(--muted);cursor:pointer;margin-bottom:10px}
+.pledge-table tr.called td{color:var(--bad)}
