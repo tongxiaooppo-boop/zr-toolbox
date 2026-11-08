@@ -12,16 +12,17 @@
 | 路徑 | 內容 | 用在 |
 |---|---|---|
 | `D:\ok\zr-calc\research-model.js`＋`tests\research.test.cjs` | 50/50 觸發、時間制再平衡、質押壓測、目標 Beta 純函式，20 項測試 | 工具 ②③④⑪ |
-| `D:\ok\zr-calc\index.html` | 原計算機（本機副本；線上版在使用者的 GitHub，網址待確認） | 工具 ① 導覽 |
+| `D:\ok\zr-calc\index.html` | 原計算機（本機副本；與線上版不同，見下方） | 工具 ① 導覽 |
 | `D:\ok\zr-calc2\` | P0 重構版（core/strategies/storage，31 項測試，3 commits，未上線） | 參考，決策已擱置 P0 |
 | `D:\ok\zr-calc\docs\正二策略重新調查-2026-11-08.md` | 策略規則、公式推導、來源 | 各工具的教學文案 |
 | `D:\ok\zr-calc\資料蒐集\2026-11-08_正二資料庫\` | 77 筆來源（含 25 個網路計算機比較） | 辭典、出處 |
 | `D:\ok\zr-calc\資料蒐集\正2serial.pdf` | AI 科普；錯誤清單見 decision/brief.md 第 4 點 | 股版／債版、迷思澄清 |
 
-## 待使用者回答
+## 使用者已定（2026-11-08）
 
-1. 朋友在用的原計算機 GitHub 網址或 repo 名稱。
-2. 新工具箱放哪裡：建議原網址不動，工具箱獨立部署，原計算機頂端加入口。
+1. 原計算機線上版：https://tongxiaooppo-boop.github.io/zr-calc/ （GitHub `tongxiaooppo-boop/zr-calc`，public，main，最後 push 2026-11-04）。
+   - **線上 index.html 與本機 `D:\ok\zr-calc\index.html`、`D:\ok\zr-calc2\index.html` 都不同**（本機版多了研究頁連結等未上線修改）。Gate 3 改原計算機時，從 GitHub main 重新 clone，以線上版為準，不要拿本機副本推上去。
+2. 部署：工具箱**獨立部署**（新 repo／新 Pages），原計算機網址不動，只在原頁頂端加工具箱入口。
 
 ## Gate 規劃（草案，Gate 0 時定死）
 
