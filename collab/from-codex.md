@@ -1,31 +1,19 @@
 ﻿## 完成項
-- 步驟 1：新增④質押壓力測試頁，含指定欄位、進階設定、維持率指標、五列壓力表、說明圖與 executable 免責區；計算僅呼叫 pledgeTable。
-- 步驟 2：新增⑪我現在等於幾倍大盤頁，含現在部位、選填調整目標、進階 Beta、雙口徑指標、交易計畫、說明圖與 executable 免責區；計算僅呼叫 exposureNow、betaPlan。
-- 步驟 3：僅更新 pledge、exposure 卡片的 ready 狀態與指定 terms；CSS 僅在檔尾追加進階設定與追繳列樣式。未 commit。
-
+- 步驟 1：新增 tools/calc-guide.html 與 js/pages/calc-guide.js，依指定順序呈現開頭卡、圖解、目錄、逐欄教學、差異、FinMind token 教學與 executable 免責區；支援初始 hash 定位。頁殼保留 manifest、apple-touch-icon 與 pwa.js。CSS 僅在檔尾追加指定樣式，資料文案未修改。
+- 步驟 2：僅將 calc-guide 卡片改為 ready，並填入指定的 8 個 terms；其他卡片未修改。未 commit，未執行 smoke。
 ## 異動檔案
+- M collab/from-codex.md（本回報）
 - M css/app.css
 - M js/data/tools.js
-- ?? js/pages/exposure.js
-- ?? js/pages/pledge.js
-- ?? tools/exposure.html
-- ?? tools/pledge.html
-- M collab/from-codex.md
-
+- ?? js/pages/calc-guide.js
+- ?? tools/calc-guide.html
 ## PROOF_CMD 輸出
-- npm.cmd test：tests 48 / pass 48 / fail 0 / todo 0，exit code 0。
-- git diff --check 通過。依任務書未執行 smoke，留由 Opus 執行。
-
-## 範例實測（帶入範例後畫面上的數字）
-- 使用 Node 記憶體中的最小 DOM 載入實際頁面模組並觸發「帶入範例」、input、change，斷言結果區產生的文字；未啟動瀏覽器，尚未核對瀏覽器版面。
-- ④：目前維持率 200%／追繳價 65.00 元／從現在跌 35.0%；表格五列（維持率、還款、補擔保）：180%、不用、不用；160%、不用、不用；140%、NT$ 62,500、NT$ 100,000；120%（追繳）、NT$ 125,000、NT$ 200,000；100%（追繳）、NT$ 187,500、NT$ 300,000。
-- ⑪：淨資產 NT$ 9,000,000／淨資產口徑 1.11 倍／總資產口徑 0.83 倍／槓桿比 1.33 倍／正二目標 NT$ 1,300,000／買進 NT$ 1,300,000／新增借款 NT$ 0／「交易後：現金 NT$ 700,000、借款 NT$ 3,000,000，等於 1.40 倍大盤。」
-- ⑪ 目標改 2：「⚠ 現金不足且未允許新增借款。」「還差 NT$ 2,000,000。」
-- 額外斷言通過：必填提示、④零借款訊息及 core 錯誤顯示、⑪允許新增借款時的壓力測試連結、淨資產不足時略過目標計算、目標留白時只顯示現在指標。
-
+- npm.cmd test：tests / pass / fail / todo：51 / 51 / 0 / 0。
+## 畫面實測
+- 區塊數（GUIDE_SECTIONS 卡片數）／欄位說明總數／差異條數／token 步驟數／錯誤條數：6／24／4／4／3。
+- 有 ⓘ 的欄位數：8；另有 token 標題 1 顆，全頁共 9 顆。
+- 使用記憶體 DOM 執行頁面並核對文案、節點數量、8 個目錄連結、免責區位於最後與初始 #token 定位，全部通過；另比對頁殼僅變更 title 與頁面 script。未進行瀏覽器視覺實測（環境未提供可直接使用的 Playwright 套件）；smoke 依任務書交由 Opus 執行。
 ## 自行決定的小事
-- 沿用樣板，兩頁同時監聽 input 與 change；初次載入顯示缺少欄位數。
-- 為避免啟動 Chrome，以不落地的一次性 Node DOM 模擬核對實際頁面輸出，沒有新增套件、暫存檔或測試檔；瀏覽器視覺驗收留給 Opus。
-
+- 無需新增套件或暫存檔；以記憶體 DOM 補查頁面組裝與資料文案。
 ## 需要決定的事
 - 無

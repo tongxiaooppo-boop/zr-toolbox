@@ -95,3 +95,11 @@ td:first-child,th:first-child{text-align:left}
 .advanced{border-top:1px solid var(--line);margin:12px 0;padding:10px 0}
 .advanced summary{color:var(--muted);cursor:pointer;margin-bottom:10px}
 .pledge-table tr.called td{color:var(--bad)}
+
+/* ① 原計算器逐欄教程 */
+.button-link{display:inline-block;padding:10px 16px;border-radius:8px;background:var(--accent);color:var(--card);text-decoration:none;font-weight:700;margin:8px 0}
+.guide-toc a{display:block;padding:4px 0}
+.guide-field{border-top:1px solid var(--line);padding:10px 0}
+.guide-field h3{font-size:16px;margin:0 0 4px}
+.tip{font-size:14px;color:var(--muted)}
+.map{font-size:14px;color:var(--accent)}

@@ -1,8 +1,8 @@
 # zr-toolbox 交接檔
 
 - 現行版本：決策 2026-11-08（[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)）；框架 **2026-11-08 v4**（[FRAMEWORK.md](FRAMEWORK.md)）
-- 狀態：**Gate 2 全部完成**（2026-11-08）。2b（④⑪）Codex sol 一輪過、Opus 未修改；PROOF_CMD 實測：tests 48 全過；smoke pages 8 全過。2a（⑥⑧）、Gate 1（⑫③）同日完成。
-- 進行中＝**Gate 3a**（① 逐欄教程＋token 教學）：Opus 已準備好文案 `js/data/calcGuide.js`（依線上版程式碼逐欄核對）、圖 `img/calc-guide/map.svg`、測試（tests 51）、任務書 `collab/to-codex.md` v1。PWA（3b 前半）Opus 已做完：manifest、network-first `sw.js`、圖示、所有頁殼。下一步＝使用者在 Codex 面板派 3a → Opus 驗收（tests 51、smoke pages 9）→ push 更新線上版。
+- 狀態：**Gate 3a 完成**（2026-11-08，① 逐欄教程＋token 教學，Codex sol 一輪過、Opus 未修改）。PROOF_CMD 實測：tests 51 全過；smoke pages 9 全過。Gate 0–2 同日完成。
+- 下一步：① 使用者手機實機看一次、加到主畫面試離線（Gate 3b 收尾）；② **Gate 4**（⑤ 融資維持率、⑦ 定期定額／CAGR、⑨ 交易成本、⑩ 股息殖利率）：開工前 Opus 先定 core 簽名與測試預期值、畫圖、寫任務書。
 - **已部署**（2026-11-08，使用者同意公開）：https://tongxiaooppo-boop.github.io/zr-toolbox/ （GitHub `tongxiaooppo-boop/zr-toolbox`，public，Pages 來源 `master` 根目錄，MIT）。之後每個 Gate 驗收完 `git push` 就會更新。剩：手機實機看一次、加到主畫面試離線。
 - **Codex 面板環境限制**（Gate 1 發現）：PowerShell 擋 `npm.ps1`，要用 `npm.cmd`；沙箱裡 `npm run smoke` 開不了無頭 Chrome 會卡住。任務書的 PROOF_CMD 改成：Codex 只跑 `npm.cmd test`，smoke 由 Opus 跑。
 - 驗收指令：`npm test && npm run smoke`（現行預期見上方狀態）。
