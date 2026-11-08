@@ -21,6 +21,7 @@
 ## 使用者已定（2026-11-08）
 
 1. 原計算機線上版：https://tongxiaooppo-boop.github.io/zr-calc/ （GitHub `tongxiaooppo-boop/zr-calc`，public，main，最後 push 2026-11-04）。
+2. 部署：工具箱**獨立部署**（新 repo／新 Pages）。
 3. **舊案完全不改**（使用者 2026-11-08）：不改 `tongxiaooppo-boop/zr-calc` repo、不在原頁加入口或導覽。原決策 D3（原頁加導覽、ⓘ、副標）與原頁的 token 402 處理、PWA 更新提示**作廢**。
    - 工具 ① 改為在工具箱內做：(a) 原計算機逐欄教程（對照線上版欄位：持股、正二、現金與負債、目標 Beta、口徑、允許借款、FinMind token），工具箱可以單向連到原頁；(b) 是否另做同公式的白話版計算機（含 token 402 教學）→ Gate 0 時由 Opus 提案、使用者拍板。
    - 教程以**線上版**欄位為準（本機 `D:\ok\zr-calc\index.html`、`D:\ok\zr-calc2\index.html` 都和線上不同，不能當依據）。
