@@ -65,6 +65,7 @@
 - **A 類改精靈全部完成**（②③④⑤⑥⑦⑧⑨⑩⑪⑮⑲）。
 - **科普範圍追加（使用者 2026-11-09）**：首頁加「科普」分組。① **ETF 入門**（素材現成：[research/R3-ETF常識.md](research/R3-ETF常識.md) 37 條，不用再調研）；② **借錢投資的管道**＝**個人可以借的全部管道**（使用者原話「全部喔，個人可以借的」）：股票質借（銀行／券商不限用途）、融資、融券、借券、個人信貸、房貸增貸／理財型房貸、保單質借，以及其他個人可借管道（例：信用卡預借現金、車貸增貸等，由調研補齊）。要先派 Codex sol 上網調研 **研究 R4**（每種：怎麼借、利率大約、會不會追繳／斷頭、期限、最壞情況、官方來源＋查詢日期），頁面放總比較表並連到 ④⑤⑬；③ 正二教學（FRAMEWORK Gate 6 原規劃）。
   - **順序（使用者定）**：先做 ⑬⑭，科普放後面。⑬ 若需要信貸／房貸數字，先用使用者輸入（利率、月付自己填），不等 R4。
+- **⑬⑭ 進度（2026-11-09，Opus）**：`js/core/lifelev.js`（`lifeLeveragePlan`、`loanPayment`、`DEBT_KINDS`；口徑照 HAMR 人生槓桿，不採作者建議倍數）、`js/core/kelly.js`（`kellyPlan`、`leveredGrowth`；每日固定倍數 GBM，借錢段 borrowRate、現金段 cashRate，腰斬機率 0.5^(2ν/(Lσ)²)）＋`tests/lifelev-kelly.test.js`（7 項：房貸 800 萬 2.2% 25 年月付 34,692.69 用逐月攤還驗；⑬ 範例金融淨資產 1,981,000、曝險 1.52、帳面 2.50、總曝險 2.51、結餘 +7,307、現金 5.4 月、生活費 4.1 倍、歸零 65.9%、跌 30% → 1,078,900／1.66；⑭ 範例 8%／20%／3%／1% → 全凱利 1.69（格點搜尋驗）、年化 9.02%、2 倍 8.80%／腰斬 48.1%、1.4 倍 8.84%／22.4%、3.76 倍歸零）；4 個術語（金融淨資產、生活費倍數、波動、凱利倍數）；tools.js 加 ⑬ `lifelev`、⑭ `kelly`（`planned`）；`wizard.js` 檔頭定 `kind:'life'`、`debtsInput`／`readDebts`；卡通提示 `lifelev-01/02`、`kelly-01/02`；任務書 `collab/to-codex.md`（⑬⑭ v1：兩個元件＋兩頁＋四張圖）待 Codex 面板做。框架 v5.10。tests 145 全過。
 - **下次開工（新 session，從這裡接）**：⑬ 人生槓桿體檢、⑭ 幾倍槓桿最划算（凱利）。開工先讀 [research/候選清單.md](research/候選清單.md) 的 ⑬⑭ 列與 FRAMEWORK 第 7 節 Gate 5，Opus 定 core 簽名＋測試預期值→卡通提示→任務書（照 ③ 格式）。之後 ⑯⑰⑱ → 科普（研究 R4 → ETF 入門、借錢管道、正二教學）→ UI 統一美化（Neo-brutalism）。
 - （舊）⑥ ⑧ 改精靈（無持股，輸入少，步驟可以短）。全部 A 類做完 → ⑬⑭ → ⑯⑰⑱ → UI 統一美化（Neo-brutalism）。
   - 注意：股票事件換算（`core/events.js`）其他工具目前用不到（都用券商 App 現在的股數／成本）；之後若有工具要比歷史價格，直接用 `fetchEvents`＋`adjustBasePrice`。
@@ -87,7 +88,7 @@
 4. 之後才分批派 Codex 改各工具、做新工具。
 
 
-- 現行版本：決策 2026-11-08（[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)）；框架 **2026-11-09 v5.9**（[FRAMEWORK.md](FRAMEWORK.md)）
+- 現行版本：決策 2026-11-08（[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)）；框架 **2026-11-09 v5.10**（[FRAMEWORK.md](FRAMEWORK.md)）
 - 狀態：**Gate 3a 完成**（2026-11-08，① 逐欄教程＋token 教學，Codex sol 一輪過、Opus 未修改）。PROOF_CMD 實測：tests 51 全過；smoke pages 9 全過。Gate 0–2 同日完成。
 - 手機實機：使用者 2026-11-08 回報線上版可以打開。尚未確認：加到主畫面、離線開啟。
 - （以下 Gate 4–7 計畫已被上方「方向修正」取代，待重排；內容與大仁數字仍可用）
@@ -104,7 +105,7 @@
 - 今天（2026-11-08）結束時：master＝origin/master，工作目錄乾淨；tests 51、smoke pages 9 全過；Codex 面板沒有進行中的任務（`collab/to-codex.md` 是已完成的 3a）。
 - **已部署**（2026-11-08，使用者同意公開）：https://tongxiaooppo-boop.github.io/zr-toolbox/ （GitHub `tongxiaooppo-boop/zr-toolbox`，public，Pages 來源 `master` 根目錄，MIT）。之後每個 Gate 驗收完 `git push` 就會更新（Pages 約 1 分鐘生效）。
 - **Codex 面板環境限制**（Gate 1 發現）：PowerShell 擋 `npm.ps1`，要用 `npm.cmd`；沙箱裡 `npm run smoke` 開不了無頭 Chrome 會卡住。任務書的 PROOF_CMD 改成：Codex 只跑 `npm.cmd test`，smoke 由 Opus 跑。
-- 驗收指令：`npm test && npm run smoke`（現行預期：tests 138 全過、smoke pages 15 全過）。
+- 驗收指令：`npm test && npm run smoke`（現行預期：tests 145 全過、smoke pages 15 全過）。
 - 使用者 2026-11-08 補充：工具箱分四大類（正二教學／正二變種／正二槓桿／其他股票計算機，含融資等原 v2 項目），**每個工具都要圖文解說，圖由 sol 畫**（流程見 FRAMEWORK.md 第 5 節）。（「⑪ 擔任白話版、不另做」已被 Gate 7 推翻，見上方追加三件事。）
 
 ## 這是什麼

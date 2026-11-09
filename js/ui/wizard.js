@@ -27,6 +27,13 @@
 //     rows：[{ code, shares, price, beta }]（數字可為 NaN／空；beta 空白＝core 預設 stock 1、lever 2）
 //     代號是台股代號（normalizeCode 通過）→ 跟 holdingsInput 一樣自動抓收盤價並顯示名稱；不是 → 不抓價，提示「現價自己填」
 //   readBetaHoldings(id) → [{ code, shares, price, beta }]   只讀畫面，檢查交給 core 的 checkBalanceRows
+//     kind：'life'（v5.10，⑬ 全部持股：max 預設 10，可以全部刪光〔同 'stock' 的空白提示〕；股數副標「1 張＝1000 股」；
+//           Beta 留白看代號猜，說明文字同 'mix'）
+//   debtsInput({ id, rows, max, label })     ⑬ 借款清單（v5.10）：每筆「種類＋餘額＋每月繳款＋年利率＋剩幾年＋拿去投資多少」
+//     rows：[{ kind, balance, monthly, ratePct, years, invest }]（數字可為 NaN／空）；max 預設 8；可以全部刪光
+//       （刪光時顯示「沒有借款：直接按「下一步」。」）；「＋ 再加一筆借款」新增一列，種類預設 'mortgage'
+//     種類用 core/lifelev.js 的 DEBT_KINDS（value／label）；「拿去投資」的 placeholder 依種類：investAll ? '留白＝全部' : '留白＝0'
+//   readDebts(id) → [{ kind, balance, monthly, ratePct, years, invest }]   只讀畫面（ratePct 是百分比數字，頁面自己 ÷100），檢查交給 core
 //   tokenBox()                               FinMind token（選填）：存在這台裝置、清除、連到申請教學
 //   explain({ label, value, tone, how, means, todo })   結果的一項：大數字＋▸怎麼來的／▸代表什麼／▸要做什麼
 import { h, infoChip, metric, figure } from './components.js';
