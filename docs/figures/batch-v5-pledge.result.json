@@ -1,0 +1,47 @@
+[
+  {
+    "index": 0,
+    "out": "D:\\ok\\zr-toolbox\\img\\pledge\\step1-holdings.svg",
+    "model": "gpt-6.1-sol",
+    "status": "ok",
+    "input": 801,
+    "output": 5438,
+    "ms": 85888
+  },
+  {
+    "index": 1,
+    "out": "D:\\ok\\zr-toolbox\\img\\pledge\\step2-debt.svg",
+    "model": "gpt-6.1-sol",
+    "status": "ok",
+    "input": 785,
+    "output": 3958,
+    "ms": 55841
+  },
+  {
+    "index": 2,
+    "out": "D:\\ok\\zr-toolbox\\img\\pledge\\step3-ratio-scale.svg",
+    "model": "gpt-6.1-sol",
+    "status": "ok",
+    "input": 766,
+    "output": 3285,
+    "ms": 43671
+  },
+  {
+    "index": 3,
+    "out": "D:\\ok\\zr-toolbox\\img\\pledge\\help-avg-cost.svg",
+    "model": "gpt-6.1-sol",
+    "status": "ok",
+    "input": 649,
+    "output": 3130,
+    "ms": 51401
+  },
+  {
+    "index": 4,
+    "out": "D:\\ok\\zr-toolbox\\img\\pledge\\help-haircut.svg",
+    "model": "gpt-6.1-sol",
+    "status": "ok",
+    "input": 642,
+    "output": 1570,
+    "ms": 21932
+  }
+]

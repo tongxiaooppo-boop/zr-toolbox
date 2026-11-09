@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 464" role="img" aria-labelledby="svg-title svg-desc">
+  <title id="svg-title">步驟 2：借了多少錢</title>
+  <desc id="svg-desc">在質押帳戶找到「借款餘額 500,000」，將借款總額填為 500000。借來的 50 萬留作現金、買大盤 ETF 或買正二，遇到股價下跌時的損失不同，也會影響被追繳時補錢的壓力。</desc>
+
+  <style>
+    text {
+      font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif;
+    }
+    .ink { fill: #1c2330; }
+    .secondary { fill: #6b7482; }
+    .primary { fill: #2563eb; }
+    .safe { fill: #15803d; }
+    .emphasis { fill: #b45309; }
+    .danger { fill: #b91c1c; }
+    .line-stroke { stroke: #c9ced6; }
+    .neutral-stroke { stroke: #9aa3b2; }
+    .primary-stroke { stroke: #2563eb; }
+    .safe-stroke { stroke: #15803d; }
+    .emphasis-stroke { stroke: #b45309; }
+    .danger-stroke { stroke: #b91c1c; }
+    .box { fill: none; stroke-width: 1.25; }
+    .connector {
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .heading { font-size: 16px; font-weight: 600; }
+    .label { font-size: 15px; font-weight: 600; }
+    .body { font-size: 14px; }
+    .small { font-size: 12px; }
+
+    @media (prefers-color-scheme: dark) {
+      .ink { fill: #e8ebf0; }
+      .secondary { fill: #9aa3b2; }
+      .primary { fill: #6ea0ff; }
+      .safe { fill: #4ade80; }
+      .emphasis { fill: #fbbf24; }
+      .danger { fill: #f87171; }
+      .line-stroke { stroke: #3a4250; }
+      .neutral-stroke { stroke: #6b7482; }
+      .primary-stroke { stroke: #6ea0ff; }
+      .safe-stroke { stroke: #4ade80; }
+      .emphasis-stroke { stroke: #fbbf24; }
+      .danger-stroke { stroke: #f87171; }
+    }
+  </style>
+
+  <defs>
+    <marker id="arrow-primary" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto">
+      <path class="primary" d="M0 0 L6 3 L0 6 Z"/>
+    </marker>
+    <marker id="arrow-safe" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto">
+      <path class="safe" d="M0 0 L6 3 L0 6 Z"/>
+    </marker>
+    <marker id="arrow-emphasis" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto">
+      <path class="emphasis" d="M0 0 L6 3 L0 6 Z"/>
+    </marker>
+    <marker id="arrow-danger" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto">
+      <path class="danger" d="M0 0 L6 3 L0 6 Z"/>
+    </marker>
+  </defs>
+
+  <text x="16" y="25" class="ink heading">步驟 2｜借了多少錢</text>
+
+  <rect x="16" y="42" width="328" height="80" rx="12" class="box line-stroke"/>
+  <text x="30" y="67" class="ink body">質押帳戶（示意）</text>
+  <text x="30" y="99" class="ink heading">借款餘額 500,000</text>
+
+  <path d="M278 138 V101 Q278 93 270 93 H179" class="connector primary-stroke" marker-end="url(#arrow-primary)"/>
+  <text x="130" y="153" class="primary body">借款總額 → 填 500000</text>
+
+  <path d="M16 171 H344" class="connector line-stroke"/>
+  <text x="16" y="196" class="ink heading">借來的 50 萬拿去做什麼？</text>
+
+  <rect x="16" y="295" width="68" height="52" rx="9" class="box primary-stroke"/>
+  <text x="50" y="315" text-anchor="middle" class="ink body">借款</text>
+  <text x="50" y="335" text-anchor="middle" class="primary label">50 萬</text>
+
+  <path d="M84 321 H99 M99 243 V399" class="connector neutral-stroke"/>
+  <path d="M99 243 H112" class="connector safe-stroke" marker-end="url(#arrow-safe)"/>
+  <path d="M99 321 H112" class="connector emphasis-stroke" marker-end="url(#arrow-emphasis)"/>
+  <path d="M99 399 H112" class="connector danger-stroke" marker-end="url(#arrow-danger)"/>
+
+  <rect x="118" y="212" width="226" height="62" rx="10" class="box safe-stroke"/>
+  <text x="130" y="236" class="ink label">留著當現金</text>
+  <text x="130" y="257" class="safe small">股價跌，這筆錢不會少</text>
+
+  <rect x="118" y="290" width="226" height="62" rx="10" class="box emphasis-stroke"/>
+  <text x="130" y="314" class="ink label">買 0050 這類大盤 ETF</text>
+  <text x="130" y="335" class="emphasis small">大盤跌 35%，約少 35%</text>
+
+  <rect x="118" y="368" width="226" height="62" rx="10" class="box danger-stroke"/>
+  <text x="130" y="392" class="ink label">買正二</text>
+  <text x="130" y="413" class="danger small">大盤跌 35%，粗估少 70%</text>
+
+  <text x="16" y="454" class="secondary small">被追繳時，借錢買的股票也在虧，補錢會更吃力。</text>
+</svg>

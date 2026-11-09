@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 190" role="img" aria-labelledby="title desc">
+  <title id="title">買入價＝成本均價</title>
+  <desc id="desc">分兩次各買 1 張，價格分別為 100 元與 80 元，合計 2 張，花 18 萬。18 萬除以 2,000 股，平均每股 90 元，所以買入價填 90。</desc>
+  <style>
+    svg {
+      --text: #1c2330;
+      --secondary: #6b7482;
+      --primary: #2563eb;
+      --danger: #b91c1c;
+      --neutral: #9aa3b2;
+      --emphasis: #b45309;
+      --line: #c9ced6;
+      --safe: #15803d;
+      font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif;
+    }
+    text { fill: var(--text); }
+    .title { font-size: 16px; font-weight: 700; }
+    .secondary { fill: var(--secondary); font-size: 12px; }
+    .purchase { font-size: 12px; }
+    .box { fill: none; stroke: var(--line); }
+    .connector {
+      fill: none;
+      stroke: var(--neutral);
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .arrow, .junction { fill: var(--neutral); }
+    .total { font-size: 12px; }
+    .formula { fill: var(--primary); font-size: 18px; font-weight: 700; }
+    .answer { font-size: 12px; }
+    @media (prefers-color-scheme: dark) {
+      svg {
+        --text: #e8ebf0;
+        --secondary: #9aa3b2;
+        --primary: #6ea0ff;
+        --danger: #f87171;
+        --neutral: #6b7482;
+        --emphasis: #fbbf24;
+        --line: #3a4250;
+        --safe: #4ade80;
+      }
+    }
+  </style>
+  <defs>
+    <marker id="arrow" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="6" markerHeight="6" orient="auto">
+      <path class="arrow" d="M0 0 6 3 0 6Z"/>
+    </marker>
+  </defs>
+
+  <text class="title" x="8" y="21">買入價＝成本均價</text>
+  <text class="secondary" x="8" y="41">分兩次買的人，要填平均價。</text>
+
+  <rect class="box" x="8" y="54" width="106" height="68" rx="8"/>
+  <text class="secondary" x="61" y="72" text-anchor="middle">第 1 次</text>
+  <text class="purchase" text-anchor="middle">
+    <tspan x="61" y="92">1 張 × 100 元</tspan>
+    <tspan x="61" y="111">＝ 10 萬</tspan>
+  </text>
+
+  <rect class="box" x="128" y="54" width="106" height="68" rx="8"/>
+  <text class="secondary" x="181" y="72" text-anchor="middle">第 2 次</text>
+  <text class="purchase" text-anchor="middle">
+    <tspan x="181" y="92">1 張 × 80 元</tspan>
+    <tspan x="181" y="111">＝ 8 萬</tspan>
+  </text>
+
+  <path class="connector" d="M61 122V132H242V88"/>
+  <path class="connector" d="M234 88H251" marker-end="url(#arrow)"/>
+  <circle class="junction" cx="242" cy="88" r="2"/>
+
+  <text class="total">
+    <tspan x="257" y="81">合計 2 張，</tspan>
+    <tspan x="257" y="101">花 18 萬</tspan>
+  </text>
+
+  <text class="formula" x="352" y="159" text-anchor="end">18 萬 ÷ 2,000 股 ＝ 90 元</text>
+  <text class="answer" x="352" y="181" text-anchor="end">買入價填 90</text>
+</svg>

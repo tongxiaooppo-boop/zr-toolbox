@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 180" role="img" aria-labelledby="chart-title chart-desc">
+  <title id="chart-title">擔保品認列成數</title>
+  <desc id="chart-desc">券商把股票打折算維持率：股票市值 100 萬，認列 80% 時，維持率用打折後的 80 萬算。0050 這類 ETF 多半認列 100%，以契約為準。</desc>
+  <style>
+    text {
+      font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif;
+      font-size: 13px;
+    }
+    .title { font-size: 16px; font-weight: 600; }
+    .small { font-size: 12px; }
+    .text { fill: #1c2330; }
+    .secondary { fill: #6b7482; }
+    .primary { fill: #2563eb; }
+    .neutral { fill: #9aa3b2; }
+    .danger { fill: #b91c1c; }
+    .accent { fill: #b45309; }
+    .line { stroke: #c9ced6; }
+    .safe { fill: #15803d; }
+    @media (prefers-color-scheme: dark) {
+      .text { fill: #e8ebf0; }
+      .secondary { fill: #9aa3b2; }
+      .primary { fill: #6ea0ff; }
+      .neutral { fill: #6b7482; }
+      .danger { fill: #f87171; }
+      .accent { fill: #fbbf24; }
+      .line { stroke: #3a4250; }
+      .safe { fill: #4ade80; }
+    }
+  </style>
+
+  <text class="text title" x="12" y="24">擔保品認列成數</text>
+  <text class="secondary small" x="12" y="45">券商把股票打折算維持率。</text>
+
+  <text class="text" x="12" y="70">股票市值 100 萬</text>
+  <rect class="neutral" x="12" y="79" width="200" height="12" rx="3"/>
+
+  <text class="text" x="12" y="113">認列 80%</text>
+  <text class="primary" x="113" y="113">算 80 萬</text>
+  <rect class="primary" x="12" y="122" width="160" height="12" rx="3"/>
+
+  <text class="secondary small" x="230" y="115">
+    <tspan x="230">維持率用打折後的</tspan>
+    <tspan x="230" dy="18">80 萬算</tspan>
+  </text>
+
+  <text class="secondary small" x="12" y="164">0050 這類 ETF 多半認列 100%，以契約為準。</text>
+</svg>

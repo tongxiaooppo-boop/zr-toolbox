@@ -1,0 +1,34 @@
+{
+ "jobs": [
+  {
+   "promptFile": "pledge-step1-holdings.md",
+   "model": "gpt-6.1-sol",
+   "effort": "high",
+   "out": "../../img/common/step-holdings.svg"
+  },
+  {
+   "promptFile": "pledge-step2-debt.md",
+   "model": "gpt-6.1-sol",
+   "effort": "high",
+   "out": "../../img/pledge/step2-debt.svg"
+  },
+  {
+   "promptFile": "pledge-step3-ratio-scale.md",
+   "model": "gpt-6.1-sol",
+   "effort": "high",
+   "out": "../../img/pledge/step3-ratio-scale.svg"
+  },
+  {
+   "promptFile": "pledge-help-avg-cost.md",
+   "model": "gpt-6.1-sol",
+   "effort": "high",
+   "out": "../../img/common/help-avg-cost.svg"
+  },
+  {
+   "promptFile": "pledge-help-haircut.md",
+   "model": "gpt-6.1-sol",
+   "effort": "high",
+   "out": "../../img/pledge/help-haircut.svg"
+  }
+ ]
+}

@@ -1,7 +1,7 @@
 // 工具④ 質押壓力測試（v5 精靈樣板：之後每個工具照這份的結構寫）。
 // 結構：toolHeader → wizard（輸入步驟＋結果逐項解說）→「怎麼讀」卡（圖解）→ disclaimer。公式只在 core/pledge.js 的 pledgePlan。
 import { h, toolHeader, selectField, disclaimer, figure } from '../ui/components.js';
-import { wizard, holdingsInput, readHoldings, tokenBox, numberInput, explain } from '../ui/wizard.js';
+import { wizard, holdingsInput, readHoldings, tokenBox, numberInput, explain, withHelp } from '../ui/wizard.js';
 import { holdingSummary } from '../core/holdings.js';
 import { pledgePlan } from '../core/pledge.js';
 import { parseNum, fmtMoney, fmtPct } from '../core/format.js';
@@ -22,17 +22,25 @@ const steps = [
   {
     title: '你拿去質押的股票',
     hint: '填你實際押給券商或銀行的那幾檔。代號填好，現價會自動抓最近收盤價。',
+    about: '這一步算出「擔保品現在值多少」。打開券商 App 的庫存，照下圖找三個數字。',
+    figure: { src: '../img/common/step-holdings.svg', alt: '券商 App 庫存畫面示意：代號 0050 元大台灣50、股數 10,000、成本均價 80.00、現價 100.00。股票代號填 0050，買入股數填 10000（1 張＝1000 股），買入價填 80；現價會自動抓，不用填。' },
     body: s => [holdingsInput({ id: 'hold', rows: s.holdings || [{}] }), tokenBox()],
     read: s => { s.holdings = readHoldings('hold'); holdingSummary(s.holdings); }
   },
   {
     title: '借了多少錢',
     hint: '看質押或借貸帳戶的「借款餘額」。借來的錢拿去做什麼也會影響風險。',
+    about: '這一步算出「你欠多少」。借款越多、借越久，維持率越低；借來的錢拿去買股票，下跌時會兩頭虧。',
+    figure: { src: '../img/pledge/step2-debt.svg', alt: '質押帳戶示意：借款餘額 500,000，借款總額填 500000。借來的 50 萬有三種去向：留著當現金，股價跌這筆錢不會少；買 0050 這類大盤 ETF，大盤跌 35% 約少 35%；買正二，大盤跌 35% 粗估少 70%。' },
     body: s => [
-      numberInput({ id: 'debt', label: '借款總額', plain: '已經借的＋這次打算借的，全部加起來', termId: 'pledge', value: s.debt, suffix: '元' }),
-      selectField({ id: 'use', label: '借來的錢拿去做什麼', plain: '拿去買股票，股價下跌時會兩頭虧', options: USE, value: s.use || 'cash' }),
-      numberInput({ id: 'rate', label: '借款年利率（選填）', plain: '契約上的年利率，例：2.5；不知道就留白', value: s.rate, suffix: '%' }),
-      numberInput({ id: 'days', label: '打算借多久（選填）', plain: '算幾天後的利息，例：365；留白就不算利息', value: s.days, suffix: '天' })],
+      numberInput({ id: 'debt', label: '借款總額', plain: '已經借的＋這次打算借的，全部加起來', termId: 'pledge', value: s.debt, suffix: '元',
+        help: { text: ['質押或不限用途借貸帳戶裡的「借款餘額」，加上這次還打算借的金額。', '分好幾筆借的，全部加起來填。例：已借 30 萬、還想借 20 萬 → 填 500000。'] } }),
+      withHelp(selectField({ id: 'use', label: '借來的錢拿去做什麼', plain: '拿去買股票，股價下跌時會兩頭虧', options: USE, value: s.use || 'cash' }),
+        { text: ['留著當現金：股價跌時這筆錢還在，可以拿來補繳。', '買 0050 這類大盤 ETF：跟著大盤跌。買正二：每天約 2 倍大盤，跌起來粗估是 2 倍。', '選了買股票，結果會多一項「借來的錢買的股票也會跟著虧」。'] }),
+      numberInput({ id: 'rate', label: '借款年利率（選填）', plain: '契約上的年利率，例：2.5；不知道就留白', value: s.rate, suffix: '%',
+        help: { text: ['契約或 App 上寫的年利率，例：2.5 就填 2.5。', '利息會加進借款，借越久維持率越低。留白就當作不算利息。'] } }),
+      numberInput({ id: 'days', label: '打算借多久（選填）', plain: '算幾天後的利息，例：365；留白就不算利息', value: s.days, suffix: '天',
+        help: { text: ['想看幾天後的情況，用日曆天算：半年填 182，一年填 365。', '跟年利率一起填才會算利息。'] } })],
     read: s => {
       s.debt = num('debt'); s.use = document.getElementById('use').value; s.rate = num('rate'); s.days = num('days');
       if (!(s.debt > 0)) throw new Error('借款總額要大於 0；沒有借款就不會被追繳。');
@@ -43,10 +51,16 @@ const steps = [
   {
     title: '契約上的追繳規則',
     hint: '這三個數字寫在質押契約裡。不確定就先用預設值，之後再問券商或銀行。',
+    about: '這一步決定「維持率掉到哪裡會出事」。下圖由上往下：現在、補回目標、追繳線。',
+    figure: { src: '../img/pledge/step3-ratio-scale.svg', alt: '維持率刻度：200% 是範例的現在，160% 是補回目標，130% 是追繳線，100% 是擔保品剛好等於借款。130% 以下危險、130–160% 注意、160% 以上安全。認列成數：股票 100 萬 × 認列 100％ ＝ 算 100 萬。' },
     body: s => [
-      numberInput({ id: 'call', label: '追繳線', plain: '維持率低於這裡就會被通知補錢；多數券商契約是 130', termId: 'margin-call', value: s.call ?? 130, suffix: '%' }),
-      numberInput({ id: 'target', label: '補回目標', plain: '被追繳後要補回到多少，例如 160 或 166', termId: 'maintenance-ratio', value: s.target ?? 160, suffix: '%' }),
-      numberInput({ id: 'q', label: '擔保品認列成數', plain: '股票打幾折算維持率；沒打折就是 100', value: s.q ?? 100, suffix: '%' })],
+      numberInput({ id: 'call', label: '追繳線', plain: '維持率低於這裡就會被通知補錢；多數券商契約是 130', termId: 'margin-call', value: s.call ?? 130, suffix: '%',
+        help: { text: ['契約裡寫「維持率低於 ○○% 時應補繳」的那個數字。', '多數券商的不限用途借貸是 130%，銀行質押可能不同，以你的契約為準。'] } }),
+      numberInput({ id: 'target', label: '補回目標', plain: '被追繳後要補回到多少，例如 160 或 166', termId: 'maintenance-ratio', value: s.target ?? 160, suffix: '%',
+        help: { text: ['被追繳後，要補到維持率回到多少才算解除。', '不是剛好補到追繳線就好，常見是 160% 或 166%，看契約。'] } }),
+      numberInput({ id: 'q', label: '擔保品認列成數', plain: '股票打幾折算維持率；沒打折就是 100', value: s.q ?? 100, suffix: '%',
+        help: { img: { src: '../img/pledge/help-haircut.svg', alt: '股票市值 100 萬，認列 80% 只算 80 萬；維持率用打折後的 80 萬算。0050 這類 ETF 多半認列 100%。' },
+          text: ['有些券商或銀行不是用全部市值算維持率，而是先打折。', '契約寫「擔保品按市值八成計算」就填 80；沒寫就填 100。'] } })],
     read: s => {
       s.call = num('call'); s.target = num('target'); s.q = num('q');
       if (!(s.call >= 100)) throw new Error('追繳線至少 100，例：130。');

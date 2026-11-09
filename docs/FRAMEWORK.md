@@ -1,6 +1,6 @@
 # zr-toolbox 框架（Gate 0 定稿）
 
-- 版本：**2026-11-09 v5**（v5＝逐步精靈：新增 `js/ui/wizard.js`、`js/net/price.js`、`js/core/holdings.js`、`js/data/stocks.js`、`pledgePlan`；④ 改為精靈樣板；FinMind 抓價與 token 存瀏覽器；第 4 節樣板改為 `js/pages/pledge.js`。v2＝加入圖解流程、首頁四大分組、Gate 4；v3＝`components.js` 新增 `lineChart`、Gate 2 拆 2a／2b、Codex 只跑單元測試；v4＝PWA 定案（network-first、不做新版提示）、頁殼加 manifest／`pwa.js`、Gate 3 拆 3a／3b、① 文案放 `js/data/calcGuide.js`）。改介面要改這份並升版，所有還寫舊行為的段落一起改。
+- 版本：**2026-11-09 v5.1**（v5.1＝說明版面：桌面左計算機、右說明欄，手機說明在下方；步驟可帶 `about`＋`figure`；格子用 `withHelp` 掛說明（可附小圖）；共用圖放 `img/common/`。v5＝逐步精靈：新增 `js/ui/wizard.js`、`js/net/price.js`、`js/core/holdings.js`、`js/data/stocks.js`、`pledgePlan`；④ 改為精靈樣板；FinMind 抓價與 token 存瀏覽器；第 4 節樣板改為 `js/pages/pledge.js`。v2＝加入圖解流程、首頁四大分組、Gate 4；v3＝`components.js` 新增 `lineChart`、Gate 2 拆 2a／2b、Codex 只跑單元測試；v4＝PWA 定案（network-first、不做新版提示）、頁殼加 manifest／`pwa.js`、Gate 3 拆 3a／3b、① 文案放 `js/data/calcGuide.js`）。改介面要改這份並升版，所有還寫舊行為的段落一起改。
 - 依據：[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)、[HANDOFF.md](HANDOFF.md)。
 
 ## 1. 技術約定
@@ -70,6 +70,8 @@ scripts/smoke.mjs          冒煙測試（無頭 Chrome，逐頁按「帶入範�
    - `read` 把百分比照使用者輸入存（例 130），`result` 裡才除以 100 傳進 core。
    - `result` 用一串 `explain({label, value, tone, how, means, todo})`：**每個數字都要有「怎麼來的」（帶入使用者自己的數字寫出算式）與「代表什麼」**，有行動就寫「要做什麼」；表格放最後。
    - `example`：完整 state，數字和圖解一致；第 1 步的「帶入範例」直接跳到結果（冒煙測試靠它）。
+   - **說明（v5.1，使用者 2026-11-09）**：每步給 `about`（一句這步在做什麼）＋`figure`（sol 畫的步驟圖，**必做**）；桌面放右欄、手機放步驟內。格子給 `help: { text, img? }`（`numberInput` 直接帶；其他 `.field` 用 `withHelp`）：桌面點進格子或按「說明」顯示在右欄，手機按「說明」在格子下方展開。**格子小圖只給新手會卡的格子**（例：成本均價、認列成數）。figure 不另寫 caption 重複圖裡的字。
+   - 持股四格（代號、股數、買入價、現價）的說明內建在 `holdingsInput`，共用圖在 `img/common/`。
 3. 「怎麼讀」卡：至少一張圖解＋2–3 段白話（同 v4）。
 4. `disclaimer(...)` 放最後。
 
@@ -77,7 +79,8 @@ scripts/smoke.mjs          冒煙測試（無頭 Chrome，逐頁按「帶入範�
 
 ## 5. 圖解（使用者 2026-11-08：每個工具都要圖文解說，圖交給 sol 畫）
 
-- 每個工具頁（含辭典）至少一張圖解，放 `img/<工具id>/`；冒煙測試檢查圖存在且載入成功。
+- 每個工具頁（含辭典）至少一張圖解，放 `img/<工具id>/`；多個工具共用的圖（持股步驟、成本均價）放 `img/common/`；冒煙測試檢查圖存在且載入成功。
+- 精靈工具（v5.1）：每個輸入步驟一張步驟圖＋新手會卡的格子小圖；提示檔 `docs/figures/<id>-step<N>-*.md`、`<id>-help-*.md`，批次檔 `docs/figures/batch-*.json`（範例 `batch-v5-pledge.json`）。
 - 流程：寫繪圖提示 `docs/figures/<id>-<名>.md`（照抄 `trigger5050-split-5050.md` 的格式：要表達的事＋**寫死的數字**＋技術規格）→ 免費 sol 一次問答出 SVG（`ask-file.mts --sol --effort high`，可用 `batch` 一次多張）→ 存檔 → 無頭 Chrome 淺色／深色各截一張 → **Opus 對照 core 函式核對圖上每個數字**，錯就改提示重畫，最多 2 輪。
 - 圖上的數字必須和該頁「帶入範例」或 core 測試裡的數字一致，不准另編。
 - SVG 規格：`viewBox="0 0 360 H"`、不設 width/height、有 `<title>`／`<desc>`、顏色寫在內部 `<style>` 並含 `prefers-color-scheme: dark`、背景透明、最小字 12；禁止 script、foreignObject、外部資源、filter、動畫。色票見提示範本。
