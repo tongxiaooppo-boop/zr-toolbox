@@ -1,130 +1,129 @@
-# 任務 ⑩：股息與除權息精靈頁（照 ⑨ 樣板）
+# 任務 ⑦：定期定額與年化報酬精靈頁＋兩張卡通圖（照 ⑨⑩ 樣板）
 
-- 版本：2026-11-09 v2（v2：加 2b 生卡通圖）。上一份（研究任務 R v4）已完成，以本檔為準。
+- 版本：2026-11-09 v1。上一份（⑩ v2）已完成，以本檔為準。
 - 執行者：訂閱 Codex sol，直接在本 repo（`D:\ok\zr-toolbox`）工作。**不要上網。不要 commit**。做完寫 `collab/from-codex.md`（覆蓋舊的）就停。
-- 指令一律用 `npm.cmd`／`node`（PowerShell 擋 `npm.ps1`）；**不要跑 `npm.cmd run smoke`**（沙箱開不了 Chrome，Opus 會跑）。
+- 指令一律用 `npm.cmd`／`node`；**不要跑 `npm.cmd run smoke`**（Opus 會跑）。
 - 暫存檔、一次性腳本只准放本 repo 內，結束前刪掉。
 
 ## 0. 要讀的檔案（只准讀這些）
 
-- `js/pages/cost.js`（**樣板，結構照抄**：import、steps 陣列、result、example、頁尾「怎麼讀」）
-- `tools/cost.html`（照抄成 `tools/dividend.html`）
-- `js/core/dividend.js`（公式，只准呼叫、不准改）
-- `js/ui/wizard.js` 第 53–80 行（`withHelp`、`numberInput`、`explain` 簽名）
-- `js/core/cost.js` 第 15–20 行（`guessKind`）
+- `js/pages/dividend.js`（**樣板，結構照抄**：import、steps、result、example、頁尾）
+- `js/pages/pledge.js` 第 100–108 行（表格寫法 `trade-table`）
+- `tools/dividend.html`（照抄成 `tools/dca.html`）
+- `js/core/dca.js`（公式，只准呼叫、不准改）
+- `js/core/holdings.js` 第 1–5 行（`CODE_RE`）
+- `docs/figures/cartoon/00-風格與角色.md`、`dca-01-每月存五千四格.md`、`dca-02-月報酬不是除以12.md`（第 3 節生圖用）
 
-## 1. 要新增的檔案（只准新增這兩個＋第 2b 節兩張 PNG＋回報檔，其他檔一律不改）
+## 1. 只准新增這些檔（其他檔一律不改）
 
-- `tools/dividend.html`：照抄 `tools/cost.html`，title 改「股息與除權息｜正二工具箱」，script 改 `../js/pages/dividend.js`。
-- `js/pages/dividend.js`：照下面規格。
+- `tools/dca.html`：照抄 `tools/dividend.html`，title「定期定額與年化報酬｜正二工具箱」，script `../js/pages/dca.js`。
+- `js/pages/dca.js`：照第 2 節。
+- `docs/figures/cartoon/out/dca-comic.png`、`docs/figures/cartoon/out/dca-step3.png`：照第 3 節。
+- `collab/from-codex.md`。
 
-**不准改**：`js/core/`、`tests/`、`js/ui/`、`js/data/`（`tools.js` 的 status 由 Opus 改）、`css/`、`img/`。覺得要改就停下寫進回報。
+**不准改**：`js/core/`、`tests/`、`js/ui/`、`js/data/`、`css/`、`img/`。覺得要改就停下寫進回報。
 
 ## 2. 頁面規格
 
-`const tool = TOOLS.find(t => t.id === 'dividend');`，`import { dividendPlan, NHI_MIN } from '../core/dividend.js'`、`import { guessKind } from '../core/cost.js'`，其他 import 照 cost.js 需要的留。
+`const tool = TOOLS.find(t => t.id === 'dca');`；`import { dcaPlan } from '../core/dca.js'`、`import { holdingSummary, CODE_RE } from '../core/holdings.js'`，其他照 dividend.js 需要的留。
 
-### 步驟 1「你持有什麼」
-- 跟 cost.js 步驟 1 一樣：`holdingsInput({ id: 'hold', rows: s.holdings || [{}], max: 1, label: '你的持股' })`＋`tokenBox()`，figure 用同一張 `../img/common/step-holdings.svg`（alt 照抄）。
-- hint：「填一檔你有的股票或 ETF：代號、股數、買入價。代號填好，現價會自動抓。」
-- about：「這一步確定你有幾股、成本多少。股利是按股數發的。」
-- read：`readHoldings` → `holdingSummary([x])`；代號換了才設 `s.kind = guessKind(x.code)`、`s.prevClose = x.nowPrice`；`s.holdings = [x]`。
+### 步驟 1「要扣哪一檔」
+- hint：「填你要定期定額的股票或 ETF 代號，現價會自動抓。已經有這檔的，股數和買入價也填，會一起算進去。」
+- about：「這一步確定要買哪一檔、現在已經有多少。」
+- figure：同 dividend.js 步驟 1 的 `../img/common/step-holdings.svg`（alt 照抄）。
+- 欄位：
+  1. `selectField` id `have`，label「這檔你已經有了嗎」，options `no`「還沒有，從零開始」、`yes`「已經有一些」，預設 `s.have || 'no'`。`withHelp`：「還沒有：只填代號就好，股數、買入價留空。」「已經有：照券商 App 庫存填股數和買入價，現在的市值會當成起始金額一起滾。」
+  2. `holdingsInput({ id: 'hold', rows: s.holdings || [{}], max: 1, label: '要扣款的那一檔' })`
+  3. `tokenBox()`
+- read：`s.have = …value`；`const [x] = readHoldings('hold')`；
+  - `yes`：`holdingSummary([x])`（會丟錯誤訊息），`s.initial = x.shares * x.nowPrice`。
+  - `no`：`if (!CODE_RE.test(x.code)) throw new Error('股票代號格式不對，例：0050、00631L。')`；`s.initial = 0`。
+  - `s.holdings = [x]`。
 
-### 步驟 2「這次發多少股利」
-- hint：「照公司（或投信）的股利公告填。公告在券商 App 個股頁的『股利』或公開資訊觀測站。」
-- about：「這一步算出你會領多少現金、多幾股。股票股利的『元』要除以面額，才是配股比例。」
-- figure：`{ src: '../img/dividend/step2.webp', alt: '卡通圖：股利公告怎麼看？某檔股票股利公告：現金股利每股 2.4 元，填到每股現金股利；股票股利每股 0.5 元，填到每股股票股利。小安有 1 張（1,000 股）：現金 2.4 元 × 1,000 股＝2,400 元；配股 0.5 元 ÷ 面額 10 元＝5%，1,000 股 × 5%＝50 股。老師說：股票股利的元要除以面額，才是配股比例。多數公司面額 10 元，少數不是，依公告；ETF 通常只配現金。' }`
-- 欄位（依序）：
-  1. `selectField` id `exdone`，label「除權息日過了嗎」，options：`no`「還沒，先算算看」、`yes`「已經過了」，預設 `s.exDone || 'no'`。用 `withHelp`：「還沒過：除權息前收盤價就用現價（已自動帶入）。」「已經過了：要自己查除權息前一天的收盤價，結果會告訴你填息了沒。」
-  2. `numberInput` id `prevclose`，label「除權息前一天收盤價」，termId `ex-dividend`，plain「還沒除權息就用現價」，value `s.prevClose`，suffix「元」，help：「除權息當天的參考價，就是用這個價格扣掉股利算出來的。」「已經除權息過了：在券商 App 的日 K 線找除權息前一天的收盤價。」
-  3. `numberInput` id `cash`，label「每股現金股利」，termId `dividend-yield`，plain「公告寫『現金股利 2.4 元』就填 2.4」，value `s.cash ?? ''`，suffix「元」，help：「是每 1 股發多少錢，不是你總共領多少。」「沒有發現金就填 0。ETF 的『每單位配息』也填這裡。」
-  4. `numberInput` id `stockdiv`，label「每股股票股利」，plain「公告寫『股票股利 0.5 元』就填 0.5；沒有填 0」，value `s.stockDiv ?? 0`，suffix「元」，help：「配股比例＝這個數字 ÷ 面額。面額 10 元時，0.5 元＝每 1,000 股配 50 股。」「ETF 通常只配現金，填 0。」
-  5. `numberInput` id `par`，label「股票面額」，plain「多數公司是 10 元」，value `s.par ?? 10`，suffix「元」，help：「少數公司面額不是 10 元（例：1 元），公告或公開資訊觀測站查得到。」
-- read：讀進 `s.exDone`、`s.prevClose`、`s.cash`、`s.stockDiv`、`s.par`；驗證（訊息照寫）：
-  - prevClose 不是 >0 → 「除權息前收盤價要大於 0，例：50。」
-  - cash 或 stockDiv 不是 ≥0 → 「股利不能是負的，沒有就填 0。」
-  - 兩者都 0 → 「現金股利和股票股利至少填一個。」
-  - par 不是 >0 → 「面額要大於 0，多數公司是 10 元。」
-
-### 步驟 3「健保身分」
-- hint：「股利一次領到 2 萬元以上，會先被扣二代健保補充保費。」
-- about：「這一步決定要不要扣補充保費。大多數人選『一般』。」
+### 步驟 2「每月扣多少」
+- hint：「填每次扣款金額和券商的手續費設定。不知道就先用預設值。」
+- about：「這一步決定每月投入多少、被收多少手續費。」
 - 不放 figure。
-- 欄位：`selectField` id `identity`，label「健保身分」，termId `nhi-premium`，plain「不確定就選一般」，options：`general`「一般（受僱、自己投保、依附眷屬）」、`exempt`「符合免扣資格（例：中低收入戶，依健保署規定）」，預設 `s.identity || 'general'`。用 `withHelp`：「一般身分：單次股利所得達 20,000 元，全額 × 2.11%，由發股利的公司直接扣。」「以雇主或自營業主身分投保的人另有扣除規則，這裡沒有算，請以健保署為準。」
-- read：`s.identity = document.getElementById('identity').value`。
+- 欄位：
+  1. `numberInput` id `monthly`，label「每月投入」，termId `dca`，plain「每個月扣款多少錢」，value `s.monthly ?? ''`，suffix「元」，help：「一個月扣好幾次（例：6、16、26 日），把每次金額加起來填。」「券商通常有最低扣款金額（常見 1,000 元或 3,000 元），依券商。」
+  2. `numberInput` id `stepup`，label「每年調升」，plain「薪水變多想多扣就填；不調填 0」，value `s.stepUp ?? 0`，suffix「%」，help：「例：填 5，第 2 年每月投入變成 1.05 倍，第 3 年再乘 1.05。」
+  3. `numberInput` id `discount`，label「手續費折扣」，termId `broker-fee`，plain「2.8 折填 2.8；沒打折填 10」，value `s.discount ?? 10`，suffix「折」，help：「定期定額的手續費常有專屬優惠，看券商的定期定額說明。」
+  4. `numberInput` id `minfee`，label「每次最低手續費」，plain「定期定額常見 1 元」，value `s.minFee ?? 1`，suffix「元」，help：「手續費算出來比這個少，就收這個數字。」
+- read（訊息照寫）：monthly 不是 >0 →「每月投入要大於 0，例：5000。」；stepUp 不是 0–100 →「每年調升填 0–100，不調升填 0。」；discount 不是 >0 且 ≤10 →「折扣填 0.1–10，例：2.8；沒打折填 10。」；minFee 不是 ≥0 →「最低手續費填 0 以上的數字，例：1。」
+
+### 步驟 3「假設報酬與年數」
+- hint：「報酬率是你自己設的假設，不是預測。可以試幾個不同的數字比較。」
+- about：「這一步決定要滾多久、用多少報酬率算。年報酬會用複利換成每月報酬。」
+- figure：`{ src: '../img/dca/step3.webp', alt: '卡通圖：年報酬 6%，每個月是多少？直接除以 12 得每月 0.5%，一年滾起來約 6.17%，算多了。用複利換算：(1＋6%) 開 12 次方根 − 1，每月約 0.487%，一年滾起來剛好 6%。老師說：每個月賺的錢會繼續滾，所以每月要比 0.5% 少一點。本工具用複利換算；報酬率是你自己設的假設，不是預測。' }`
+- 欄位：
+  1. `numberInput` id `years`，label「投資幾年」，plain「填整數，例：20」，value `s.years ?? ''`，suffix「年」，help：「定期定額適合長期；年數越長，複利的效果越明顯。」
+  2. `numberInput` id `ret`，label「假設年報酬」，termId `compound-interest`，plain「自己設的假設，例：6」，value `s.ret ?? ''`，suffix「%」，help：「這是假設每年都一樣的報酬，真實市場會有漲有跌，也可能虧損。」「ETF 的內扣費用已經反映在淨值裡，用歷史報酬當假設時不要再扣一次。」
+  3. `selectField` id `timing`，label「每月什麼時候扣款」，options `start`「月初（當月就開始滾）」、`end`「月底（下個月才開始滾）」，預設 `s.timing || 'start'`。
+- read：years 不是 1–60 的整數 →「投資年數填 1–60 的整數，例：20。」；ret 不是 >−99 且 <99 →「假設年報酬填 −99 到 99，例：6。」
 
 ### 結果
 ```js
 const [x] = s.holdings;
-const after = s.exDone === 'yes';
-const r = dividendPlan({ shares: x.shares, prevClose: s.prevClose, cashPerShare: s.cash, stockPerShare: s.stockDiv, par: s.par,
-  buyPrice: x.buyPrice, nowPrice: after ? x.nowPrice : undefined, identity: s.identity });
+const r = dcaPlan({ initial: s.initial, monthly: s.monthly, years: s.years, annualReturn: s.ret / 100, timing: s.timing,
+  stepUp: s.stepUp / 100, discount: s.discount / 10, minFee: s.minFee });
+const last = r.rows[r.rows.length - 1];
 ```
-名稱照 cost.js 用 `STOCK_NAMES`。依序輸出 `explain`（數字格式：金額 `fmtMoney`、百分比 `fmtPct(…, 2)`、股數 `toLocaleString('en-US') + ' 股'`、參考價 `r.refPrice.toFixed(2) + ' 元'`）：
+名稱照 dividend.js 用 `STOCK_NAMES`。依序 `explain`（金額 `fmtMoney`、百分比 `fmtPct(…, 2)`）：
 
-1. **現金股利** `fmtMoney(r.cashTotal)`；how：「每股 {cash} 元 × {shares} 股＝{cashTotal}（元以下捨去）。」；means：「發放日以公告為準，匯進你的交割帳戶。」。`s.cash === 0` 時不顯示。
-2. **配股** `{newShares} 股`；how：「配股比例＝{stockDiv} ÷ 面額 {par}＝{stockRate 百分比}；{shares} 股 × 配股比例＝{newSharesExact 取 2 位}股。」若 `newSharesExact !== newShares` 加「不足 1 股的部分依公司公告處理（通常折發現金）。」；means：「除權後你有 {sharesAfter} 股。」。`s.stockDiv === 0` 時不顯示。
-3. **二代健保補充保費** `fmtMoney(r.premium)`，`r.premium > 0` 時 tone `warn`；how 三種情況擇一：
-   - exempt：「你選了免扣資格，不扣。」
-   - `r.income < NHI_MIN`：「這次股利所得 {income}（現金 {cashTotal} ＋ 股票股利面額 {stockIncome}），未達 20,000 元，不扣。」（stockIncome 為 0 時省略括號裡的股票股利那段）
-   - 其他：「（現金 {cashTotal} ＋ 股票股利面額 {stockIncome}）× 2.11%＝{premium}（四捨五入）。」（stockIncome 為 0 時寫「現金 {cashTotal} × 2.11%」）
-   - means：「由發股利的公司直接從現金股利扣掉。」
-4. **實領現金** `fmtMoney(r.netCash)`，tone `ok`；how：「現金股利 {cashTotal} − 補充保費 {premium}。」；means：「這是會進帳的錢；所得稅另外在報稅時算（見下方注意）。」
-5. **除權息參考價** `{refPrice} 元`；how：「（{prevClose} − {cash}）÷（1 ＋ {stockRate 百分比}）。」（stockDiv 為 0 時寫「{prevClose} − {cash}」）；means：「除權息當天的開盤參考，不是預測會成交在哪；實際參考價會對齊升降單位，以證交所公告為準。」
-6. **除權息前後總值** `{fmtMoney(valueBefore)} → {fmtMoney(valueAfter)}`；how：「前：{shares} 股 × {prevClose} 元。後：{sharesAfter} 股 × {refPrice} 元 ＋ 現金股利 {cashTotal}。」；means：「總值幾乎不變：股利是從股價搬到你口袋，不是多賺的。扣掉補充保費 {premium} 元，反而少一點。」（premium 為 0 時最後一句省略）
-7. **現金殖利率** `fmtPct(r.cashYield, 2)`；how：「每股現金股利 {cash} ÷ 除權息前收盤價 {prevClose}。」；有 buyPrice 時 means：「用你的買入價 {buyPrice} 元算，成本殖利率是 {costYield}。比較不同股票要用同一種分母。」，沒有時 means：「殖利率高不等於賺得多，還要看股價有沒有漲回來。」。`s.cash === 0` 時不顯示。
-8. **填息要漲多少** `fmtPct(r.fillPct, 2)`；how：「從參考價 {refPrice} 元漲回 {prevClose} 元：{prevClose} ÷ {refPrice} − 1。」；means：
-   - `r.filled === true`（tone `ok`）：「現價 {nowPrice} 元已回到 {prevClose} 元，已經填息。」
-   - `r.filled === false`（tone `warn`）：「現價 {nowPrice} 元，還差 {prevClose − nowPrice 取 2 位} 元才填息。」
-   - `null`：「除權息後股價漲回 {prevClose} 元才叫填息（有配股叫填權），不保證，也沒有期限。」
-9. **含息損益**（`x.buyPrice` 有值才顯示）`signed(r.profitAfter)`，tone 依正負 `ok`／`bad`；how：「{sharesAfter} 股 × 參考價 {refPrice} ＋ 實領現金 {netCash} − 買進成本 {costTotal}（{shares} 股 × {buyPrice}）。」；means：「除權息前是 {signed(profitBefore)}，差的就是補充保費。手續費、證交稅沒算，買賣成本請用 ⑨。」
+1. **{years} 年後的資產** `fmtMoney(r.finalValue)`；how：「{name}：每月 {monthly} 元，共 {months} 次；年報酬 {ret}% 換成每月 {fmtPct(r.monthlyRate, 3)}（(1＋{ret}%) 開 12 次方根 − 1）。{timing 為 start：『月初投入，當月就開始滾。』／end：『月底投入，下個月才開始滾。』}」；means：「用固定報酬算的情境，不是預測；真實市場有漲有跌，結果可能差很多。」
+2. **投入本金** `fmtMoney(r.principal)`；how：initial>0 時開頭「目前持股市值 {fmtMoney(initial)} ＋ 」，接「每月投入合計 {fmtMoney(r.contributed)}」；stepUp>0 時再加「（每年調升 {stepUp}%，最後一年每月 {last.amount} 元）」。；means：「你自己放進去的錢。」
+3. **手續費合計** `fmtMoney(r.fees)`；how：「第 1 年每次 {r.rows[0].amount} 元 × 0.1425%{discount<10 時 ` × ${discount} 折`}，元以下捨去、最低 {minFee} 元＝{r.rows[0].fees / 12} 元，共扣 {months} 次。」；means：「手續費另外付，不從扣款金額裡扣（依券商可能不同）。」
+4. **累積賺到** `signed(r.gain)`（`signed` 照 dividend.js），tone 依正負 `ok`／`bad`；how：「{years} 年後資產 − 投入本金 − 手續費。」；means：「占你總共付出的 {fmtPct(r.gainPct, 2)}。」
+5. **如果一開始一次投入** `fmtMoney(r.lumpValue)`；how：「同樣 {fmtMoney(r.principal)} 第一天全部投入：{fmtMoney(r.principal)} × (1＋{ret}%)^{years}；扣一次手續費 {fmtMoney(r.lumpFee)}，賺 {signed(r.lumpGain)}。」；means 依 ret：>0「報酬為正時，越早投入滾越久，所以一次投入比較多；但前提是錢一開始就在手上，定期定額通常是因為每月才有薪水。」；<0「報酬為負時，分批投入虧得比較少。」；=0「報酬為 0 時兩種一樣，只差手續費。」
+6. **年化報酬別算錯** `fmtPct(s.ret / 100, 2)`，tone `warn`；how：「在這個情境裡，每一筆錢都是年 {ret}%。如果用『投入本金 {fmtMoney(r.principal)} → 期末 {fmtMoney(r.finalValue)}』硬套年化公式，會算出 {fmtPct(r.naiveCagr, 2)}。」；means：「後面投入的錢只放了很短時間，所以硬算會偏低。定期定額要看年化，要用每筆錢的投入日期算（IRR），不要用單筆的年化公式。」
+7. **每月約可買**（`x.nowPrice > 0` 才顯示）`{Math.floor(r.rows[0].amount / x.nowPrice).toLocaleString('en-US')} 股`；how：「第 1 年每月 {r.rows[0].amount} 元 ÷ 現價 {x.nowPrice} 元，取整數。」；means：「台股定期定額通常買零股；每月成交價不同，買到的股數也會變。」
 
-最後一個 `h('div', { class: 'note' }, …)`，固定三條：
-- 「所得稅沒有算：股利所得可選合併計稅（8.5% 可抵減，每戶上限 8 萬元）或分開計稅 28%，要看你全年所得。」
-- 「ETF 的收益分配不一定全是股利所得，補充保費與所得稅的計算以配息通知為準；這裡用全額估，是上限。」
-- 「現金增資、減資、分割、匯費等沒有算；實際金額以公司公告與券商入帳為準。」
+接著 `h('h3', {}, '逐年變化')` ＋表格 `h('table', { class: 'trade-table' }, …)`，欄位：`年`、`每月投入（元）`、`累計投入（元）`、`累計手續費（元）`、`年底資產（元）`，每列一年，金額 `Math.round(…).toLocaleString('en-US')`；累計投入要加上 `s.initial`（＝本金口徑）。
+
+最後 `h('div', { class: 'note' }, …)` 固定四條：
+- 「這是固定報酬的情境，沒有模擬漲跌的先後順序；同樣平均報酬，先跌後漲和先漲後跌的結果不一樣。」
+- 「配息如果沒有再投入，期末資產會比這裡少。」
+- 「扣款日遇到休市會順延；最低扣款金額、手續費以券商為準。」
+- 「證交稅只在賣出時收，這裡沒有算賣出。」
 
 ### 範例與頁尾
 ```js
-const example = { holdings: [{ code: '2412', shares: 10000, buyPrice: 40, nowPrice: 50 }], kind: 'stock',
-  exDone: 'no', prevClose: 50, cash: 2.4, stockDiv: 0.5, par: 10, identity: 'general' };
+const example = { have: 'no', holdings: [{ code: '0050', nowPrice: 50 }], initial: 0,
+  monthly: 5000, stepUp: 0, discount: 10, minFee: 1, years: 20, ret: 6, timing: 'start' };
 ```
-範例結果必須是：現金股利 24,000、配股 500 股、補充保費 612、實領 23,388、參考價 45.33、總值 500,000 → 500,000、現金殖利率 4.80%、填息 10.29%、含息損益 +99,388。
+範例結果必須是：期末資產 NT$ 2,278,229、投入本金 NT$ 1,200,000、手續費 NT$ 1,680、累積賺到 +NT$ 1,076,549、一次投入 NT$ 3,848,563、硬算年化 3.26%、每月約可買 100 股、表格 20 列。
 
-頁尾照 cost.js：`toolHeader(tool)`、`wizard({ steps, result, example })`、「怎麼讀」卡片放
-`figure({ src: '../img/dividend/comic.webp', alt: '四格漫畫：一、除權息前一天，小安有某檔股票 10,000 股 × 50 元＝500,000 元。二、股利來了：現金股利 2.4 元 × 10,000 股＝24,000 元，股票股利 0.5 元多 500 股，健保補充保費 −612 元。三、除權息當天參考價 45.33 元，10,500 股 × 45.33 元約 476,000 元，加現金 24,000 元還是 500,000 元。四、老師說股價要從 45.33 元漲 10.29% 回到 50 元才叫填權息；股利是從股價搬到你口袋，股價漲回來才算真的賺到。補充保費＝（現金 24,000＋股票股利面額 5,000）× 2.11%。' })`
+頁尾照 dividend.js：`toolHeader(tool)`、`wizard({ steps, result, example })`、「怎麼讀」卡片放
+`figure({ src: '../img/dca/comic.webp', alt: '四格漫畫：一、小安在券商 App 設定某檔 ETF 每月 6 日扣款 5,000 元。二、20 年總共投入 5,000 元 × 12 個月 × 20 年＝1,200,000 元，手續費共 1,680 元。三、假設每年 6%，20 年後約 2,278,000 元，賺的錢約 1,077,000 元。四、老師說：6% 是假設不是保證；早投入的錢滾得比較久；真實市場有漲有跌，可能賠錢；這是用固定報酬算的情境，不是預測。' })`
 加三段 `h('p')`：
-- 「發股利那天叫除權息：股價先扣掉發出去的股利，所以你的總值幾乎不變。」
-- 「股利要等股價漲回除權息前的價格（填息），才算真的賺到；一直沒漲回來叫貼息，領了股利還是虧。」
-- 「單次股利達 2 萬元會先扣 2.11% 補充保費；殖利率比較要用同一種分母（現價或你的成本）。」
+- 「定期定額＝每月固定日期、固定金額自動買進，不用挑時間。它不保證賺錢，賺多少還是看你買的東西。」
+- 「複利：賺到的錢繼續放著，下一期連它一起賺。所以時間越長，『賺的錢』占的比例越大。」
+- 「年化報酬只適用一筆錢從頭放到尾；定期定額每筆錢放的時間不同，不能拿總本金直接套。」
 
-最後 `disclaimer('general')`。
+最後 `disclaimer('general')`。`img/dca/` 的 webp 由 Opus 轉檔放入，你不要放、不要轉檔。
 
-註：`img/dividend/` 的兩張 webp 由 Opus 從你生的 PNG 轉檔放入（第 2b 節），你不要自己放進 `img/`、不要轉檔。
+## 3. 生兩張卡通圖（用你的生圖功能）
 
-## 2b. 生兩張卡通圖（用你的生圖功能）
-
-依序讀 `docs/figures/cartoon/00-風格與角色.md`，再讀下面每張的提示檔，**把風格檔全文＋該張提示全文合在一起當生圖提示**，生成直式 1024×1536 PNG：
+每張把 `00-風格與角色.md` 全文＋該張提示全文合在一起當生圖提示，生成直式 1024×1536 PNG：
 
 | 提示檔 | 存成 |
 |---|---|
-| `docs/figures/cartoon/dividend-01-領股利四格.md` | `docs/figures/cartoon/out/dividend-comic.png` |
-| `docs/figures/cartoon/dividend-02-股利公告怎麼看.md` | `docs/figures/cartoon/out/dividend-step2.png` |
+| `docs/figures/cartoon/dca-01-每月存五千四格.md` | `docs/figures/cartoon/out/dca-comic.png` |
+| `docs/figures/cartoon/dca-02-月報酬不是除以12.md` | `docs/figures/cartoon/out/dca-step3.png` |
 
-- 生完自己看一遍：圖上中文與數字要和提示一字不差；有錯字或數字錯，重生該張，**每張最多重生 2 次**，仍有錯就留最後一張並在回報寫出哪裡錯。
-- 不能生圖（沒有這個功能）就跳過本節，回報寫「無法生圖」，頁面照常交付。
-- 這兩個 PNG 是本任務唯一允許寫進 `docs/` 的檔案。
+- 生完自己看一遍：中文與數字要和提示一字不差；錯了重生該張，**每張最多重生 2 次**，仍有錯就留最後一張並在回報寫出哪裡錯。
+- 不能生圖就跳過本節，回報寫「無法生圖」，頁面照常交付。
 
-## 3. PROOF_CMD（必跑，貼結果）
+## 4. PROOF_CMD（必跑，貼結果）
 
 ```
 npm.cmd test
-node -e "import('./js/core/dividend.js').then(m=>{const r=m.dividendPlan({shares:10000,prevClose:50,cashPerShare:2.4,stockPerShare:0.5,par:10,buyPrice:40});console.log(r.cashTotal,r.newShares,r.premium,r.netCash,r.refPrice.toFixed(2),Math.round(r.valueAfter),(r.fillPct*100).toFixed(2),Math.round(r.profitAfter))})"
-node --check js/pages/dividend.js
+node -e "import('./js/core/dca.js').then(m=>{const r=m.dcaPlan({monthly:5000,years:20,annualReturn:0.06,timing:'start',discount:1,minFee:1});console.log(Math.round(r.finalValue),r.principal,r.fees,Math.round(r.gain),Math.round(r.lumpValue),(r.naiveCagr*100).toFixed(2),r.rows.length)})"
+node --check js/pages/dca.js
 ```
-預期：`ℹ tests 73`、`ℹ pass 73`、`ℹ fail 0`；第二行輸出 `24000 500 612 23388 45.33 500000 10.29 99388`；第三行無輸出。
+預期：`ℹ tests 80`、`ℹ pass 80`、`ℹ fail 0`；第二行 `2278229 1200000 1680 1076549 3848563 3.26 20`；第三行無輸出。
 
-## 4. 回報 `collab/from-codex.md`（欄位寫死，不貼程式碼）
+## 5. 回報 `collab/from-codex.md`（欄位寫死，不貼程式碼）
 
 ```
 ## 完成項
@@ -136,8 +135,8 @@ node --check js/pages/dividend.js
 - 範例數字：__
 - node --check：__
 ## 卡通圖
-- dividend-comic.png：已生成／重生 _ 次／自查有無錯字（列出）
-- dividend-step2.png：同上
+- dca-comic.png：已生成／重生 _ 次／自查有無錯字（列出）
+- dca-step3.png：同上
 ## 偏離規格或自行決定的小事
 - （沒有寫「無」）
 ## 需要 Opus 決定的事
