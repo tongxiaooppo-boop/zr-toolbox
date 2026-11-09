@@ -58,6 +58,7 @@
   - **已上線（2026-11-09）**：Codex 一輪過（頁面＋兩張圖，comic 重生 1 次）；兩張圖逐字核對無誤，轉 `img/trigger5050/comic.webp`、`step2.webp`。Opus 改三處：「用買入價」模式每次進第 2 步都跟第 1 步買入價同步；股數加千分位；**疑似分割時只顯示漲跌幅＋警告，不給買賣股數與觸發價**（無頭 Chrome 實測：00631L 填 2026-01-03 → 抓到 01-02 收盤 375.25，現價 26.3，原版會建議「跌到了，買 450 股」）。範例數字全對、回第 2 步值還在、390px 無水平捲動。tests 122、smoke 15 全過。
   - **② v2 股票事件（使用者 2026-11-09：「有股票事件要帶入；也可要求使用者重新輸入券商 App 的股數＋成本」）**：Opus 寫好 `js/core/events.js`＋`fetchEvents`＋`tests/events.test.js`（3 項，用 FinMind 實際資料：00631L 2026-03-31 分割 443.15→20.14，基準 375.25 → 17.0541，現價 26.3 → +54.2% 要配回；0050 有 4 筆除息＋1 筆分割已實查）。除權息也換算（還原價），結果頁提醒現金股利加進策略現金。任務書 `collab/to-codex.md`（② v2，只改頁面）。框架 v5.7。
     - **已上線（2026-11-09）**：Codex 一輪過；Opus 只改一句（買進說明不限跌到時）。無頭 Chrome 實測 00631L 填 2026-01-03 → 01-02 收盤 375.25 × 20.14 ÷ 443.15 ＝ 17.0541，結果頁列出換算過程、+54.2% 要配回。tests 125、smoke 15 全過。
+- **③ 進度（2026-11-09，Opus）**：`js/core/rebalance.js` 新增 `WIZARD_TEMPLATES`（8 個含自訂，模板只是預設列）、`guessBeta`（L 2／R −1／B 0／其他 1）、`rebalancePlan`（任意多檔、新投入、零股／整張取整：買捨去、賣四捨五入、整張不超賣、現金變負就從最大買單減）＋`tests/rebalance.test.js`（6 項手算：範例 0050 2,000 股@195.5、00631L 9,000 股@26.3、現金 172,300、新投入 5 萬 → 總額 85 萬、買 173／695 股、現金 170,200、曝險 1.08→1.10；正二漲到 40 → 零股賣 2,075 股、整張賣 2 張；債版建倉 00679B 5,263 股）；`stocks.js` 加 00679B；舊 `TEMPLATES`／`rebalance` 保留。卡通提示 `rebalance-01`→`out/rebalance-comic.png`、`rebalance-02`→`out/rebalance-step1.png`；任務書 `collab/to-codex.md`（③ v1：`betaHoldingsInput` 加 `kind:'mix'`＋頁面＋生圖）待 Codex 面板做。框架 v5.8。tests 131 全過。
 - **下次開工（新 session，從這裡接）**：③ 定期配比改精靈＋擴充（使用者已定：任意多檔＋股數取整，保留 532／442／433 等模板）。Opus 先定 `js/core/rebalance.js` 新函式簽名與測試預期值（多檔用 holdingsInput 的代號＋股數＋現價；目標比例可選模板或自訂；新投入資金；輸出每檔買賣股數、取整後剩餘現金、曝險倍數），卡通提示兩張，任務書派 Codex 面板（頁面＋生圖一份）。之後 ⑥ ⑧ 改精靈（無持股，輸入少，步驟可以短）。全部 A 類做完 → ⑬⑭ → ⑯⑰⑱ → UI 統一美化（Neo-brutalism）。
   - 注意：股票事件換算（`core/events.js`）其他工具目前用不到（都用券商 App 現在的股數／成本）；之後若有工具要比歷史價格，直接用 `fetchEvents`＋`adjustBasePrice`。
 - **再下一步（舊）**：⑪ 完成（Gate 7 併入）。之後「其餘 A 類改精靈」（先列清單給使用者看）。原文：⑮ 平均成本（加碼／攤平後均價），照 ⑦ 格式「core＋測試由 Opus 寫，頁面＋生圖一份任務書」。（原文：⑤ 融資融券（core 由 Opus 寫：研究 R2-06 RSI20 融資融券試算＋R2-01 證交所指南；併融券、整戶維持率；任務書照 ⑦ 格式「頁面＋生圖一份」）→ ⑲ 退休提領（使用者 2026-11-09 定：todo2 財務計算機只納入退休提領，⑦ 之後加「停扣後再滾」選項；詳見 [research/候選清單.md](research/候選清單.md) 末節）。）
@@ -79,7 +80,7 @@
 4. 之後才分批派 Codex 改各工具、做新工具。
 
 
-- 現行版本：決策 2026-11-08（[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)）；框架 **2026-11-09 v5.7**（[FRAMEWORK.md](FRAMEWORK.md)）
+- 現行版本：決策 2026-11-08（[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)）；框架 **2026-11-09 v5.8**（[FRAMEWORK.md](FRAMEWORK.md)）
 - 狀態：**Gate 3a 完成**（2026-11-08，① 逐欄教程＋token 教學，Codex sol 一輪過、Opus 未修改）。PROOF_CMD 實測：tests 51 全過；smoke pages 9 全過。Gate 0–2 同日完成。
 - 手機實機：使用者 2026-11-08 回報線上版可以打開。尚未確認：加到主畫面、離線開啟。
 - （以下 Gate 4–7 計畫已被上方「方向修正」取代，待重排；內容與大仁數字仍可用）
@@ -96,7 +97,7 @@
 - 今天（2026-11-08）結束時：master＝origin/master，工作目錄乾淨；tests 51、smoke pages 9 全過；Codex 面板沒有進行中的任務（`collab/to-codex.md` 是已完成的 3a）。
 - **已部署**（2026-11-08，使用者同意公開）：https://tongxiaooppo-boop.github.io/zr-toolbox/ （GitHub `tongxiaooppo-boop/zr-toolbox`，public，Pages 來源 `master` 根目錄，MIT）。之後每個 Gate 驗收完 `git push` 就會更新（Pages 約 1 分鐘生效）。
 - **Codex 面板環境限制**（Gate 1 發現）：PowerShell 擋 `npm.ps1`，要用 `npm.cmd`；沙箱裡 `npm run smoke` 開不了無頭 Chrome 會卡住。任務書的 PROOF_CMD 改成：Codex 只跑 `npm.cmd test`，smoke 由 Opus 跑。
-- 驗收指令：`npm test && npm run smoke`（現行預期：tests 125 全過、smoke pages 15 全過）。
+- 驗收指令：`npm test && npm run smoke`（現行預期：tests 131 全過、smoke pages 15 全過）。
 - 使用者 2026-11-08 補充：工具箱分四大類（正二教學／正二變種／正二槓桿／其他股票計算機，含融資等原 v2 項目），**每個工具都要圖文解說，圖由 sol 畫**（流程見 FRAMEWORK.md 第 5 節）。（「⑪ 擔任白話版、不另做」已被 Gate 7 推翻，見上方追加三件事。）
 
 ## 這是什麼
