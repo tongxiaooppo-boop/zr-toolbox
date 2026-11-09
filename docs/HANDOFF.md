@@ -22,7 +22,7 @@
 3. 持股可「＋再加一檔」，由工具決定哪些代號算擔保品或曝險。
 4. 老手捷徑＝結果頁「改參數重算」跳回某一步，不另做一頁式表單。
 5. 沒有 FinMind token → 現價手動填，旁邊放 token 教學連結。
-6. 使用者追加：研究範圍加「圍繞正二與各類 ETF 的股票常識」；調研改派**訂閱 Codex sol**（面板可上網），取代下方第 2、2b 步的 luna／Opus WebSearch。任務書 `collab/to-codex.md`（研究任務 R v2，產出 `docs/research/R1–R3`，R2／R3 的網頁下載整理到 `docs/research/來源/`，已 gitignore 不公開），驗收 `node scripts/check-research.mjs`。Codex 回報後 Opus 抽查網址與稅率數字，再合併成清單給使用者挑選排序。
+6. 使用者追加：研究範圍加「圍繞正二與各類 ETF 的股票常識」；調研改派**訂閱 Codex sol**（面板可上網），取代下方第 2、2b 步的 luna／Opus WebSearch。任務書 `collab/to-codex.md`（研究任務 R v3，產出 `docs/research/R1–R3`，R2／R3 的網頁下載讀完、由 sol 用自己的理解重寫成筆記放 `docs/research/來源/`，不存原文，會 commit），驗收 `node scripts/check-research.mjs`。Codex 回報後 Opus 抽查網址與稅率數字，再合併成清單給使用者挑選排序。
 
 **下次開工順序（Opus）**：
 1. 先跟使用者確認上面「目標樣子」，用 1–2 個畫面草圖（ASCII 或 artifact）對齊，**沒對齊不寫程式**。

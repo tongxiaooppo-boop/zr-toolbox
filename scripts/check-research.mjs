@@ -25,7 +25,7 @@ if (r1ids.length !== new Set(r1ids).size) fail('R1 有重複 ID');
 const cats = { 計算: 0, 科普: 0, 兩者: 0 };
 for (const r of r1) { if (r[1] in cats) cats[r[1]]++; else fail(`R1 ${r[0]} 類別不合法：${r[1]}`); }
 
-// R2、R3：最後一欄要有本機來源檔「來源/xxx.md」與原網址；來源檔要有網址、抓取日期、摘錄
+// R2、R3：最後一欄要有本機來源檔「來源/xxx.md」與原網址；來源檔要有網址、抓取日期、重點整理、關鍵數字、我的判讀
 const seen = new Set();
 function urls(file, min, name) {
   const rs = rows(file);
@@ -42,7 +42,10 @@ function urls(file, min, name) {
       const t = readFileSync(f, 'utf8');
       if (!/網址[:：]\s*https?:\/\//.test(t)) fail(`${l} 沒有「網址：」`);
       if (!/抓取日期[:：]\s*20\d\d-\d\d-\d\d/.test(t)) fail(`${l} 沒有「抓取日期：YYYY-MM-DD」`);
-      if (!/## 摘錄/.test(t) || t.split('## 摘錄')[1].trim().length < 200) fail(`${l} 的「## 摘錄」少於 200 字`);
+      const body = (t.split('## 重點整理')[1] || '').split('## 關鍵數字')[0].trim();
+      if (body.length < 300) fail(`${l} 的「## 重點整理」少於 300 字`);
+      if (!/## 關鍵數字/.test(t)) fail(`${l} 沒有「## 關鍵數字」`);
+      if (!/## 我的判讀/.test(t)) fail(`${l} 沒有「## 我的判讀」`);
     }
   });
   return rs.length;
