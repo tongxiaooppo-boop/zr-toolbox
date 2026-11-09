@@ -70,7 +70,8 @@
 - **⑯⑰⑱ 進度（2026-11-09，Opus）**：`js/core/valuation.js`（`valuationPlan`、`ratiosToBase`、`historyBands`）、`js/core/divtax.js`（`dividendTaxPlan`、`progressiveTax`、`TAX_YEARS`）、`js/core/fx.js`（`fxPlan`、`ratePair`）、`price.js` 加 `fetchDataset`／`fetchRatios`／`fetchFxRate`＋`tests/valuation-divtax-fx.test.js`（10 項：⑯ 範例 580／EPS 32／淨值 140／股利 16 → 480–800、420–700、400–640；⑰ 單身薪資 80 萬股利 30 萬 → 合併 8,120、分開 100,800；高薪 600 萬＋股利 200 萬分開省 160,000；四口之家基本生活費差額 202,000 → 可退 8,500；⑱ 33 萬換 1 萬美元→11,000、33→31.5 → +15,400、拆解 +32,950／−16,500／−500／−550）。5 個術語（每股盈餘、本益比、本淨比、股利合併／分開計稅、匯差）；tools.js 加 ⑯ `valuation`、⑰ `divtax`、⑱ `fx`（`planned`）；卡通提示六張 `valuation-01/02`、`divtax-01/02`、`fx-01/02`；任務書 `collab/to-codex.md`（⑯⑰⑱ v1：三頁＋六張圖）待 Codex 面板做。框架 v5.11。tests 155 全過。
   - 稅率參數（Opus WebSearch 2026-11-09，新聞轉述財政部 2025-11-27 公告；累進差額自行驗算）：115 年度免稅額 101,000（70 歲以上 151,500）、標準 136,000／272,000、薪資 227,000、級距 61／138／277／519 萬；114 年度 97,000／145,500、131,000／262,000、218,000、59／133／266／498 萬、基本生活費 213,000。**115 年度基本生活費未公告（通常 11 月下旬）→ 暫用 213,000，公告後改 `TAX_YEARS[115].basicLiving`、`provisional:false`**。
   - FinMind 實測（匿名可用）：TaiwanStockPER 2330 五年 1,211 筆、分位 16.7／23.4／27.6 倍；0050 無資料（ETF）→ 頁面請使用者自填；TaiwanExchangeRate USD 即期 32.72／32.82、JPY 也有。
-- **下次開工（新 session，從這裡接）**：⑯⑰⑱ 等 Codex 面板回報 → Opus 驗收（讀回報、git diff、`npm test && npm run smoke`、六張圖逐字核對轉 webp、卡片改 ready）。之後 → 科普（研究 R4 → ETF 入門、借錢管道、正二教學）→ UI 統一美化（Neo-brutalism）。
+  - **已上線（2026-11-09）**：Codex 一輪過（三頁＋六張圖；第一輪 6 次生圖因 PowerShell 把提示序列化成物件字串而畫出無關照片，未交付，修正後各重生 1 次、valuation-step3 2 次）。六張圖逐字核對無誤，轉 `img/valuation/`、`img/divtax/`、`img/fx/` 的 webp，三張卡片 ready。Opus 改一處：⑯ 反推 EPS／淨值／股利改用**證交所比率那天**的收盤價（`fetchCloseOn`；原本用最新收盤價配舊比率，2330 實測 2235 vs 2135 差 4.7%），並取 2 位小數。無頭 Chrome 實測：三頁範例數字全對；2330 → 11-06 收盤 2135 反推 EPS 86.26、五年區間帶入 16.71／23.37／27.61；0050 正確提示自填；⑰ 114 年度四口之家可退 8,500；⑱ 填 2026-01-03 → 抓 01-02 牌告 31.37／31.47、第 3 步自動抓今天 32.72／32.82；390px 無水平捲動。tests 155、smoke 20 全過。
+- **下次開工（新 session，從這裡接）**：計算機全部完成（②–⑲）。下一步 → 科普（研究 R4 個人借錢管道 → ETF 入門、借錢管道、正二教學）→ UI 統一美化（Neo-brutalism）。另：**115 年度基本生活費公告後（約 11 月下旬）改 `js/core/divtax.js` 的 `TAX_YEARS[115].basicLiving` 與 `provisional:false`**。
 - （舊）⑥ ⑧ 改精靈（無持股，輸入少，步驟可以短）。全部 A 類做完 → ⑬⑭ → ⑯⑰⑱ → UI 統一美化（Neo-brutalism）。
   - 注意：股票事件換算（`core/events.js`）其他工具目前用不到（都用券商 App 現在的股數／成本）；之後若有工具要比歷史價格，直接用 `fetchEvents`＋`adjustBasePrice`。
 - **再下一步（舊）**：⑪ 完成（Gate 7 併入）。之後「其餘 A 類改精靈」（先列清單給使用者看）。原文：⑮ 平均成本（加碼／攤平後均價），照 ⑦ 格式「core＋測試由 Opus 寫，頁面＋生圖一份任務書」。（原文：⑤ 融資融券（core 由 Opus 寫：研究 R2-06 RSI20 融資融券試算＋R2-01 證交所指南；併融券、整戶維持率；任務書照 ⑦ 格式「頁面＋生圖一份」）→ ⑲ 退休提領（使用者 2026-11-09 定：todo2 財務計算機只納入退休提領，⑦ 之後加「停扣後再滾」選項；詳見 [research/候選清單.md](research/候選清單.md) 末節）。）
@@ -109,7 +110,7 @@
 - 今天（2026-11-08）結束時：master＝origin/master，工作目錄乾淨；tests 51、smoke pages 9 全過；Codex 面板沒有進行中的任務（`collab/to-codex.md` 是已完成的 3a）。
 - **已部署**（2026-11-08，使用者同意公開）：https://tongxiaooppo-boop.github.io/zr-toolbox/ （GitHub `tongxiaooppo-boop/zr-toolbox`，public，Pages 來源 `master` 根目錄，MIT）。之後每個 Gate 驗收完 `git push` 就會更新（Pages 約 1 分鐘生效）。
 - **Codex 面板環境限制**（Gate 1 發現）：PowerShell 擋 `npm.ps1`，要用 `npm.cmd`；沙箱裡 `npm run smoke` 開不了無頭 Chrome 會卡住。任務書的 PROOF_CMD 改成：Codex 只跑 `npm.cmd test`，smoke 由 Opus 跑。
-- 驗收指令：`npm test && npm run smoke`（現行預期：tests 155 全過、smoke pages 17 全過；⑯⑰⑱ 上線後 smoke 20）。
+- 驗收指令：`npm test && npm run smoke`（現行預期：tests 155 全過、smoke pages 20 全過）。
 - 使用者 2026-11-08 補充：工具箱分四大類（正二教學／正二變種／正二槓桿／其他股票計算機，含融資等原 v2 項目），**每個工具都要圖文解說，圖由 sol 畫**（流程見 FRAMEWORK.md 第 5 節）。（「⑪ 擔任白話版、不另做」已被 Gate 7 推翻，見上方追加三件事。）
 
 ## 這是什麼

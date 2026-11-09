@@ -1,45 +1,61 @@
 ## 完成項
-- 完成 ⑬「人生槓桿體檢」四步精靈、結果逐項解說、範例及「怎麼讀」；計算只呼叫既有 core。
-- 完成 ⑭「幾倍槓桿最划算」兩步精靈、凱利對照表、年化曲線、範例及「怎麼讀」；計算只呼叫既有 core。
-- betaHoldingsInput 加入 kind:'life'；新增 debtsInput、readDebts，支援刪光、筆數上限、重新編號及依借款種類更新投資金額 placeholder。
-- 完成兩個 HTML 入口，只替換模板的 title 和頁面 script 路徑。
-- 完成四張 PNG；頁面引用指定 WebP 路徑，等待 Opus 轉檔搬入。
+
+- 完成⑯股價估價、⑰股利要怎麼報稅、⑱換匯成本與海外損益：三步精靈、範例、結果解說、比較／損益表、完整圖文替代文字和頁尾「怎麼讀」。計算只呼叫既有 core。
+- 估價代號同時查收盤價和比率；可反推每股數字、套用歷史分位數。換匯可依日期查牌告，第三步在兩格均空白時查最新匯率。
+- 三份 HTML 沿用 kelly，只替換 title 與頁面 script。
+- 六張卡通 PNG 已生成、逐張檢視並確認尺寸，存入指定 out 目錄。
+- 已完成指定 PROOF_CMD；未上網查資料、未 commit、未執行 smoke。
 
 ## 修改檔案
-- js/ui/wizard.js
-- js/pages/lifelev.js（新增）
-- js/pages/kelly.js（新增）
-- tools/lifelev.html（新增）
-- tools/kelly.html（新增）
-- docs/figures/cartoon/out/lifelev-comic.png（新增）
-- docs/figures/cartoon/out/lifelev-step3.png（新增）
-- docs/figures/cartoon/out/kelly-comic.png（新增）
-- docs/figures/cartoon/out/kelly-step1.png（新增）
+
+- js/pages/valuation.js（新增）
+- js/pages/divtax.js（新增）
+- js/pages/fx.js（新增）
+- tools/valuation.html（新增）
+- tools/divtax.html（新增）
+- tools/fx.html（新增）
+- docs/figures/cartoon/out/valuation-comic.png
+- docs/figures/cartoon/out/valuation-step3.png
+- docs/figures/cartoon/out/divtax-comic.png
+- docs/figures/cartoon/out/divtax-step3.png
+- docs/figures/cartoon/out/fx-comic.png
+- docs/figures/cartoon/out/fx-step1.png
 - collab/from-codex.md（覆蓋）
 
+未修改 core、net、ui、data、tests、img、CSS 或其他頁面。
+
 ## PROOF_CMD 結果
-- npm.cmd test：tests 145 pass 145 fail 0。
-- 範例數字：1981000 1.52 7307 1.66 1.69 3.76 7（與指定輸出一致）。
-- node --check（三檔）：js/pages/lifelev.js、js/pages/kelly.js、js/ui/wizard.js 均 exit 0，無輸出。
-- git diff --check：通過，無輸出。
-- 額外以暫存 Node 驗證器載入頁面，替代 DOM／呈現元件，檢查範例結果、必填欄位錯誤、選填收入／倍數、無持股／零資產及全凱利為零情境，全部通過。兩個 HTML 與模板逐字比較，確認只有 title 和頁面 script 不同。驗證器已刪除，未修改 tests/。
-- 未跑瀏覽器視覺／互動測試；未跑 npm.cmd run smoke，留給 Opus。
+
+- npm.cmd test：tests 155 pass 155 fail 0（exit 0）。
+- 範例數字：cheap-fair,fair-expensive,fair-expensive 8120 100800 combined 15400 30（exit 0）。
+- node --check（三檔）：valuation.js、divtax.js、fx.js 全部 exit 0，無輸出。
+- 額外離線驗證：使用暫存 mock DOM 執行三頁的範例結果、三步 body/read，並檢查估價舊回應、代號清空後來源清除、換匯舊回應及手動改值後待回應不覆寫，全部通過。暫存檔已刪除。未跑瀏覽器 smoke，也未實際呼叫 FinMind。
 
 ## 生圖（每張重生幾次、有沒有殘留錯字）
-- 使用內建 imagegen；每張最終提示均為「docs/figures/cartoon/00-風格與角色.md 全文＋對應提示檔全文」，未改寫提示內容。
-- lifelev-comic.png：對應 lifelev-01-人生槓桿體檢四格.md；重生 0 次；目視未見殘留錯字或數字錯誤。
-- lifelev-step3.png：對應 lifelev-02-借的錢拿去哪.md；重生 0 次；目視未見殘留錯字。
-- kelly-comic.png：對應 kelly-01-幾倍最划算四格.md；重生 0 次；目視未見殘留錯字或數字錯誤。
-- kelly-step1.png：對應 kelly-02-報酬和波動.md；重生 0 次；目視未見殘留錯字。
-- 四張均存於 docs/figures/cartoon/out/，PNG、1024×1536。目錄被 Git 忽略，一般 git status 不會列出，實體檔案已交付。
+
+使用內建 image_gen，未使用 CLI／API fallback。提示組合為 docs/figures/cartoon/00-風格與角色.md 全文＋to-codex.md 第 5 節對應提示檔全文；估價步驟圖另補「老師不戴眼鏡，其餘文字及構圖保留」的修正提示。
+
+首輪六次呼叫因 PowerShell 回傳文字帶有包裝屬性，提示被序列化成物件字串，產生不符題意的圖片，均未交付。修正後重新生成六張，以下次數將該次重新生成計入：
+
+| 檔名（均存於 docs/figures/cartoon/out/） | 重生次數 | 檢查結果 |
+| --- | --- | --- |
+| valuation-comic.png | 1 | 1024×1536 PNG，逐項檢查，未發現殘留錯字或數字錯誤 |
+| valuation-step3.png | 2 | 1024×1536 PNG；第二次移除老師眼鏡，與同工具四格圖一致；未發現殘留錯字或數字錯誤 |
+| divtax-comic.png | 1 | 1024×1536 PNG，逐項檢查，未發現殘留錯字或數字錯誤 |
+| divtax-step3.png | 1 | 1024×1536 PNG，逐項檢查，未發現殘留錯字或數字錯誤 |
+| fx-comic.png | 1 | 1024×1536 PNG，逐項檢查，未發現殘留錯字或數字錯誤 |
+| fx-step1.png | 1 | 1024×1536 PNG，逐項檢查，未發現殘留錯字或數字錯誤 |
 
 ## 偏離規格或自行決定的小事
-- 未追加 CSS，沿用既有 holding-grid、field、trade-table 樣式。
-- wizard.js 僅新增必要的 DEBT_KINDS import、擴充 betaHoldingsInput 與於檔尾新增借款元件；未變更檔頭註解及其他函式。
-- 圖中老師的眼鏡有些微外觀差異：兩張步驟圖戴眼鏡、兩張四格圖未戴眼鏡；主要角色髮色與服裝仍一致。未因非文字差異重生。
-- 遵守不上網、不 commit、不改 core／data／tests／img；暫存檔皆已刪除。
+
+- 換匯變更幣別／即期或現鈔後，清除舊的「現在」匯率，避免沿用不同幣別／種類的數字；第三步重新抓取。
+- 換匯查詢期間手動編輯匯率會取消該回應的覆寫資格。
+- 換匯範例手續費的負零顯示成「+0」。
+- 未追加 CSS；沿用既有 triple、trade-table 等樣式。
+- 生圖已授權使用內建功能；未另外連網查證稅務資料，所有年度參數與提醒照既有核心及任務文字呈現。
 
 ## 需要 Opus 決定的事
-- 將四張 PNG 轉成 WebP 並搬入 img/lifelev/comic.webp、img/lifelev/step3.webp、img/kelly/comic.webp、img/kelly/step1.webp。
-- 依原分工更新 tools.js 的 status，並跑 smoke／瀏覽器檢查。
-- 若要求跨圖老師外觀完全一致，可再處理眼鏡差異；目前文字、數字已檢查通過。
+
+- 依原分工：將六張 PNG 壓縮／轉成 WebP 並搬到 img/valuation、img/divtax、img/fx 的指定名稱；頁面已引用該目標路徑。
+- 依原分工：更新 tools.js 的 status，執行 npm.cmd run smoke，確認桌面與手機版面及真實 FinMind 串接。
+- 無需改動禁止修改的檔案；沒有其他阻塞事項。
