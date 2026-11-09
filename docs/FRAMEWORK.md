@@ -51,6 +51,7 @@ scripts/smoke.mjs          冒煙測試（無頭 Chrome，逐頁按「帶入範�
 | exposure.js | `exposureNow({positions:[{value,beta}], cash, debt})` → `{assets, net, exposure, assetBasis, netBasis, leverageRatio}`；`betaPlan(p)` | ⑪（及 ① 教程對照） | betaPlan 為 research-model 移植 |
 | holdings.js | `CODE_RE`、`normalizeCode(text)`、`holdingSummary(list)` → `{rows, cost, value, gain, gainPct}`（錯誤訊息標明第幾檔） | 所有精靈的持股步驟 | v5 新 |
 | pledge.js（v5） | `pledgePlan({holdings, debt, rate, days, call, target, collateralQ, use})` → `{summary, rows, nowRatio, callDrop, interest, perStock[{code, callPrice, vsBuy}], useFactor, useLossAtCall}`；多檔擔保品視為同時同幅漲跌；`use`：'cash' 0 倍、'same' 1 倍、'lever' 2 倍（粗估） | ④ 精靈 | v5 新，內部呼叫 `pledgeTable` |
+| cost.js | `FEE_RATE`、`TAX_RATE`、`TAX_UNTIL`、`guessKind(code)`、`defaultMinFee(shares)`、`taxRate(kind, dayTrade)`、`tickSize(price, kind)`、`roundUpToTick`、`brokerFee(amount, {discount, minFee})`、`tradeCost({kind, dayTrade, shares, buyPrice, sellPrice, discount, minFee})` → `{buyAmount, buyFee, buyTotal, rate, sell{amount, fee, tax, net}, totalCost, profit, profitPct, breakEven, breakEvenTick, feeRate}`；手續費、證交稅元以下捨去；discount 小數（2.8 折＝0.28） | ⑨（之後 ⑩⑮⑤ 共用費用） | v5 新 |
 | finmind.js | `finmindAction({status, usedToken, retried})` → `{action, message}` | 日後抓股價的工具（v1 工具箱不抓 FinMind） | 新 |
 
 **單位規約**：core 一律用小數，不用百分比數字——比例、跌幅、利率、維持率都是小數（利率 3%＝`0.03`、追繳線 130%＝`1.3`、跌 30%＝`0.3`、權重 40%＝`0.4`）；金額為新台幣元；`days` 為日曆天整數。頁面欄位讓使用者輸入百分比數字（例 130），**頁面自己除以 100** 再傳進 core，顯示時用 `fmtPct`。
@@ -59,7 +60,7 @@ scripts/smoke.mjs          冒煙測試（無頭 Chrome，逐頁按「帶入範�
 
 **FinMind 回應規則**（`finmindAction`，決策 D5 的落實版）：200 正常；402 顯示「申請免費會員 token（每小時 600 次）」教學；**403 一律停止**（可能是 IP 被封 30 分鐘，清 token 或重試只會更糟）；400／401 且有帶 token 且還沒重試 → 不帶 token 重試一次，**重試回 200 才清掉 token**（400 也可能是參數錯，不能直接判定 token 壞）；其他一律停止並請使用者手動輸入股價。
 
-## 4. 工具頁樣板（v5：精靈，照抄 `js/pages/pledge.js`）
+## 4. 工具頁樣板（v5：精靈，照抄 `js/pages/pledge.js`；單筆交易型照抄 `js/pages/cost.js`）
 
 每頁由上到下：
 
