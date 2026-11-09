@@ -25,7 +25,7 @@
 
 - 新增資料檔：`js/data/basics.js`、`js/data/zr101.js`
 - 新增頁面：`js/pages/basics.js`、`js/pages/zr101.js`
-- 新增 html：`tools/basics.html`、`tools/zr101.html`（照抄 `tools/etf101.html`，只改 `<title>`〔「股票基本術語｜正2工具箱」「正二教學｜正2工具箱」〕和頁面 script 路徑）
+- 新增 html：`tools/basics.html`、`tools/zr101.html`（照抄 `tools/etf101.html`，只改 `<title>`〔「股票基本術語｜正2工具箱與股市學堂」「正二教學｜正2工具箱與股市學堂」〕和頁面 script 路徑）
 - `js/pages/etf101.js`：**只准**在 `s.id === 'borrow'` 那行的前面，加一行：`s.id === 'leveraged' ? h('p', {}, h('a', { href: 'zr101.html' }, '㉔ 正二教學：從頭帶你走一遍 →')) : null,`
 - `css/app.css`：只准**在檔尾追加**需要的幾行（用既有 token，不准寫死顏色，淺／深都要看得清楚）
 - `docs/figures/cartoon/out/` 底下四張 PNG（第 5 節）
