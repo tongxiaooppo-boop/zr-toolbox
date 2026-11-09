@@ -1,116 +1,129 @@
-# 研究任務 R：計算機清單＋正二／ETF 常識（不寫程式）
+# 任務 ⑩：股息與除權息精靈頁（照 ⑨ 樣板）
 
-- 版本：2026-11-09 v4（v2：來源要下載整理成本機檔；v3：改成用自己的理解重寫；v4：原文與轉寫都要留，原文不公開）。Gate 3a 的任務書已完成，以本檔為準。
-- 執行者：訂閱 Codex sol。直接在本 repo（`D:\ok\zr-toolbox`）工作。**需要上網搜尋**；若你的環境不能上網，做完 R1 就停，在回報寫「無法上網」。
-- **不要 commit**。做完寫 `collab/from-codex.md`（覆蓋舊的）就停。指令一律用 `npm.cmd`／`node`。
-- 只准新增 `docs/research/` 底下三個檔與 `docs/research/來源/` 資料夾，加上覆蓋 `collab/from-codex.md`。其他檔案一律不改（含 `scripts/check-research.mjs`）。暫存檔結束前刪掉。
-- **R2、R3 用到的每個網頁都要下載讀完、原文全文存檔＋用自己的理解轉寫成筆記**（見第 4 節），表格只放網址不算完成。
+- 版本：2026-11-09 v1。上一份（研究任務 R v4）已完成，以本檔為準。
+- 執行者：訂閱 Codex sol，直接在本 repo（`D:\ok\zr-toolbox`）工作。**不要上網。不要 commit**。做完寫 `collab/from-codex.md`（覆蓋舊的）就停。
+- 指令一律用 `npm.cmd`／`node`（PowerShell 擋 `npm.ps1`）；**不要跑 `npm.cmd run smoke`**（沙箱開不了 Chrome，Opus 會跑）。
+- 暫存檔、一次性腳本只准放本 repo 內，結束前刪掉。
 
-## 背景（一段話）
+## 0. 要讀的檔案（只准讀這些）
 
-工具箱是給**投資新手**的手機計算機集合，主題是台股、0050、正二（00631L 等 2 倍槓桿 ETF）。改版後每個計算機都是**逐步精靈**：使用者輸入股票代號＋買入股數＋買入價（現價自動抓）→ 現金／借款金額 → 倍率與參數 → 輸出數字並逐項解說。這次研究要回答：該做哪些計算機、解說裡要放哪些常識。
+- `js/pages/cost.js`（**樣板，結構照抄**：import、steps 陣列、result、example、頁尾「怎麼讀」）
+- `tools/cost.html`（照抄成 `tools/dividend.html`）
+- `js/core/dividend.js`（公式，只准呼叫、不准改）
+- `js/ui/wizard.js` 第 53–80 行（`withHelp`、`numberInput`、`explain` 簽名）
+- `js/core/cost.js` 第 15–20 行（`guessKind`）
 
-現有 core 函式（R1 的「對應 core」欄只能填這些名稱，沒有就寫「缺」並說缺什麼）：
-`simulateDaily`、`makeScenario`（每日 2 倍模擬）、`recoveryGain`、`maxDrawdown`、`yearsToRecover`（回撤）、`exposureNow`、`betaPlan`（曝險倍數、目標 Beta）、`pledgeStress`、`pledgeTable`（質押壓測）、`dueDate`、`rebalance`、`TEMPLATES`（定期配比 532／442／433 等）、`checkTrigger`、`split5050`（50/50 觸發）。
+## 1. 要新增的檔案（只准新增這兩個＋回報檔，其他檔一律不改）
 
-## 0. 要讀的檔案
+- `tools/dividend.html`：照抄 `tools/cost.html`，title 改「股息與除權息｜正二工具箱」，script 改 `../js/pages/dividend.js`。
+- `js/pages/dividend.js`：照下面規格。
 
-- `D:\ok\zr-calc\資料蒐集\2026-11-08_正二資料庫\來源筆記\` 底下 77 個 `.md`（檔名前三碼是 ID，例 `C01`）
-- 同資料夾的 `變種策略比較.md`、`計算機比較.md`、`研究判讀與疑點.md`
-- 不准讀其他專案檔案。
+**不准改**：`js/core/`、`tests/`、`js/ui/`、`js/data/`（`tools.js` 的 status 由 Opus 改）、`css/`、`img/`。覺得要改就停下寫進回報。
 
-## R1：`docs/research/R1-77筆分類.md`
+## 2. 頁面規格
 
-一張表，77 列，每個 ID 一列，**欄位順序固定**：
+`const tool = TOOLS.find(t => t.id === 'dividend');`，`import { dividendPlan, NHI_MIN } from '../core/dividend.js'`、`import { guessKind } from '../core/cost.js'`，其他 import 照 cost.js 需要的留。
 
-`| ID | 類別 | 名稱 | 計算方法（一句） | 需要的輸入 | 輸出 | 對應 core | 科普可用在 |`
+### 步驟 1「你持有什麼」
+- 跟 cost.js 步驟 1 一樣：`holdingsInput({ id: 'hold', rows: s.holdings || [{}], max: 1, label: '你的持股' })`＋`tokenBox()`，figure 用同一張 `../img/common/step-holdings.svg`（alt 照抄）。
+- hint：「填一檔你有的股票或 ETF：代號、股數、買入價。代號填好，現價會自動抓。」
+- about：「這一步確定你有幾股、成本多少。股利是按股數發的。」
+- read：`readHoldings` → `holdingSummary([x])`；代號換了才設 `s.kind = guessKind(x.code)`、`s.prevClose = x.nowPrice`；`s.holdings = [x]`。
 
-- 類別只能填 `計算`、`科普`、`兩者`。`計算`＝裡面有可照做的算法、規則、配置比例、壓測公式，或本身是網路計算機；`科普`＝風險說明、論文、基金資料、公告，沒有可照做的算法。
-- 「計算方法」「輸入」「輸出」：科普類填 `—`。輸入要寫成新手能填的東西（例：股票代號、股數、買入價、借款金額、追繳線％），不要寫「市值」這種要先算的量。
-- 「科普可用在」：一句話，寫這筆資料適合放進哪個解說（例：「⑥ 正二不是兩倍：波動耗損」）；計算類沒有就填 `—`。
-- 表格後面加「## 歸併」：把 `計算`／`兩者` 類合併成「候選計算機」清單（同一算法的多筆來源合成一個），每個候選一行：`- 名稱｜來源 ID｜對應 core 或缺什麼`。
+### 步驟 2「這次發多少股利」
+- hint：「照公司（或投信）的股利公告填。公告在券商 App 個股頁的『股利』或公開資訊觀測站。」
+- about：「這一步算出你會領多少現金、多幾股。股票股利的『元』要除以面額，才是配股比例。」
+- figure：`{ src: '../img/dividend/step2.webp', alt: '卡通圖：股利公告怎麼看？某檔股票股利公告：現金股利每股 2.4 元，填到每股現金股利；股票股利每股 0.5 元，填到每股股票股利。小安有 1 張（1,000 股）：現金 2.4 元 × 1,000 股＝2,400 元；配股 0.5 元 ÷ 面額 10 元＝5%，1,000 股 × 5%＝50 股。老師說：股票股利的元要除以面額，才是配股比例。多數公司面額 10 元，少數不是，依公告；ETF 通常只配現金。' }`
+- 欄位（依序）：
+  1. `selectField` id `exdone`，label「除權息日過了嗎」，options：`no`「還沒，先算算看」、`yes`「已經過了」，預設 `s.exDone || 'no'`。用 `withHelp`：「還沒過：除權息前收盤價就用現價（已自動帶入）。」「已經過了：要自己查除權息前一天的收盤價，結果會告訴你填息了沒。」
+  2. `numberInput` id `prevclose`，label「除權息前一天收盤價」，termId `ex-dividend`，plain「還沒除權息就用現價」，value `s.prevClose`，suffix「元」，help：「除權息當天的參考價，就是用這個價格扣掉股利算出來的。」「已經除權息過了：在券商 App 的日 K 線找除權息前一天的收盤價。」
+  3. `numberInput` id `cash`，label「每股現金股利」，termId `dividend-yield`，plain「公告寫『現金股利 2.4 元』就填 2.4」，value `s.cash ?? ''`，suffix「元」，help：「是每 1 股發多少錢，不是你總共領多少。」「沒有發現金就填 0。ETF 的『每單位配息』也填這裡。」
+  4. `numberInput` id `stockdiv`，label「每股股票股利」，plain「公告寫『股票股利 0.5 元』就填 0.5；沒有填 0」，value `s.stockDiv ?? 0`，suffix「元」，help：「配股比例＝這個數字 ÷ 面額。面額 10 元時，0.5 元＝每 1,000 股配 50 股。」「ETF 通常只配現金，填 0。」
+  5. `numberInput` id `par`，label「股票面額」，plain「多數公司是 10 元」，value `s.par ?? 10`，suffix「元」，help：「少數公司面額不是 10 元（例：1 元），公告或公開資訊觀測站查得到。」
+- read：讀進 `s.exDone`、`s.prevClose`、`s.cash`、`s.stockDiv`、`s.par`；驗證（訊息照寫）：
+  - prevClose 不是 >0 → 「除權息前收盤價要大於 0，例：50。」
+  - cash 或 stockDiv 不是 ≥0 → 「股利不能是負的，沒有就填 0。」
+  - 兩者都 0 → 「現金股利和股票股利至少填一個。」
+  - par 不是 >0 → 「面額要大於 0，多數公司是 10 元。」
 
-## R2：`docs/research/R2-常用計算機.md`
+### 步驟 3「健保身分」
+- hint：「股利一次領到 2 萬元以上，會先被扣二代健保補充保費。」
+- about：「這一步決定要不要扣補充保費。大多數人選『一般』。」
+- 不放 figure。
+- 欄位：`selectField` id `identity`，label「健保身分」，termId `nhi-premium`，plain「不確定就選一般」，options：`general`「一般（受僱、自己投保、依附眷屬）」、`exempt`「符合免扣資格（例：中低收入戶，依健保署規定）」，預設 `s.identity || 'general'`。用 `withHelp`：「一般身分：單次股利所得達 20,000 元，全額 × 2.11%，由發股利的公司直接扣。」「以雇主或自營業主身分投保的人另有扣除規則，這裡沒有算，請以健保署為準。」
+- read：`s.identity = document.getElementById('identity').value`。
 
-上網調查**台灣投資新手和老手實際會用到的計算機**，不限正二。來源：台灣投資計算機網站與 App、券商工具頁、PTT Stock／Dcard 投資板常被問的計算問題。種子清單（要驗證、補齊、刪掉沒人用的）：
+### 結果
+```js
+const [x] = s.holdings;
+const after = s.exDone === 'yes';
+const r = dividendPlan({ shares: x.shares, prevClose: s.prevClose, cashPerShare: s.cash, stockPerShare: s.stockDiv, par: s.par,
+  buyPrice: x.buyPrice, nowPrice: after ? x.nowPrice : undefined, identity: s.identity });
+```
+名稱照 cost.js 用 `STOCK_NAMES`。依序輸出 `explain`（數字格式：金額 `fmtMoney`、百分比 `fmtPct(…, 2)`、股數 `toLocaleString('en-US') + ' 股'`、參考價 `r.refPrice.toFixed(2) + ' 元'`）：
 
-- 交易基本：買賣損益與報酬率（手續費、證交稅、ETF 稅率較低、零股、券商折扣）、攤平後平均成本、損益兩平價、停損停利價
-- 股息：殖利率、除權息參考價、填息、股票股利配股、二代健保補充保費、股利所得合併／分開計稅
-- 長期：定期定額（扣款日、手續費下限）、單筆 vs 定期定額、複利與 CAGR、存股達標年數、退休 4% 提領
-- 信用交易：融資維持率與追繳價、融券、整戶維持率、當沖損益
-- 槓桿與借貸：質押、借錢投資的利息 vs 預期報酬、信貸／房貸增貸投資
-- 估價：本益比、本淨比、殖利率估價法（便宜／合理／昂貴價）
-- 其他：ETF 折溢價、換匯成本、任意比例再平衡
+1. **現金股利** `fmtMoney(r.cashTotal)`；how：「每股 {cash} 元 × {shares} 股＝{cashTotal}（元以下捨去）。」；means：「發放日以公告為準，匯進你的交割帳戶。」。`s.cash === 0` 時不顯示。
+2. **配股** `{newShares} 股`；how：「配股比例＝{stockDiv} ÷ 面額 {par}＝{stockRate 百分比}；{shares} 股 × 配股比例＝{newSharesExact 取 2 位}股。」若 `newSharesExact !== newShares` 加「不足 1 股的部分依公司公告處理（通常折發現金）。」；means：「除權後你有 {sharesAfter} 股。」。`s.stockDiv === 0` 時不顯示。
+3. **二代健保補充保費** `fmtMoney(r.premium)`，`r.premium > 0` 時 tone `warn`；how 三種情況擇一：
+   - exempt：「你選了免扣資格，不扣。」
+   - `r.income < NHI_MIN`：「這次股利所得 {income}（現金 {cashTotal} ＋ 股票股利面額 {stockIncome}），未達 20,000 元，不扣。」（stockIncome 為 0 時省略括號裡的股票股利那段）
+   - 其他：「（現金 {cashTotal} ＋ 股票股利面額 {stockIncome}）× 2.11%＝{premium}（四捨五入）。」（stockIncome 為 0 時寫「現金 {cashTotal} × 2.11%」）
+   - means：「由發股利的公司直接從現金股利扣掉。」
+4. **實領現金** `fmtMoney(r.netCash)`，tone `ok`；how：「現金股利 {cashTotal} − 補充保費 {premium}。」；means：「這是會進帳的錢；所得稅另外在報稅時算（見下方注意）。」
+5. **除權息參考價** `{refPrice} 元`；how：「（{prevClose} − {cash}）÷（1 ＋ {stockRate 百分比}）。」（stockDiv 為 0 時寫「{prevClose} − {cash}」）；means：「除權息當天的開盤參考，不是預測會成交在哪；實際參考價會對齊升降單位，以證交所公告為準。」
+6. **除權息前後總值** `{fmtMoney(valueBefore)} → {fmtMoney(valueAfter)}`；how：「前：{shares} 股 × {prevClose} 元。後：{sharesAfter} 股 × {refPrice} 元 ＋ 現金股利 {cashTotal}。」；means：「總值幾乎不變：股利是從股價搬到你口袋，不是多賺的。扣掉補充保費 {premium} 元，反而少一點。」（premium 為 0 時最後一句省略）
+7. **現金殖利率** `fmtPct(r.cashYield, 2)`；how：「每股現金股利 {cash} ÷ 除權息前收盤價 {prevClose}。」；有 buyPrice 時 means：「用你的買入價 {buyPrice} 元算，成本殖利率是 {costYield}。比較不同股票要用同一種分母。」，沒有時 means：「殖利率高不等於賺得多，還要看股價有沒有漲回來。」。`s.cash === 0` 時不顯示。
+8. **填息要漲多少** `fmtPct(r.fillPct, 2)`；how：「從參考價 {refPrice} 元漲回 {prevClose} 元：{prevClose} ÷ {refPrice} − 1。」；means：
+   - `r.filled === true`（tone `ok`）：「現價 {nowPrice} 元已回到 {prevClose} 元，已經填息。」
+   - `r.filled === false`（tone `warn`）：「現價 {nowPrice} 元，還差 {prevClose − nowPrice 取 2 位} 元才填息。」
+   - `null`：「除權息後股價漲回 {prevClose} 元才叫填息（有配股叫填權），不保證，也沒有期限。」
+9. **含息損益**（`x.buyPrice` 有值才顯示）`signed(r.profitAfter)`，tone 依正負 `ok`／`bad`；how：「{sharesAfter} 股 × 參考價 {refPrice} ＋ 實領現金 {netCash} − 買進成本 {costTotal}（{shares} 股 × {buyPrice}）。」；means：「除權息前是 {signed(profitBefore)}，差的就是補充保費。手續費、證交稅沒算，買賣成本請用 ⑨。」
 
-一張表，**至少 25 列**，欄位順序固定，**最後一欄＝本機來源檔＋原網址**（寫法見第 4 節）：
+最後一個 `h('div', { class: 'note' }, …)`，固定三條：
+- 「所得稅沒有算：股利所得可選合併計稅（8.5% 可抵減，每戶上限 8 萬元）或分開計稅 28%，要看你全年所得。」
+- 「ETF 的收益分配不一定全是股利所得，補充保費與所得稅的計算以配息通知為準；這裡用全額估，是上限。」
+- 「現金增資、減資、分割、匯費等沒有算；實際金額以公司公告與券商入帳為準。」
 
-`| 計算機 | 誰會用（新手／老手／都會） | 輸入（新手能填的） | 輸出 | 熱門程度（高／中／低＋一句證據） | 台灣規則要注意（稅率、費率、法規數字＋年份） | 來源 |`
+### 範例與頁尾
+```js
+const example = { holdings: [{ code: '2412', shares: 10000, buyPrice: 40, nowPrice: 50 }], kind: 'stock',
+  exDone: 'no', prevClose: 50, cash: 2.4, stockDiv: 0.5, par: 10, identity: 'general' };
+```
+範例結果必須是：現金股利 24,000、配股 500 股、補充保費 612、實領 23,388、參考價 45.33、總值 500,000 → 500,000、現金殖利率 4.80%、填息 10.29%、含息損益 +99,388。
 
-- 稅率、費率、追繳線等數字要寫出來源與年份（例：證交稅股票 0.3%、ETF 0.1%、當沖減半的適用期限）。查不到可靠來源就寫「待查」，**不要憑印象填數字**。
-- 表格後面加「## 和 R1 重疊」：列出 R2 中哪些已被 R1 的候選計算機涵蓋。
+頁尾照 cost.js：`toolHeader(tool)`、`wizard({ steps, result, example })`、「怎麼讀」卡片放
+`figure({ src: '../img/dividend/comic.webp', alt: '四格漫畫：一、除權息前一天，小安有某檔股票 10,000 股 × 50 元＝500,000 元。二、股利來了：現金股利 2.4 元 × 10,000 股＝24,000 元，股票股利 0.5 元多 500 股，健保補充保費 −612 元。三、除權息當天參考價 45.33 元，10,500 股 × 45.33 元約 476,000 元，加現金 24,000 元還是 500,000 元。四、老師說股價要從 45.33 元漲 10.29% 回到 50 元才叫填權息；股利是從股價搬到你口袋，股價漲回來才算真的賺到。補充保費＝（現金 24,000＋股票股利面額 5,000）× 2.11%。' })`
+加三段 `h('p')`：
+- 「發股利那天叫除權息：股價先扣掉發出去的股利，所以你的總值幾乎不變。」
+- 「股利要等股價漲回除權息前的價格（填息），才算真的賺到；一直沒漲回來叫貼息，領了股利還是虧。」
+- 「單次股利達 2 萬元會先扣 2.11% 補充保費；殖利率比較要用同一種分母（現價或你的成本）。」
 
-## R3：`docs/research/R3-ETF常識.md`
+最後 `disclaimer('general')`。
 
-上網整理**圍繞正二與各類 ETF 的股票常識**，給計算機的解說和科普頁用。至少涵蓋：
+註：`img/dividend/` 的兩張 webp 由 Opus 放（可能比你晚到）；圖不存在不影響你交付，不要自己做圖。
 
-- ETF 基本：ETF 是什麼、市值型／高股息／主題型／債券 ETF／主動式 ETF 的差別、成分股與定期調整、內扣費用（經理費、保管費）、追蹤誤差與追蹤差距、折溢價、流動性與造市、配息與收益平準金、除息、ETF 分割、下市清算
-- 槓桿與反向：每日 2 倍的意思、波動耗損、期貨轉倉成本、為什麼長期不等於 2 倍、反向 ETF、槓反 ETF 風險預告書與開戶門檻、台股主要正二（00631L、00663L、00675L、00685L）的差別
-- 信用與借貸：融資、融券、質押、不限用途借貸的差別、維持率與追繳流程
-- 交易規則：交易時間、盤後零股與盤中零股、漲跌幅限制、T+2 交割、手續費與證交稅
-- 新手常見誤解（例：「正二長抱就是兩倍報酬」「高股息比較安全」）
-
-一張表，**至少 20 列**，欄位順序固定，**最後一欄＝本機來源檔＋原網址**（寫法見第 4 節）：
-
-`| 主題 | 一句話說明（新手看得懂） | 常見誤解 | 放在哪個工具的解說 | 來源 |`
-
-- 來源優先順序：證交所、櫃買、投信投顧公會、金管會、發行投信官網 → 券商教學 → 其他。部落格只能當補充。
-- 數字（費率、門檻、日期）一律附來源；可以先查 `來源筆記/` 裡 A01–A10、B01–B10 的內容。
-
-## 4. 來源下載整理：`docs/research/來源/`
-
-R2、R3 引用的每個網頁（含 PDF）都要**同時留原文與轉寫**：
-
-1. **原文**：存到 `docs/research/來源/原文/`，檔名和轉寫檔同名（網頁存 `.md`，內容是網頁正文全文，去掉選單、廣告、留言；PDF 存原檔 `.pdf`，超過 10 MB 改存正文全文 `.md` 並註明）。這個資料夾已列入 `.gitignore`，只留本機，不公開。
-2. **轉寫**：存到 `docs/research/來源/`，讀完原文後**用你自己的理解重寫**，不是摘錄：重新組織成新手看得懂、可以直接拿來寫計算機解說的筆記。格式見下方，開頭資料區的「原文：」要指向原文檔。
-
-- 檔名：`R2-01_發行者：標題.md`、`R3-01_發行者：標題.md`（流水號兩碼；同一網頁被 R2、R3 都用到，只存一份，用先出現的編號）。
-- 檔案內容固定格式：
+## 3. PROOF_CMD（必跑，貼結果）
 
 ```
-# 標題
-- 網址：https://...
-- 發行者：證交所／元大投信／PTT Stock ...
-- 發布或更新日期：YYYY-MM-DD（查不到寫「未標示」）
-- 抓取日期：YYYY-MM-DD
-- 原文：原文/R2-01_發行者：標題.md（或 .pdf）
-- 用在：R2「計算機名稱」、R3「主題」
-
-## 重點整理
-（用自己的話重寫，至少 300 字。講清楚：這篇在說什麼、算法或規則是什麼、新手要注意什麼、和其他來源有沒有不同。可以重排順序、補例子、把公式改寫成「輸入 → 怎麼算 → 輸出」。）
-
-## 關鍵數字
-- 每個稅率、費率、門檻、日期、公式一行：數字＋它在原文哪一段（例：「證交稅 ETF 0.1%（原文第 2 段）」）。數字本身必須和原文一致，不准改寫或四捨五入。
-
-## 我的判讀
-- 1–3 點：這個來源可信度、是否過時、和其他來源矛盾之處
+npm.cmd test
+node -e "import('./js/core/dividend.js').then(m=>{const r=m.dividendPlan({shares:10000,prevClose:50,cashPerShare:2.4,stockPerShare:0.5,par:10,buyPrice:40});console.log(r.cashTotal,r.newShares,r.premium,r.netCash,r.refPrice.toFixed(2),Math.round(r.valueAfter),(r.fillPct*100).toFixed(2),Math.round(r.profitAfter))})"
+node --check js/pages/dividend.js
 ```
+預期：`ℹ tests 73`、`ℹ pass 73`、`ℹ fail 0`；第二行輸出 `24000 500 612 23388 45.33 500000 10.29 99388`；第三行無輸出。
 
-- 轉寫檔不准大段照抄原文：引用原文最多一句，並加引號。原文全文放原文檔。
-- 抓不到（付費牆、需要登入、被擋）：不算來源，換一個；換不到就在表格寫「待查」，不要只留網址。
-- 表格最後一欄寫法：`[本機](來源/R2-01_證交所：證券交易稅.md) https://原網址`。一列可以有多個來源，用 `；` 分隔，每個都要有本機檔。
-
-## PROOF_CMD
+## 4. 回報 `collab/from-codex.md`（欄位寫死，不貼程式碼）
 
 ```
-node scripts/check-research.mjs
+## 完成項
+- …
+## 新增檔案
+- …
+## PROOF_CMD 結果
+- npm.cmd test：tests __ pass __ fail __
+- 範例數字：__
+- node --check：__
+## 偏離規格或自行決定的小事
+- （沒有寫「無」）
+## 需要 Opus 決定的事
+- （沒有寫「無」）
 ```
-
-預期：最後一行 `OK`，前一行 `R1 77/77（計算 x、科普 y、兩者 z）；R2 ≥25 列；R3 ≥20 列；本機來源檔 n 個`。若出現 `FAIL` 就修到 OK。
-
-## 回報欄位（`collab/from-codex.md`，不貼表格內容）
-
-- 完成項：R1／R2／R3 各一行
-- PROOF_CMD 輸出：原樣貼上兩行
-- 數字：R1 計算／科普／兩者筆數、候選計算機個數；R2 列數、「待查」數量；R3 列數
-- 無法查證或互相矛盾的資料：每條一行（主題＋兩個來源的說法）
-- 需要決定的事：沒有就寫「無」

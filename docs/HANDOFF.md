@@ -33,7 +33,9 @@
 - ④ 樣板使用者 2026-11-09 已點頭。
 - **卡通圖（使用者 2026-11-09）**：嫌 SVG 太簡單，改用訂閱 sol 生卡通圖（實測中文與數字正確）。④ 已試做兩張：`img/pledge/comic.webp`（怎麼讀四格）、`img/pledge/step2.webp`（步驟 2），Opus 逐字核對無誤。流程見 FRAMEWORK 第 5 節 v5.2；之後每個工具派工前，Opus 先寫卡通提示請使用者生圖。
 - **⑨ 進度（2026-11-09，Opus 自己寫；文案即規格，寫任務書不划算）**：`js/core/cost.js`＋`tests/cost.test.js`（8 項，第 1 組對上研究 R2-02 原頁範例 584 元／100.587→101）、4 個術語（手續費、證交稅、損益兩平價、升降單位）、`js/pages/cost.js`＋`tools/cost.html`、步驟 3 SVG（free sol，已核對）。無頭 Chrome 實測範例與手動（0050 零股、2.8 折）數字全對。**卡通圖已到（使用者 2026-11-09）**：Opus 逐字核對兩張無誤，轉 `img/cost/comic.webp`、`img/cost/step2.webp`，卡片改 ready 並上線（tests 68、smoke 10 全過）。
-- **再下一步**：⑩ 股息與除權息。④（多檔持股型）、⑨（單筆交易型）兩個樣板齊了，⑩ 起 core 由 Opus 寫、頁面派 Codex 照樣板做。
+- **⑩ 進度（2026-11-09）**：Opus 寫好 `js/core/dividend.js`＋`tests/dividend.test.js`（5 項，範例 10,000 股／收盤 50／現金 2.4＋股票 0.5 → 實領 23,388、參考價 45.33、填息 10.29%）、4 個術語（除權息、殖利率、填息、二代健保補充保費）、卡通提示 `docs/figures/cartoon/dividend-01-領股利四格.md`→`out/dividend-comic.png`、`dividend-02-股利公告怎麼看.md`→`out/dividend-step2.png`；頁面任務書 `collab/to-codex.md`（⑩ v1）待 Codex 面板做。**待查證**：股票股利以面額計入補充保費的股利所得（研究原文沒寫，Opus 依健保署規則補）。
+  - 收尾：讀 `collab/from-codex.md`、看 diff、重跑 PROOF_CMD；核對兩張卡通圖、轉 `img/dividend/*.webp`；tools.js 的 dividend 改 ready；`npm test && npm run smoke`（tests 73、smoke 11）；push。
+- **再下一步**：⑦ 定期定額。
 
 **下次開工順序（Opus）**：
 1. 先跟使用者確認上面「目標樣子」，用 1–2 個畫面草圖（ASCII 或 artifact）對齊，**沒對齊不寫程式**。
@@ -69,7 +71,7 @@
 - 今天（2026-11-08）結束時：master＝origin/master，工作目錄乾淨；tests 51、smoke pages 9 全過；Codex 面板沒有進行中的任務（`collab/to-codex.md` 是已完成的 3a）。
 - **已部署**（2026-11-08，使用者同意公開）：https://tongxiaooppo-boop.github.io/zr-toolbox/ （GitHub `tongxiaooppo-boop/zr-toolbox`，public，Pages 來源 `master` 根目錄，MIT）。之後每個 Gate 驗收完 `git push` 就會更新（Pages 約 1 分鐘生效）。
 - **Codex 面板環境限制**（Gate 1 發現）：PowerShell 擋 `npm.ps1`，要用 `npm.cmd`；沙箱裡 `npm run smoke` 開不了無頭 Chrome 會卡住。任務書的 PROOF_CMD 改成：Codex 只跑 `npm.cmd test`，smoke 由 Opus 跑。
-- 驗收指令：`npm test && npm run smoke`（現行預期：tests 68 全過、smoke pages 10 全過）。
+- 驗收指令：`npm test && npm run smoke`（現行預期：tests 73 全過、smoke pages 10 全過；⑩ 上線後 smoke 11）。
 - 使用者 2026-11-08 補充：工具箱分四大類（正二教學／正二變種／正二槓桿／其他股票計算機，含融資等原 v2 項目），**每個工具都要圖文解說，圖由 sol 畫**（流程見 FRAMEWORK.md 第 5 節）。（「⑪ 擔任白話版、不另做」已被 Gate 7 推翻，見上方追加三件事。）
 
 ## 這是什麼
