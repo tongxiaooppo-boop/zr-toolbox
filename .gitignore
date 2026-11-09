@@ -3,3 +3,4 @@ node_modules/
 .DS_Store
 .smoke/
 docs/research/來源/原文/
+docs/figures/cartoon/out/*.png

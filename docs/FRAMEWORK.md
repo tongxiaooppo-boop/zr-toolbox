@@ -80,6 +80,7 @@ scripts/smoke.mjs          冒煙測試（無頭 Chrome，逐頁按「帶入範�
 ## 5. 圖解（使用者 2026-11-08：每個工具都要圖文解說，圖交給 sol 畫）
 
 - 每個工具頁（含辭典）至少一張圖解，放 `img/<工具id>/`；多個工具共用的圖（持股步驟、成本均價）放 `img/common/`；冒煙測試檢查圖存在且載入成功。
+- **卡通圖文解說（v5.2，使用者 2026-11-09）**：每個工具挑 1–3 張做卡通圖（四格漫畫放「怎麼讀」、步驟插圖放精靈步驟），由使用者用訂閱 sol 生圖（Codex 面板或 ChatGPT）。提示放 `docs/figures/cartoon/<id>-NN-名稱.md`，每張先貼共用的 `00-風格與角色.md`（角色小安／老師、畫風、禁止真實券商名稱）。原圖 PNG 存 `docs/figures/cartoon/out/`（gitignore），Opus **逐字核對圖上數字**後用 PIL 轉 800px 寬 WebP（quality 78，約 100–160KB）放 `img/<id>/`。精確對位的小圖（刻度、算式）仍用 SVG。
 - 精靈工具（v5.1）：每個輸入步驟一張步驟圖＋新手會卡的格子小圖；提示檔 `docs/figures/<id>-step<N>-*.md`、`<id>-help-*.md`，批次檔 `docs/figures/batch-*.json`（範例 `batch-v5-pledge.json`）。
 - 流程：寫繪圖提示 `docs/figures/<id>-<名>.md`（照抄 `trigger5050-split-5050.md` 的格式：要表達的事＋**寫死的數字**＋技術規格）→ 免費 sol 一次問答出 SVG（`ask-file.mts --sol --effort high`，可用 `batch` 一次多張）→ 存檔 → 無頭 Chrome 淺色／深色各截一張 → **Opus 對照 core 函式核對圖上每個數字**，錯就改提示重畫，最多 2 輪。
 - 圖上的數字必須和該頁「帶入範例」或 core 測試裡的數字一致，不准另編。

@@ -11,7 +11,7 @@
 //   showResult(box, ...nodes) / showError(box, message)
 //   metric(label, value, tone)              結果數字塊；tone: 'ok'|'bad'|'warn'|undefined
 //   disclaimer(kind)                        固定免責區；kind: 'general' | 'executable'
-//   figure({ src, alt, caption })           圖解（img/<工具id>/*.svg）；alt 必填，caption 一句白話
+//   figure({ src, alt, caption })           圖解（img/<工具id>/*.svg 或卡通 *.webp）；alt 必填，caption 一句白話；點圖開原圖
 //   lineChart({ series, label, yFormat, baseline, height })   折線圖（Gate 2 新增）
 //       series：[{ name, values:number[] }]，1–3 條，values 等長且 ≥ 2；顏色依序 accent／muted／warn
 //       label：給螢幕閱讀器的一句話（必填）；yFormat：y 軸刻度格式函式（預設 String）
@@ -103,7 +103,7 @@ export function showError(box, message) { box.replaceChildren(h('p', {}, message
 
 export function figure({ src, alt, caption }) {
   if (!alt) throw new Error('figure 需要 alt');
-  return h('figure', { class: 'figure' }, h('img', { src, alt, loading: 'lazy' }), caption ? h('figcaption', {}, caption) : null);
+  return h('figure', { class: 'figure' }, h('a', { href: src, target: '_blank', rel: 'noopener', title: '點圖看大圖' }, h('img', { src, alt, loading: 'lazy' })), caption ? h('figcaption', {}, caption) : null);
 }
 
 const SVG = 'http://www.w3.org/2000/svg';
