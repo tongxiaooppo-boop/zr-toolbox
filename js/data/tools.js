@@ -20,7 +20,7 @@ export const TOOLS = Object.freeze([
   { id: 'margin', no: '⑤', group: 'stock', title: '融資融券維持率', oneLine: '融資、融券、整戶維持率：跌多少被追繳、要補多少', href: 'tools/margin.html', gate: 4, status: 'ready', terms: ['margin-trading', 'short-selling', 'account-ratio', 'margin-call'] },
   { id: 'dca', no: '⑦', group: 'stock', title: '定期定額與年化報酬', oneLine: '每月扣款滾出多少、年化報酬怎麼算', href: 'tools/dca.html', gate: 4, status: 'ready', terms: ['dca', 'compound-interest', 'cagr'] },
   { id: 'cost', no: '⑨', group: 'stock', title: '買賣成本與損益', oneLine: '手續費、證交稅、零股、當沖，賣多少才不虧', href: 'tools/cost.html', gate: 4, status: 'ready', terms: ['broker-fee', 'transaction-tax', 'break-even-price', 'tick-size'] },
-  { id: 'avgcost', no: '⑮', group: 'stock', title: '平均成本與攤平', oneLine: '分好幾次買，平均每股多少錢？再買多少能攤到目標價', href: 'tools/avgcost.html', gate: 4, status: 'planned', terms: ['average-cost', 'averaging-down', 'broker-fee', 'break-even-price'] },
+  { id: 'avgcost', no: '⑮', group: 'stock', title: '平均成本與攤平', oneLine: '分好幾次買，平均每股多少錢？再買多少能攤到目標價', href: 'tools/avgcost.html', gate: 4, status: 'ready', terms: ['average-cost', 'averaging-down', 'broker-fee', 'break-even-price'] },
   { id: 'dividend', no: '⑩', group: 'stock', title: '股息與除權息', oneLine: '領多少股利、扣多少健保費、除息後股價、填息', href: 'tools/dividend.html', gate: 4, status: 'ready', terms: ['ex-dividend', 'dividend-yield', 'fill-dividend', 'nhi-premium'] },
   { id: 'retire', no: '⑲', group: 'stock', title: '退休提領', oneLine: '退休存的錢每月能領多少、要存多少才夠', href: 'tools/retire.html', gate: 4, status: 'ready', terms: ['four-percent-rule', 'inflation', 'real-value', 'compound-interest'] }
 ]);

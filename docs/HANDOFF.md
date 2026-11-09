@@ -45,8 +45,9 @@
 - **⑲ 進度（2026-11-09）**：Opus 寫好 `js/core/retire.js`（`retirePlan`、`annuityFactor`，移植 todo2 PRD 4.7 成長型年金；改正 todo2 在報酬＝通膨時少除 (1＋i)；勞保月退金改「其他每月固定收入」；加月初／月底領、4% 法則對照、想花多少→要存多少）＋`tests/retire.test.js`（7 項，todo2 三個鎖定值 49,768.29／39,875.32＋65,311.81／36,500.69 全對上，另用逐月加總現值獨立驗算）；⑦ `dcaPlan` 加「停扣後再滾」（`holdYears`／`holdReturn`，+1 項測試）；3 個術語（通膨、實質購買力、4% 法則）；tools.js 加 ⑲（status 先 `planned`，圖到了再改 ready）；卡通提示 `retire-01`→`out/retire-comic.png`、`retire-02`→`out/retire-step3.png`；任務書 `collab/to-codex.md`（⑲ v1：⑲ 頁面＋⑦ 加兩格與「帶到退休提領」連結＋生圖）待 Codex 面板做。tests 95 全過。
   - **已上線（2026-11-09）**：Codex 一輪過（頁面＋⑦ 修改＋兩張圖，各重生 1 次修標點／角色一致）；兩張圖逐字核對無誤，轉 `img/retire/*.webp`，卡片 ready。Opus 只改一處：⑦「停扣後再放幾年」、⑲「其他每月固定收入」兩個選填欄留白當 0（原本會跳錯）。無頭 Chrome 實測範例數字全對、⑦→⑲ 帶入 `?pool=2278229`、選填留白可算。tests 95、smoke 14 全過。
 - **⑮ 進度（2026-11-09）**：Opus 寫好 `js/core/avgcost.js`（`avgCostPlan`：逐筆手續費、整股／零股各自低消、含費／不含費均價、全部賣出的不虧價、現價損益、再買之後、攤平到目標均價要買幾股）＋`tests/avgcost.test.js`（6 項，R2-11 範例 95.00／95.14 對上；頁面範例手算：95.6→88.1 不虧價、虧損 −30,978→−31,914、攤平到 88 要 1,810 股）；`cost.js` 抽出 `breakEvenPrice`／`sellProceeds`（⑨ 測試不變全過）；`wizard.js` 加 `lotsInput`／`readLots`、`holdingsInput` 的 `side: 'lot'`（＋`css` 兩行）；2 個術語（平均成本、攤平）；tools.js 加 ⑮（`planned`）；卡通提示 `avgcost-01`→`out/avgcost-comic.png`、`avgcost-02`→`out/avgcost-step1.png`；任務書 `collab/to-codex.md`（⑮ v1，頁面＋生圖一份）待 Codex 面板做。tests 101、smoke 14 全過。框架升 v5.4。
+  - **已上線（2026-11-09）**：Codex 一輪過（頁面＋兩張圖，0 次重生），Opus 未修改；兩張圖逐字核對無誤，轉 `img/avgcost/*.webp`，卡片 ready。無頭 Chrome 實測範例 8 項與明細 3 列全對；手動（0050 零股 300 股、2.8 折、第 3 步留白）均價 150.06／+2,916／不虧價 150.3 與手算一致。tests 101、smoke 15 全過。小事：結果卡 tone `info` 目前沒有 CSS（顯示預設色），UI 統一美化時補。
 - **研究任務 O 已派（2026-11-09，使用者同意；⑮ 回報備份在 Opus scratchpad）**：朋友計算機出處＋同類比對（T06／T01／T03，4 組固定輸入，A＝130 萬、B＝192 萬檢查值），任務書 `collab/to-codex.md`（研究 O v1）。
-- **再下一步**：⑮ Codex 回報後驗收上線；之後「其餘 A 類改精靈」（先列清單給使用者看）。原文：⑮ 平均成本（加碼／攤平後均價），照 ⑦ 格式「core＋測試由 Opus 寫，頁面＋生圖一份任務書」。（原文：⑤ 融資融券（core 由 Opus 寫：研究 R2-06 RSI20 融資融券試算＋R2-01 證交所指南；併融券、整戶維持率；任務書照 ⑦ 格式「頁面＋生圖一份」）→ ⑲ 退休提領（使用者 2026-11-09 定：todo2 財務計算機只納入退休提領，⑦ 之後加「停扣後再滾」選項；詳見 [research/候選清單.md](research/候選清單.md) 末節）。）
+- **再下一步**：研究 O 回報後驗收；之後「其餘 A 類改精靈」（先列清單給使用者看）。原文：⑮ 平均成本（加碼／攤平後均價），照 ⑦ 格式「core＋測試由 Opus 寫，頁面＋生圖一份任務書」。（原文：⑤ 融資融券（core 由 Opus 寫：研究 R2-06 RSI20 融資融券試算＋R2-01 證交所指南；併融券、整戶維持率；任務書照 ⑦ 格式「頁面＋生圖一份」）→ ⑲ 退休提領（使用者 2026-11-09 定：todo2 財務計算機只納入退休提領，⑦ 之後加「停扣後再滾」選項；詳見 [research/候選清單.md](research/候選清單.md) 末節）。）
 
 **下次開工順序（Opus）**：
 1. 先跟使用者確認上面「目標樣子」，用 1–2 個畫面草圖（ASCII 或 artifact）對齊，**沒對齊不寫程式**。
@@ -82,7 +83,7 @@
 - 今天（2026-11-08）結束時：master＝origin/master，工作目錄乾淨；tests 51、smoke pages 9 全過；Codex 面板沒有進行中的任務（`collab/to-codex.md` 是已完成的 3a）。
 - **已部署**（2026-11-08，使用者同意公開）：https://tongxiaooppo-boop.github.io/zr-toolbox/ （GitHub `tongxiaooppo-boop/zr-toolbox`，public，Pages 來源 `master` 根目錄，MIT）。之後每個 Gate 驗收完 `git push` 就會更新（Pages 約 1 分鐘生效）。
 - **Codex 面板環境限制**（Gate 1 發現）：PowerShell 擋 `npm.ps1`，要用 `npm.cmd`；沙箱裡 `npm run smoke` 開不了無頭 Chrome 會卡住。任務書的 PROOF_CMD 改成：Codex 只跑 `npm.cmd test`，smoke 由 Opus 跑。
-- 驗收指令：`npm test && npm run smoke`（現行預期：tests 101 全過、smoke pages 14 全過）。
+- 驗收指令：`npm test && npm run smoke`（現行預期：tests 101 全過、smoke pages 15 全過）。
 - 使用者 2026-11-08 補充：工具箱分四大類（正二教學／正二變種／正二槓桿／其他股票計算機，含融資等原 v2 項目），**每個工具都要圖文解說，圖由 sol 畫**（流程見 FRAMEWORK.md 第 5 節）。（「⑪ 擔任白話版、不另做」已被 Gate 7 推翻，見上方追加三件事。）
 
 ## 這是什麼
