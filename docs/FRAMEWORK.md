@@ -1,6 +1,6 @@
 # zr-toolbox 框架（Gate 0 定稿）
 
-- 版本：**2026-11-09 v5.5**（v5.5＝⑪ 改精靈「正二要買多少」：新增 `balance.js`（朋友計算機線上版 `calc()` 照抄移植，`tests/balance.test.js` 直接跑線上版原始碼比對）、`wizard.js` 新增 `betaHoldingsInput`／`readBetaHoldings`；舊 `exposure.js`（`exposureNow`、`betaPlan`）保留不刪、新頁不用。v5.4＝⑮ `avgcost.js`；`cost.js` 抽出 `breakEvenPrice`、`sellProceeds`（⑨⑮ 共用，tradeCost 行為不變）；`wizard.js` 新增 `lotsInput`／`readLots`（同一檔分次買進）與 `holdingsInput` 的 `side: 'lot'`。v5.3＝⑲ `retire.js`、⑦ `dcaPlan` 加停扣後再滾（`holdYears`／`holdReturn`）；⑲ 頁面讀網址 `?pool=` 接 ⑦ 帶過來的金額，不改 wizard。v5.1＝v5.1＝說明版面：桌面左計算機、右說明欄，手機說明在下方；步驟可帶 `about`＋`figure`；格子用 `withHelp` 掛說明（可附小圖）；共用圖放 `img/common/`。v5＝逐步精靈：新增 `js/ui/wizard.js`、`js/net/price.js`、`js/core/holdings.js`、`js/data/stocks.js`、`pledgePlan`；④ 改為精靈樣板；FinMind 抓價與 token 存瀏覽器；第 4 節樣板改為 `js/pages/pledge.js`。v2＝加入圖解流程、首頁四大分組、Gate 4；v3＝`components.js` 新增 `lineChart`、Gate 2 拆 2a／2b、Codex 只跑單元測試；v4＝PWA 定案（network-first、不做新版提示）、頁殼加 manifest／`pwa.js`、Gate 3 拆 3a／3b、① 文案放 `js/data/calcGuide.js`）。改介面要改這份並升版，所有還寫舊行為的段落一起改。
+- 版本：**2026-11-09 v5.6**（v5.6＝② 改精靈：`trigger.js` 新增 `trigger5050Plan`；`price.js` 新增 `fetchCloseOn`（某日收盤價，沒開盤用前一交易日）、`priceUrl`／`fetchClose` 加選填 `endDate`。v5.5＝⑪ 改精靈「正二要買多少」：新增 `balance.js`（朋友計算機線上版 `calc()` 照抄移植，`tests/balance.test.js` 直接跑線上版原始碼比對）、`wizard.js` 新增 `betaHoldingsInput`／`readBetaHoldings`；舊 `exposure.js`（`exposureNow`、`betaPlan`）保留不刪、新頁不用。v5.4＝⑮ `avgcost.js`；`cost.js` 抽出 `breakEvenPrice`、`sellProceeds`（⑨⑮ 共用，tradeCost 行為不變）；`wizard.js` 新增 `lotsInput`／`readLots`（同一檔分次買進）與 `holdingsInput` 的 `side: 'lot'`。v5.3＝⑲ `retire.js`、⑦ `dcaPlan` 加停扣後再滾（`holdYears`／`holdReturn`）；⑲ 頁面讀網址 `?pool=` 接 ⑦ 帶過來的金額，不改 wizard。v5.1＝v5.1＝說明版面：桌面左計算機、右說明欄，手機說明在下方；步驟可帶 `about`＋`figure`；格子用 `withHelp` 掛說明（可附小圖）；共用圖放 `img/common/`。v5＝逐步精靈：新增 `js/ui/wizard.js`、`js/net/price.js`、`js/core/holdings.js`、`js/data/stocks.js`、`pledgePlan`；④ 改為精靈樣板；FinMind 抓價與 token 存瀏覽器；第 4 節樣板改為 `js/pages/pledge.js`。v2＝加入圖解流程、首頁四大分組、Gate 4；v3＝`components.js` 新增 `lineChart`、Gate 2 拆 2a／2b、Codex 只跑單元測試；v4＝PWA 定案（network-first、不做新版提示）、頁殼加 manifest／`pwa.js`、Gate 3 拆 3a／3b、① 文案放 `js/data/calcGuide.js`）。改介面要改這份並升版，所有還寫舊行為的段落一起改。
 - 依據：[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)、[HANDOFF.md](HANDOFF.md)。
 
 ## 1. 技術約定
@@ -10,7 +10,7 @@
 - 手機優先：390px 寬不得水平捲動（冒煙測試會檢查）。
 - 不用 `innerHTML` 組畫面，一律用 `js/ui/components.js` 的 `h()` 與元件（防 XSS、樣式一致）。
 - 不用 localStorage 存計算輸入。**例外（v5，使用者 2026-11-08）**：FinMind token 存在使用者自己的瀏覽器（`js/net/price.js` 的 `getToken`／`setToken`，key `zr-toolbox.finmind-token`），只送給 FinMind；讀寫一律 try/catch。
-- 抓股價只能經 `js/net/price.js` 的 `fetchClose`（沒 token 先匿名查，每小時 300 次；錯誤照 `finmindAction`）；頁面與 core 不准自己 `fetch`。
+- 抓股價只能經 `js/net/price.js` 的 `fetchClose`／`fetchCloseOn`（沒 token 先匿名查，每小時 300 次；錯誤照 `finmindAction`）；頁面與 core 不准自己 `fetch`。
 - PWA：network-first（有網路永遠拿新版，離線用最後看過的版本），所以**不做新版提示**、不用維護快取版本號（使用者 2026-11-08 授權 Opus 定）。
 
 ## 2. 目錄與模組邊界
@@ -29,7 +29,7 @@ js/pwa.js                  每頁載入，註冊 sw.js
 sw.js、manifest.webmanifest、icon-192.png、icon-512.png   PWA（根目錄）
 js/ui/components.js        共用 UI 元件（簽名見檔頭註解；Gate 0 定死，v3 加 lineChart）
 js/ui/wizard.js            精靈元件（v5）：wizard、holdingsInput／readHoldings、betaHoldingsInput／readBetaHoldings（v5.5）、lotsInput／readLots、tokenBox、explain、numberInput（簽名見檔頭註解，外包不得改）
-js/net/price.js            唯一連網模組（v5）：priceUrl、fetchClose（可注入 fetchFn 測試）、getToken／setToken
+js/net/price.js            唯一連網模組（v5）：priceUrl、fetchClose、fetchCloseOn（v5.6，可注入 fetchFn 測試）、getToken／setToken
 js/data/stocks.js          常見代號 → 名稱（只顯示用）
 js/pages/<id>.js           各工具頁：組欄位 → 呼叫 core → 顯示結果。不寫公式。
 tests/*.test.js            node:test 單元測試
@@ -43,7 +43,7 @@ scripts/smoke.mjs          冒煙測試（無頭 Chrome，逐頁按「帶入範�
 | 檔案 | 函式 | 用在 | 來源 |
 |---|---|---|---|
 | format.js | `parseNum(text)`、`fmtMoney(n)`、`fmtPct(n, digits=1)`、`fmtX(n, digits=2)` | 全部 | 新 |
-| trigger.js | `checkTrigger({basePrice, nowPrice, threshold=.5})` → `{change, hit, direction}`；`split5050({lever, cash})` → `{total, target, leverTrade, cashAfter}` | ② | 新（research.js 的頁內邏輯抽出） |
+| trigger.js | `checkTrigger({basePrice, nowPrice, threshold=.5})` → `{change, hit, direction}`；`split5050({lever, cash})` → `{total, target, leverTrade, cashAfter}`；`trigger5050Plan({shares, nowPrice, basePrice, cash, threshold=.5})`（v5.6）→ `{value, total, change, hit, direction, upPrice, downPrice, target, tradeShares, tradeAmount, leverAfter, cashAfter, newBase, nextUp, nextDown, suspectSplit}`；買進捨去、賣出四捨五入 | ② | 新（research.js 的頁內邏輯抽出） |
 | rebalance.js | `TEMPLATES`（7 個：5050、6040、532/442/433 股版、532/442 債版）；`dueDate(last, months)`；`rebalance({template, holdings[3], contribution, fee, months, last, asOf})` → `{total, targets, trades, due, ready, exposure}` | ③ | research-model 移植＋模板擴充 |
 | pledge.js | `pledgeStress(p, decline)`（欄位見檔頭；`remedy: 'repay'|'collateral'`；Gate 2b 加回傳 `nowRatio`、`callDrop`）；`pledgeTable(p, declines)` | ④ | research-model `stress()` 移植 |
 | decay.js | `simulateDaily(indexReturns, {leverage=2, dailyCost=0})` → `{indexPath, leveredPath, indexTotal, leveredTotal, naive, gap}`；`makeScenario('chop'|'trend', days, size)` | ⑥ | 新 |
