@@ -32,7 +32,7 @@
 - **UI 美化延後**（使用者 2026-11-09：「ui 有點醜，程式完成再調」）：計算機都做完後統一改 `css/app.css`＋`components.js`／`wizard.js`；調之前請使用者指出哪裡醜或給參考網站。圖的風格（SVG 內配色字型）若要改要早說，否則整批重畫。
 - ④ 樣板使用者 2026-11-09 已點頭。
 - **卡通圖（使用者 2026-11-09）**：嫌 SVG 太簡單，改用訂閱 sol 生卡通圖（實測中文與數字正確）。④ 已試做兩張：`img/pledge/comic.webp`（怎麼讀四格）、`img/pledge/step2.webp`（步驟 2），Opus 逐字核對無誤。流程見 FRAMEWORK 第 5 節 v5.2；之後每個工具派工前，Opus 先寫卡通提示請使用者生圖。
-- **⑨ 進度（2026-11-09，Opus 自己寫；文案即規格，寫任務書不划算）**：`js/core/cost.js`＋`tests/cost.test.js`（8 項，第 1 組對上研究 R2-02 原頁範例 584 元／100.587→101）、4 個術語（手續費、證交稅、損益兩平價、升降單位）、`js/pages/cost.js`＋`tools/cost.html`、步驟 3 SVG（free sol，已核對）。無頭 Chrome 實測範例與手動（0050 零股、2.8 折）數字全對。**卡片仍是 planned**：等使用者生卡通圖 `docs/figures/cartoon/cost-01-一買一賣四格.md`→`out/cost-comic.png`、`cost-02-費用誰收.md`→`out/cost-step2.png`，Opus 核對數字、轉 `img/cost/comic.webp`、`img/cost/step2.webp`，再把 tools.js 的 cost 改 ready、跑 smoke、push。
+- **⑨ 進度（2026-11-09，Opus 自己寫；文案即規格，寫任務書不划算）**：`js/core/cost.js`＋`tests/cost.test.js`（8 項，第 1 組對上研究 R2-02 原頁範例 584 元／100.587→101）、4 個術語（手續費、證交稅、損益兩平價、升降單位）、`js/pages/cost.js`＋`tools/cost.html`、步驟 3 SVG（free sol，已核對）。無頭 Chrome 實測範例與手動（0050 零股、2.8 折）數字全對。**卡通圖已到（使用者 2026-11-09）**：Opus 逐字核對兩張無誤，轉 `img/cost/comic.webp`、`img/cost/step2.webp`，卡片改 ready 並上線（tests 68、smoke 10 全過）。
 - **再下一步**：⑩ 股息與除權息。④（多檔持股型）、⑨（單筆交易型）兩個樣板齊了，⑩ 起 core 由 Opus 寫、頁面派 Codex 照樣板做。
 
 **下次開工順序（Opus）**：
@@ -69,7 +69,7 @@
 - 今天（2026-11-08）結束時：master＝origin/master，工作目錄乾淨；tests 51、smoke pages 9 全過；Codex 面板沒有進行中的任務（`collab/to-codex.md` 是已完成的 3a）。
 - **已部署**（2026-11-08，使用者同意公開）：https://tongxiaooppo-boop.github.io/zr-toolbox/ （GitHub `tongxiaooppo-boop/zr-toolbox`，public，Pages 來源 `master` 根目錄，MIT）。之後每個 Gate 驗收完 `git push` 就會更新（Pages 約 1 分鐘生效）。
 - **Codex 面板環境限制**（Gate 1 發現）：PowerShell 擋 `npm.ps1`，要用 `npm.cmd`；沙箱裡 `npm run smoke` 開不了無頭 Chrome 會卡住。任務書的 PROOF_CMD 改成：Codex 只跑 `npm.cmd test`，smoke 由 Opus 跑。
-- 驗收指令：`npm test && npm run smoke`（現行預期：tests 68 全過、smoke pages 9 全過；⑨ 上線後 smoke 10）。
+- 驗收指令：`npm test && npm run smoke`（現行預期：tests 68 全過、smoke pages 10 全過）。
 - 使用者 2026-11-08 補充：工具箱分四大類（正二教學／正二變種／正二槓桿／其他股票計算機，含融資等原 v2 項目），**每個工具都要圖文解說，圖由 sol 畫**（流程見 FRAMEWORK.md 第 5 節）。（「⑪ 擔任白話版、不另做」已被 Gate 7 推翻，見上方追加三件事。）
 
 ## 這是什麼
