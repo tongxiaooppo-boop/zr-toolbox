@@ -50,6 +50,25 @@ function sellSide(price, shares, opt, rate) {
   return { amount, fee, tax, net: amount - fee - tax };
 }
 
+/** 一次全部賣出 shares 股、證交稅率 rate：實拿 { amount, fee, tax, net }（v5.4 匯出給 ⑮ 用） */
+export function sellProceeds(price, shares, rate, { discount = 1, minFee = 20 } = {}) {
+  return sellSide(price, shares, { discount, minFee }, rate);
+}
+
+/**
+ * 損益兩平（v5.4 從 tradeCost 抽出，⑨⑮ 共用）：一次全部賣出、賣出實拿剛好等於 cost 的價格。
+ * @returns {{breakEven:number, breakEvenTick:number}} breakEven＝理論價；breakEvenTick＝實際掛得出去、而且不虧的最低價位
+ */
+export function breakEvenPrice(cost, shares, kind, rate, { discount = 1, minFee = 20 } = {}) {
+  const opt = { discount, minFee };
+  // 先用比例費率反解；若那個價位的手續費會被最低手續費墊高，改用最低手續費反解
+  let breakEven = cost / (shares * (1 - FEE_RATE * discount - rate));
+  if (floorYuan(breakEven * shares * FEE_RATE * discount) < minFee) breakEven = (cost + minFee) / (shares * (1 - rate));
+  let breakEvenTick = roundUpToTick(breakEven, kind);
+  while (sellSide(breakEvenTick, shares, opt, rate).net < cost) breakEvenTick = roundUpToTick(breakEvenTick + tickSize(breakEvenTick, kind) / 2, kind);
+  return { breakEven, breakEvenTick };
+}
+
 /**
  * @param {{kind:'stock'|'etf'|'bond-etf', dayTrade?:boolean, shares:number, buyPrice:number, sellPrice?:number,
  *          discount?:number, minFee?:number}} p  sellPrice 可省略（只算買進與損益兩平）
@@ -67,11 +86,7 @@ export function tradeCost(p) {
   if (!(minFee >= 0)) throw new Error('最低手續費不能是負的。');
   const opt = { discount, minFee };
   const buyAmount = buyPrice * shares, buyFee = brokerFee(buyAmount, opt), buyTotal = buyAmount + buyFee;
-  // 損益兩平：先用比例費率反解；若那個價位的手續費會被最低手續費墊高，改用最低手續費反解
-  let breakEven = buyTotal / (shares * (1 - FEE_RATE * discount - rate));
-  if (floorYuan(breakEven * shares * FEE_RATE * discount) < minFee) breakEven = (buyTotal + minFee) / (shares * (1 - rate));
-  let breakEvenTick = roundUpToTick(breakEven, kind);
-  while (sellSide(breakEvenTick, shares, opt, rate).net < buyTotal) breakEvenTick = roundUpToTick(breakEvenTick + tickSize(breakEvenTick, kind) / 2, kind);
+  const { breakEven, breakEvenTick } = breakEvenPrice(buyTotal, shares, kind, rate, opt);
   let sell = null, totalCost = buyFee, profit = NaN, profitPct = NaN;
   if (sellPrice != null && !Number.isNaN(sellPrice)) {
     if (!(sellPrice > 0)) throw new Error('賣出價要大於 0。');

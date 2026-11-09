@@ -16,7 +16,11 @@
 //   holdingsInput({ id, rows, max, label, side })  持股輸入：代號＋買入股數＋買入價＋現價（輸入代號自動抓 FinMind 收盤價），每格內建說明
 //     rows：[{ code, shares, buyPrice, nowPrice }]（數字可為 NaN／空），max 預設 5
 //     side：'long'（預設）｜'short'（⑤ 融券：欄名改「融券股數」「融券賣出價」，資料仍放 shares、buyPrice）
+//           ｜'lot'（v5.4，⑮ 單筆成交：欄名改「股數」「這一筆的成交價」，資料仍放 shares、buyPrice）
 //   readHoldings(id) → [{ code, shares, buyPrice, nowPrice }]   只讀畫面，檢查交給 core 的 holdingSummary
+//   lotsInput({ id, rows, max, label, first })  同一檔分次買進（v5.4，⑮）：每筆「股數＋買入價」，可「＋再加一筆」、刪掉
+//     rows：[{ shares, price }]；max 預設 10；first：第 1 筆的編號（預設 1，⑮ 第 1 筆在持股格裡時傳 2）
+//   readLots(id) → [{ shares, price }]       只讀畫面，檢查交給 core
 //   tokenBox()                               FinMind token（選填）：存在這台裝置、清除、連到申請教學
 //   explain({ label, value, tone, how, means, todo })   結果的一項：大數字＋▸怎麼來的／▸代表什麼／▸要做什麼
 import { h, infoChip, metric, figure } from './components.js';
@@ -157,7 +161,11 @@ const SIDE = {
   short: { shares: ['融券股數', '看券商 App 的「信用庫存」；1 張＝1000 股'], buy: ['融券賣出價', '信用庫存裡的「成交均價」'],
     help: { ...HOLDING_HELP,
       shares: { text: ['你融券賣出了幾「股」，不是幾張：1 張＝1000 股。', '看券商 App 的「信用庫存」或「融券庫存」。'] },
-      buy: { text: ['融券是借股票先賣掉，這裡填當初賣出的價格。', '分好幾次賣的，填信用庫存裡的「成交均價」。'] } } }
+      buy: { text: ['融券是借股票先賣掉，這裡填當初賣出的價格。', '分好幾次賣的，填信用庫存裡的「成交均價」。'] } } },
+  lot: { shares: ['股數', '這一次買了幾股；1 張＝1000 股'], buy: ['買入價', '這一筆的成交價'],
+    help: { ...HOLDING_HELP,
+      shares: { text: ['這一次買了幾「股」：1 張＝1000 股，零股照實際股數填。', '看券商 App 的「成交回報」或「對帳單」。'] },
+      buy: { text: ['這一次的成交價（每股多少錢），不是庫存裡的成本均價。', '平均成本就是這個工具要幫你算的。'] } } }
 };
 
 function holdingRow(r = {}, onRemove, side = 'long') {
@@ -229,4 +237,39 @@ export function tokenBox() {
       h('button', { type: 'button', class: 'secondary', onclick: () => { input.value = ''; setToken(''); msg.textContent = '已清除。'; } }, '清除')),
     msg,
     h('p', {}, h('a', { href: up + 'calc-guide.html#token' }, 'token 怎麼申請？')));
+}
+
+// ---------- 分次買進（v5.4） ----------
+const LOT_HELP = {
+  shares: { text: ['這一次買了幾「股」：1 張＝1000 股，零股照實際股數填。', '看券商 App 的「成交回報」或「對帳單」，一筆成交填一列。'] },
+  price: { text: ['這一次的成交價（每股多少錢），不是庫存裡的成本均價。', '同一天分好幾筆成交，手續費是分開收的，最好也分開填。'] }
+};
+function lotRow(r = {}, onRemove) {
+  const shares = h('input', { class: 'l-shares', type: 'text', inputmode: 'numeric', autocomplete: 'off', placeholder: '例：1000', value: show(r.shares), 'aria-label': '股數' });
+  const price = h('input', { class: 'l-price', type: 'text', inputmode: 'decimal', autocomplete: 'off', placeholder: '例：90', value: show(r.price), 'aria-label': '買入價' });
+  return h('div', { class: 'holding lot' },
+    h('strong', { class: 'lot-no' }),
+    h('div', { class: 'holding-grid' },
+      withHelp(h('div', { class: 'field' }, h('label', {}, '股數'), h('small', { class: 'plain-sub' }, '1 張＝1000 股'), shares), LOT_HELP.shares),
+      withHelp(h('div', { class: 'field' }, h('label', {}, '買入價（元）'), h('small', { class: 'plain-sub' }, '這一筆的成交價'), price), LOT_HELP.price)),
+    h('button', { type: 'button', class: 'link-button', onclick: onRemove }, '刪掉這筆'));
+}
+export function lotsInput({ id, rows = [{}], max = 10, label = '之後每一次買進', first = 1 }) {
+  const list = h('div', { class: 'holding-list' });
+  const add = h('button', { type: 'button', class: 'secondary' }, '＋ 再加一筆');
+  const box = h('div', { id, class: 'holdings lots' }, h('h3', {}, label), list, add);
+  const refresh = () => {
+    [...list.children].forEach((el, i) => { el.querySelector('.lot-no').textContent = `第 ${i + first} 筆`; });
+    add.hidden = list.children.length >= max;
+  };
+  const append = r => { const row = lotRow(r, () => { row.remove(); refresh(); }); list.append(row); refresh(); };
+  rows.forEach(append);
+  add.addEventListener('click', () => { append({}); list.lastElementChild.querySelector('.l-shares').focus(); });
+  return box;
+}
+export function readLots(id) {
+  return [...document.querySelectorAll(`#${id} .lot`)].map(el => ({
+    shares: parseNum(el.querySelector('.l-shares').value),
+    price: parseNum(el.querySelector('.l-price').value)
+  }));
 }

@@ -1,163 +1,163 @@
-# 任務 ⑲：退休提領精靈頁＋⑦ 加「停扣後再滾」＋兩張卡通圖（照 ⑦ 樣板）
+# 任務 ⑮：平均成本與攤平精靈頁＋兩張卡通圖（照 ⑨ 樣板）
 
-- 版本：2026-11-09 v1。上一份（⑤ v1）已完成，以本檔為準。
+- 版本：2026-11-09 v1。上一份（⑲ v1）已完成，以本檔為準。
 - 執行者：訂閱 Codex sol，直接在本 repo（`D:\ok\zr-toolbox`）工作。**不要上網。不要 commit**。做完寫 `collab/from-codex.md`（覆蓋舊的）就停。
 - 指令一律用 `npm.cmd`／`node`；**不要跑 `npm.cmd run smoke`**（Opus 會跑）。
 - 暫存檔、一次性腳本只准放本 repo 內，結束前刪掉。
 
 ## 0. 要讀的檔案（只准讀這些）
 
-- `js/pages/dca.js`（**樣板，結構照抄**；第 3 節也要改這個檔）
-- `tools/dca.html`（照抄成 `tools/retire.html`）
-- `js/core/retire.js`（公式與回傳欄位，只准呼叫、不准改）
-- `js/core/dca.js` 第 20–35 行（`dcaPlan` 新增的 `holdYears`、`holdReturn`、`heldValue`、`totalYears`）
-- `js/ui/wizard.js` 第 1–25 行（介面說明）
-- `docs/figures/cartoon/00-風格與角色.md`、`retire-01-一千萬領多久四格.md`、`retire-02-通膨要越領越多.md`（第 4 節生圖用）
+- `js/pages/cost.js`（**樣板，結構照抄**：KIND 選單、折扣、低消、`feeHow` 的寫法、結果 notes）
+- `tools/cost.html`（照抄成 `tools/avgcost.html`）
+- `js/core/avgcost.js`（公式與回傳欄位，只准呼叫、不准改）
+- `js/ui/wizard.js` 第 1–30 行（介面說明；本次新增 `holdingsInput` 的 `side: 'lot'` 與 `lotsInput`／`readLots`）
+- `docs/figures/cartoon/00-風格與角色.md`、`avgcost-01-越跌越買四格.md`、`avgcost-02-均價要照股數算.md`（第 3 節生圖用）
 
-## 1. 只准新增／修改這些檔（其他檔一律不改）
+## 1. 只准新增這些檔（其他檔一律不改）
 
-- 新增 `tools/retire.html`：照抄 `tools/dca.html`，title「退休提領｜正二工具箱」，script `../js/pages/retire.js`。
-- 新增 `js/pages/retire.js`：照第 2 節。
-- 修改 `js/pages/dca.js`：照第 3 節，只動寫到的地方。
-- 新增 `docs/figures/cartoon/out/retire-comic.png`、`docs/figures/cartoon/out/retire-step3.png`：照第 4 節。
+- `tools/avgcost.html`：照抄 `tools/cost.html`，title「平均成本與攤平｜正二工具箱」，script `../js/pages/avgcost.js`。
+- `js/pages/avgcost.js`：照第 2 節。
+- `docs/figures/cartoon/out/avgcost-comic.png`、`docs/figures/cartoon/out/avgcost-step1.png`：照第 3 節。
 - `collab/from-codex.md`。
 
 **不准改**：`js/core/`、`tests/`、`js/ui/`、`js/data/`、`css/`、`img/`。覺得要改就停下寫進回報。
 
-## 2. ⑲ 頁面規格（`js/pages/retire.js`）
+## 2. 頁面規格（`js/pages/avgcost.js`）
 
-`const tool = TOOLS.find(t => t.id === 'retire');`；`import { retirePlan } from '../core/retire.js'`；`h, toolHeader, selectField, disclaimer, figure` 從 components.js；`wizard, numberInput, explain, withHelp` 從 wizard.js；`parseNum, fmtMoney, fmtPct` 從 format.js。不用 holdings、tokenBox、STOCK_NAMES。
-共用小工具：`num`、`signed` 照 dca.js。
+`const tool = TOOLS.find(t => t.id === 'avgcost');`
+import：`h, toolHeader, selectField, disclaimer, figure` 從 components.js；`wizard, holdingsInput, readHoldings, lotsInput, readLots, tokenBox, numberInput, explain, withHelp` 從 wizard.js；`holdingSummary` 從 core/holdings.js；`avgCostPlan` 從 core/avgcost.js；`guessKind, tickSize, TAX_UNTIL` 從 core/cost.js；`parseNum, fmtMoney, fmtPct` 從 format.js；`STOCK_NAMES`、`TOOLS`。
+共用小工具照 cost.js：`num`、`yuan`、`signed`、`KIND`、`KIND_NAME`；另加 `const p2 = n => n.toFixed(2) + ' 元';`、`const sh = n => n.toLocaleString('en-US') + ' 股';`。
 
-從 ⑦ 帶過來的資產：
-```js
-const fromDca = parseNum(new URLSearchParams(location.search).get('pool') ?? '');
-```
+state 欄位：`first`（{code, shares, buyPrice, nowPrice}）、`more`（[{shares, price}]）、`kind`、`discount`（折，10＝不打折）、`minFeeBoard`、`minFeeOdd`、`addPrice`、`addShares`、`target`。
 
-### 步驟 1「退休時有多少錢」
-- hint：「把退休時預計有的錢加起來：存款、股票、ETF、勞退專戶……。」
-- about：「這一步是你要拿來每月領的那筆錢。」
-- 不放 figure。
+### 步驟 1「你買了哪些」
+- hint：「打開券商 App 的「成交回報」或「對帳單」，每一次買進填一筆。代號填好，現價會自動抓。」
+- about：「這一步算出平均每股花了多少錢。分次買的價格要照股數加權，不是直接平均。」
+- figure：`{ src: '../img/avgcost/step1.webp', alt: '插圖：平均成本，要照股數算。對帳單兩筆：100 元 × 1,000 股、90 元 × 3,000 股。直接平均（錯）：(100＋90)÷2＝95 元，沒管每次買了幾股。照股數加權（對）：100×1,000＝100,000，90×3,000＝270,000，370,000÷4,000 股＝92.5 元，買比較多的那次影響比較大。老師說：每一次成交填一筆，工具會幫你加上每筆的手續費。這張圖沒算手續費。' }`
 - body：
-  1. `fromDca > 0` 時先放 `h('p', { class: 'tip' }, \`已從定期定額帶入 ${fmtMoney(fromDca)}，可以自己改。\`)`；否則放 `h('p', { class: 'tip' }, '還不知道退休時會有多少？先用「定期定額與年化報酬」算，結果頁可以一鍵帶過來。')`。
-  2. `numberInput` id `pool`，label「退休時的資產」，plain「例：10000000（1,000 萬）」，value `s.pool ?? (fromDca > 0 ? Math.round(fromDca) : '')`，suffix「元」，help：「股票、ETF 用退休那時預計的市值。」「房子如果不打算賣，不要算進來。」
-- read：`s.pool = num('pool');`；不是 >0 →「退休時的資產要大於 0，例：10000000。」
+  1. `holdingsInput({ id: 'hold', rows: [s.first || {}], max: 1, label: '第 1 筆買進', side: 'lot' })`
+  2. `lotsInput({ id: 'lots', rows: s.more ?? [{}], first: 2, label: '之後每一次買進（只買過一次就按「刪掉這筆」）' })`
+  3. `tokenBox()`
+- read：
+  ```js
+  const [x] = readHoldings('hold');
+  holdingSummary([x]);
+  const more = readLots('lots').filter(l => !(Number.isNaN(l.shares) && Number.isNaN(l.price))); // 整列留白就略過
+  avgCostPlan({ kind: guessKind(x.code), lots: [{ shares: x.shares, price: x.buyPrice }, ...more] }); // 只拿來檢查，錯誤會寫「第 N 筆」
+  if (s.first?.code !== x.code) { s.kind = guessKind(x.code); s.addPrice = x.nowPrice; }
+  s.first = x; s.more = more;
+  ```
 
-### 步驟 2「要領多久、報酬多少」
-- hint：「年數想保守就多填幾年；報酬率是你自己設的假設，不是預測。」
-- about：「這一步決定錢要撐多久，以及還沒領的錢怎麼繼續滾。」
-- 不放 figure。
-- body：
-  1. `numberInput` id `years`，label「要領幾年」，plain「例：65 歲退休、領到 90 歲就填 25」，value `s.years ?? ''`，suffix「年」，help：「怕活得比預期久，就多填幾年。」
-  2. `numberInput` id `ret`，label「退休後年報酬」，termId `compound-interest`，plain「退休後通常放保守一點，例：3.5」，value `s.ret ?? ''`，suffix「%」，help：「這是假設每年都一樣的報酬；真實市場有漲有跌。」「退休後還要每月領錢，通常會多放債券或現金，報酬會比存錢時低。」
-  3. `selectField({ id: 'timing', label: '每月什麼時候領', options: [{ value: 'end', label: '月底領（多滾一個月）' }, { value: 'start', label: '月初領（先拿到錢）' }], value: s.timing || 'end' })`
-- read：`s.years = num('years'); s.ret = num('ret'); s.timing = document.getElementById('timing').value;`；years 不是 1–60 整數 →「要領幾年填 1–60 的整數，例：25。」；ret 不是 >−99 且 <99 →「退休後年報酬填 −99 到 99，例：3.5。」
+### 步驟 2「商品類型與券商費率」
+- hint、about：照 cost.js 第 2 步（about 改成：「這一步決定每一筆被收多少手續費，以及全部賣掉時的證交稅。」）。
+- figure：不放。
+- body（照 cost.js 寫法）：
+  1. `kind` 選單：照抄 cost.js（`KIND`、withHelp 第一段說明照抄），value `s.kind || 'stock'`。**不放當沖選單**。
+  2. `discount`：照抄 cost.js，value `s.discount ?? 10`。
+  3. `numberInput` id `minboard`，label「整股最低手續費」，plain「1000 股的倍數，常見 20 元」，value `s.minFeeBoard ?? 20`，suffix「元」，help：「這一筆的手續費算出來比這個少，就收這個數字。」「你的券商不同就改掉。」
+  4. `numberInput` id `minodd`，label「零股最低手續費」，plain「不滿 1000 股的倍數，常見 1 元」，value `s.minFeeOdd ?? 1`，suffix「元」，help：「零股交易的最低收費，各券商不同，常見 1 元。」「像 1500 股這種，實際下單會拆成 1 張＋500 股兩筆；這裡整筆當零股算。」
+- read：`s.kind`、`s.discount`、`s.minFeeBoard = num('minboard')`、`s.minFeeOdd = num('minodd')`；折扣檢查照 cost.js；任一低消不是 ≥0 →「最低手續費填 0 以上的數字，例：20。」
 
-### 步驟 3「通膨與留給家人」
-- hint：「通膨先用 2%；不打算留錢就填 0。」
-- about：「這一步決定每月領的錢要不要跟著物價調高，以及最後要留下多少。」
-- figure：`{ src: '../img/retire/step3.webp', alt: '卡通圖：為什麼每月要越領越多？每月固定領 49,768 元：第 1 年購物籃是滿的，第 25 年少了一截，錢一樣多，買得到的東西越來越少。每月跟著物價調高：第 1 年 39,875 元、第 25 年 65,312 元，購物籃一樣滿，買得到的東西一樣多。老師說：物價每年漲 2%，每月領的錢也要跟著調高。1,000 萬、年報酬 3.5%、領 25 年、最後剛好領完。通膨是你自己設的假設。' }`
+### 步驟 3「打算再買（選填）」
+- hint：「想知道再買會怎樣才填。只想看現在的平均成本，股數和目標均價都留白，直接看結果。」
+- about：「這一步試算「再買一筆」之後的平均成本，或想攤平到某個價格要再買多少股。」
+- figure：不放。
 - body：
-  1. `numberInput` id `inflation`，label「通膨率」，termId `inflation`，plain「每年物價漲幾 %，常用 2；不考慮填 0」，value `s.inflation ?? 2`，suffix「%」，help：「填 2：每月領的錢每個月調高一點，一年下來多 2%，買得到的東西不變。」「填 0：每月領一樣多，但後面幾年買得到的東西會變少。」
-  2. `numberInput` id `residual`，label「最後要留下多少」，plain「領完時還想剩的錢；不留填 0」，value `s.residual ?? 0`，suffix「元」，help：「例：想留 200 萬給家人或當醫療預備金。」「留越多，每月能領的越少。」
-- read：`s.inflation = num('inflation'); s.residual = num('residual');`；inflation 不是 0–20 →「通膨率填 0–20，例：2；不考慮通膨填 0。」；residual 不是 ≥0 →「要留下的錢不能是負的，不留填 0。」
-
-### 步驟 4「其他收入與每月花費」
-- hint：「勞保年金、租金這類每月固定進帳填在這裡；兩格都是選填。」
-- about：「這一步拿來比較：每月能領的錢＋其他收入，夠不夠你想花的。」
-- 不放 figure。
-- body：
-  1. `numberInput` id `other`，label「其他每月固定收入（選填）」，plain「勞保年金、租金……；沒有填 0」，value `s.other ?? 0`，suffix「元」，help：「勞保年金可以到勞保局網站試算。」「這筆錢這裡不跟著通膨調高。」
-  2. `numberInput` id `target`，label「退休第一年每月想花多少（選填）」，plain「用今天的物價想；留白就不比較」，value `s.target`，suffix「元」，help：「之後每年照通膨調高。」
-- read：`s.other = num('other'); s.target = num('target');`；other 不是 ≥0 →「其他每月收入不能是負的，沒有填 0。」；target 不是 NaN 且不是 >0 →「每月想花多少要大於 0；不比較就留白。」
+  1. `numberInput` id `addprice`，label「打算再買的價格」，termId `averaging-down`，plain「預設是現價，可以改成你想掛的價格」，value `s.addPrice`，suffix「元」，help：「跌了再買叫攤平，漲了再買叫加碼；兩種都可以算。」
+  2. `numberInput` id `addshares`，label「打算再買幾股（選填）」，plain「例：2000（2 張）；不試算就留白」，value `s.addShares`，suffix「股」，help：「填了會算出再買之後的平均成本、回本要漲多少。」
+  3. `numberInput` id `target`，label「想把平均成本降到多少（選填）」，termId `average-cost`，plain「例：88；不試算就留白」，value `s.target`，suffix「元」，help：「會算出用上面的價格要再買幾股，平均成本（含手續費）才會降到這裡。」「目標要低於現在的均價、又要高於再買的價格，不然算不出來。」
+- read：`s.addPrice = num('addprice'); s.addShares = num('addshares'); s.target = num('target');`；
+  addShares 或 target 至少一個有填時：addPrice 不是 >0 →「打算再買的價格要大於 0，例：80。」；addShares 有填但不是正整數 →「打算再買的股數要是正整數，例：2000；不試算就留白。」；target 有填但不是 >0 →「目標均價要大於 0，例：88；不試算就留白。」
 
 ### 結果
 ```js
-const r = retirePlan({ pool: s.pool, years: s.years, annualReturn: s.ret / 100, inflation: s.inflation / 100,
-  residual: s.residual, timing: s.timing, otherIncome: s.other, targetSpend: s.target });
+const want = Number.isFinite(s.addShares) || Number.isFinite(s.target);
+const lots = [{ shares: s.first.shares, price: s.first.buyPrice }, ...s.more];
+const r = avgCostPlan({ kind: s.kind, lots, nowPrice: s.first.nowPrice, discount: s.discount / 10,
+  minFeeBoard: s.minFeeBoard, minFeeOdd: s.minFeeOdd,
+  add: want ? { price: s.addPrice, shares: s.addShares } : null, targetAvg: want ? s.target : undefined });
+const b = r.before, a = r.after, now = s.first.nowPrice;
+const name = STOCK_NAMES[s.first.code] ? `${s.first.code} ${STOCK_NAMES[s.first.code]}` : s.first.code;
 ```
-依序 `explain`（金額 `fmtMoney`，百分比 `fmtPct(…, 2)`，月利率 `fmtPct(…, 3)`）：
+依序 `explain`：
 
-1. **每月可領（第 1 個月）** `fmtMoney(r.firstWithdraw)`，tone `ok`；how：「資產 {fmtMoney(s.pool)}」＋（residual>0 時「，扣掉要留下的 {fmtMoney(s.residual)} 折現到今天 {fmtMoney(r.pvResidual)}」）＋「；年報酬 {ret}% 換成每月 {fmtPct(r.monthlyRate, 3)}，領 {years} 年共 {r.months} 個月」＋（inflation>0 時「，每月照通膨 {inflation}% 調高」）＋「。」＋（timing start 時「月初領，少滾一個月。」否則「月底領。」）；means：inflation>0 →「之後每個月調高一點，買得到的東西一樣多。」否則 →「每月都一樣多。」；再加 residual>0 →「領完時剛好剩 {fmtMoney(s.residual)}。」否則「領完時剛好用完。」
-2. **最後一個月可領**（inflation>0 才顯示）`fmtMoney(r.lastWithdraw)`；how：「第 1 個月 {fmtMoney(r.firstWithdraw)} × (1＋每月 {fmtPct(r.monthlyGrowth, 3)})^{r.months − 1}。」；means：「金額變大，但換回第 1 年的物價，買得到的東西一樣多。」
-3. **每月總收入**（other>0 才顯示）`fmtMoney(r.firstTotal)`；how：「第 1 個月可領 {fmtMoney(r.firstWithdraw)} ＋ 其他固定收入 {fmtMoney(s.other)}。最後一個月是 {fmtMoney(r.lastTotal)}。」；means：inflation>0 →「其他收入這裡不跟著通膨調高：{fmtMoney(s.other)} 到最後一個月，只等於第 1 年的 {fmtMoney(r.lastOtherReal)}。」否則 →「沒有算通膨。」
-4. **第一年提領率** `fmtPct(r.withdrawRate, 2)`，tone：`r.withdrawRate > 0.04` → `warn`，否則 `ok`；how：「第 1 個月可領 {fmtMoney(r.firstWithdraw)} × 12 ÷ 資產 {fmtMoney(s.pool)}。4% 法則第一年每月約 {fmtMoney(r.rule4Monthly)}。」；means：>0.04 →「比 4% 高：真實報酬比你假設的低、或剛退休就遇到大跌，錢可能提早用完。」否則 →「沒超過 4%，比較保守。」；兩種都再加「4% 法則來自美國的歷史資料，是經驗法則，不是保證。」
-5. **想花的錢夠不夠**（target 有填才顯示）`signed(r.gap)`，tone：`r.gap >= 0` → `ok`，否則 `bad`；how：「第 1 個月總收入 {fmtMoney(r.firstTotal)} − 想花 {fmtMoney(s.target)}。」；means：gap<0 →「每月不夠 {fmtMoney(−r.gap)}。要剛好夠，退休時要有 {fmtMoney(r.needPool)}，還差 {fmtMoney(r.needPool − s.pool)}。」否則 →「夠用，每月多 {fmtMoney(r.gap)}。要剛好夠，退休時有 {fmtMoney(r.needPool)} 就可以。」；todo（gap<0 時才給）：「可以多存一點、晚幾年退休、少領幾年，或降低每月花費，改參數重算看看。」
-6. **總共領出** `fmtMoney(r.totalWithdrawn)`；how：「{r.months} 個月的提領加起來。」；means：`r.totalWithdrawn > s.pool` →「比退休時的資產多，因為還沒領的錢會繼續滾。」否則 →「比退休時的資產少，因為報酬是負的或要留下一筆錢。」
+1. **平均成本（含手續費）** `p2(b.avgWithFee)`；how：「{name}：」＋每一筆「第 {i} 筆 {price} 元 × {sh(shares)}＝{yuan(amount)}，手續費 {fee} 元」用「；」串起來＋「。合計 {yuan(b.totalCost)} ÷ {sh(b.shares)}。」；means：「不含手續費是 {p2(b.avgNoFee)}。券商 App 的「成本均價」有的含手續費、有的不含，對不上時先看是哪一種。」
+2. **現在賺賠** `${signed(b.gain)}（${fmtPct(b.gainPct, 2)}）`，tone `b.gain >= 0 ? 'ok' : 'bad'`；how：「全部按現價 {now} 元賣出：{yuan(b.sell.amount)} − 手續費 {b.sell.fee} 元 − 證交稅 {b.sell.tax} 元＝{yuan(b.sell.net)}；再減總成本 {yuan(b.totalCost)}。」；means：「跟券商的「預估損益」一樣，已經扣掉賣出的費用和稅。」
+3. **至少要賣在這裡才不虧** `${b.breakEvenTick} 元`，tone `warn`；how：「理論上賣 {b.breakEven.toFixed(3)} 元剛好拿回總成本；{KIND_NAME[s.kind]}在這個價位每檔跳 {tickSize(b.breakEven, s.kind)} 元，往上取到 {b.breakEvenTick} 元。」；means：`b.needRise > 0` →「比現價還要漲 {fmtPct(b.needRise, 2)}。」否則 →「現價已經比這裡高，現在全部賣掉就有賺。」
 
-接著 `h('h3', {}, '逐年變化')`，表格 `h('table', { class: 'trade-table' }, …)` 欄位：`年`、`那年每月領（第 1 個月，元）`、`那年共領（元）`、`年底剩下（元）`；每列 `r.rows`，數字 `Math.round(n).toLocaleString('en-US')`。
+`a`（有填再買股數）時接著：
 
-最後 `h('div', { class: 'note' }, …)` 固定四條：
-- 「這是固定報酬的情境；剛退休就遇到大跌，同樣平均報酬，錢會比這裡更早用完。」
-- 「其他每月收入這裡不跟著通膨調高；勞保年金實際有調整機制但不固定，這裡沒有模擬。」
-- 「沒算稅、健保費，也沒算醫療、長照這類一次性的大筆支出。」
-- 「每月賣股票、ETF 換現金時，還有手續費和證交稅，可以用「買賣成本與損益」算。」
+4. **再買之後的平均成本** `p2(a.avgWithFee)`；how：「原本總成本 {yuan(b.totalCost)} ＋ 這次 {s.addPrice} 元 × {sh(r.addLot.shares)}＝{yuan(r.addLot.amount)}、手續費 {r.addLot.fee} 元，合計 {yuan(a.totalCost)} ÷ {sh(a.shares)}。」；means：`a.avgWithFee < b.avgWithFee` →「平均成本從 {p2(b.avgWithFee)} 降到 {p2(a.avgWithFee)}。」否則 →「再買的價格比平均成本高（加碼），平均成本從 {p2(b.avgWithFee)} 變成 {p2(a.avgWithFee)}。」
+5. **回本要漲多少** `fmtPct(a.needRise, 2)`；how：「再買之後至少要賣 {a.breakEvenTick} 元才不虧（理論 {a.breakEven.toFixed(3)} 元），÷ 現價 {now} 元 − 1。」；means：「再買前要漲 {fmtPct(b.needRise, 2)}。」（needRise ≤ 0 時兩處都改寫「現價已經高於不虧價」）
+6. **再買之後賺賠** `${signed(a.gain)}（${fmtPct(a.gainPct, 2)}）`，tone `a.gain >= 0 ? 'ok' : 'bad'`；how：「全部按現價 {now} 元賣出實拿 {yuan(a.sell.net)} − 總成本 {yuan(a.totalCost)}。」；means：`b.gain < 0` →「再買前是 {signed(b.gain)}。攤平讓平均成本變低，但已經虧的錢不會消失。」否則 →「再買前是 {signed(b.gain)}。」
+7. **投入的錢** `fmtMoney(a.totalCost)`，tone `warn`；how：「原本 {yuan(b.totalCost)} ＋ 這次 {yuan(r.addLot.total)}。」；means：「是原本的 {(a.totalCost / b.totalCost).toFixed(2)} 倍。這一檔再跌 10%，帳面要多虧約 {fmtMoney(a.sell.amount * 0.1)}。」；todo：「再買之前先問自己：如果現在手上沒有這檔，還會用這個價格買嗎？」
+
+`r.target`（有填目標）時接著：
+
+8. **攤平到 {s.target} 元要再買**：
+   - `r.target.ok`：value `sh(r.target.shares)`，tone `info`；how：「用 {s.addPrice} 元買 {sh(r.target.shares)}：{yuan(r.target.lot.amount)}＋手續費 {r.target.lot.fee} 元＝{yuan(r.target.lot.total)}。({yuan(b.totalCost)}＋{yuan(r.target.lot.total)}) ÷ {sh(r.target.totalShares)}＝{r.target.avgWithFee.toFixed(2)} 元。」；means：「約 {(r.target.shares / 1000).toFixed(2)} 張，要再拿出 {fmtMoney(r.target.lot.total)}；少買 1 股，平均成本就會高於 {s.target} 元。」
+   - 否則：value「算不出來」，tone `warn`；means：`r.target.message`。
+
+接著 `h('h3', {}, '每一筆明細')`，表格 `h('table', { class: 'trade-table' }, …)`，欄位：`筆`、`股數`、`買入價（元）`、`股款（元）`、`手續費（元）`、`合計（元）`；每列 `b.lots`（筆＝1、2…），有 `r.addLot` 時最後加一列筆＝「再買」；數字 `Math.round(n).toLocaleString('en-US')`，買入價照原值。
+
+最後 `h('div', { class: 'note' }, …)`：
+- 固定：「每一筆買進的手續費分開算，各有最低收費；不是 1000 股倍數的整筆當零股算。」
+- 固定：「賣掉一部分、領現金股利或配股之後，各家券商 App 的成本均價調整方式不同，這裡沒有算。」
+- 固定：「損益和不虧價都假設一次全部賣出，已扣賣出手續費和證交稅。」
+- `s.kind === 'bond-etf'` 時：「債券 ETF 證交稅停徵到 {TAX_UNTIL['bond-etf']}，之後可能恢復課徵。」
+- `s.discount < 10` 時：照 cost.js 退佣那句。
 
 ### 範例與頁尾
 ```js
-const example = { pool: 10000000, years: 25, ret: 3.5, timing: 'end', inflation: 2, residual: 0, other: 15000, target: 50000 };
+const example = { first: { code: '2317', shares: 1000, buyPrice: 100, nowPrice: 80 }, more: [{ shares: 1000, price: 90 }],
+  kind: 'stock', discount: 10, minFeeBoard: 20, minFeeOdd: 1, addPrice: 80, addShares: 2000, target: 88 };
 ```
-範例結果必須是：每月可領 NT$ 39,875、最後一個月 NT$ 65,312、每月總收入 NT$ 54,875（最後一個月 NT$ 80,312、其他收入只等於 NT$ 9,158）、第一年提領率 4.79%（黃）、4% 法則每月約 NT$ 33,333、想花的錢夠不夠 +NT$ 4,875（綠，要剛好夠 NT$ 8,777,360）、總共領出 NT$ 15,466,611、表格 25 列（第 1 列 39,875／482,874／9,859,455）。
+範例結果必須是：平均成本 95.14 元（不含費 95.00 元）、現在賺賠 −NT$ 30,978（-16.28%，紅）、不虧價 95.6 元（理論 95.558，還要漲 19.50%）、再買之後 87.62 元、回本要漲 10.12%（再買前 19.50%）、再買之後賺賠 −NT$ 31,914（-9.11%）、投入的錢 NT$ 350,498（1.84 倍，再跌 10% 多虧約 NT$ 32,000）、攤平到 88 元要再買 1,810 股（NT$ 145,006，均價 88.00）、明細表 3 列（第 3 列「再買」2,000／80／160,000／228／160,228）。
 
-頁尾照 dca.js：`toolHeader(tool)`、`wizard({ steps, result, example })`、「怎麼讀」卡片放
-`figure({ src: '../img/retire/comic.webp', alt: '四格漫畫：一、小安抱著 1,000 萬的錢袋，問退休後每個月能領多少。二、不管物價：年報酬 3.5%、領 25 年、最後剛好領完，每月約 49,768 元。三、物價每年漲 2%：第 1 年每月 39,875 元、第 25 年每月 65,312 元，每月跟著物價調高；老師說一開始領少一點，換來每年買得到的東西一樣多。四、4% 法則每月約 33,333 元；老師的白板寫報酬是假設不是保證、剛退休就大跌要領少一點；這是規劃情境，不是預測。' })`
+頁尾照 cost.js：`toolHeader(tool)`、`wizard({ steps, result, example })`、「怎麼讀」卡片放
+`figure({ src: '../img/avgcost/comic.webp', alt: '四格漫畫：一、小安分兩次買同一檔股票：100 元買 1 張、90 元買 1 張，股款 190,000 元加手續費 270 元，共 190,270 元。二、老師說平均成本＝總花費 ÷ 總股數：190,270 ÷ 2,000 股約 95.14 元，每一筆的手續費都要算進去。三、跌到 80 元，小安再買 2 張攤平：平均成本 95.14 變 87.62 元，回本要漲 19.5% 變 10.1%。四、老師說虧的錢沒有消失：帳面虧損約 3.1 萬變約 3.2 萬，投入的錢約 19 萬變約 35 萬；先問如果手上沒有這檔，現在還會買嗎。手續費 0.1425%、不打折、最低 20 元；虧損已扣賣出手續費與證交稅 0.3%。' })`
 加三段 `h('p')`：
-- 「退休提領＝把退休時的錢分成很多個月領，還沒領的錢繼續放著滾。」
-- 「物價會漲，所以每月領的錢要跟著調高，買得到的東西才不會變少。」
-- 「4% 法則：第一年領資產的 4%，之後照通膨調高。它是經驗法則，不是保證。」
+- 「平均成本＝總花費 ÷ 總股數。分好幾次買，要照每次的股數加權，不是把價格直接平均。」
+- 「攤平：跌了再買，平均成本變低、回本要漲的幅度變小；但投入的錢變多，再跌會虧更多。」
+- 「「至少要賣在這裡才不虧」比平均成本高一點，因為賣出還要付手續費和證交稅。」
 
-最後 `disclaimer('general')`。`img/retire/` 的 webp 由 Opus 轉檔放入，你不要放、不要轉檔。
+最後 `disclaimer('general')`。`img/avgcost/` 的 webp 由 Opus 轉檔放入，你不要放、不要轉檔。
 
-## 3. ⑦ 修改（`js/pages/dca.js`）
-
-1. 第 3 步「假設報酬與年數」body 在 `timing` 的 selectField **後面**加兩格：
-   - `numberInput` id `holdyears`，label「停扣後再放幾年（選填）」，plain「例：45 歲停扣、65 歲退休就填 20；不放填 0」，value `s.holdYears ?? 0`，suffix「年」，help：「停止扣款後不賣，讓錢繼續滾到退休。」「這段期間不再扣款，也不收手續費。」
-   - `numberInput` id `holdret`，label「停扣後年報酬（選填）」，plain「快退休了常放保守一點，例：3；留白＝跟上面一樣」，value `s.holdRet`，suffix「%」，help：「留白就用上面的假設年報酬。」
-   read 補上：`s.holdYears = num('holdyears'); s.holdRet = num('holdret');`；holdYears 不是 0–60 整數 →「停扣後再放幾年填 0–60 的整數，不放填 0。」；holdRet 不是 NaN 且不是 >−99 且 <99 →「停扣後年報酬填 −99 到 99，例：3；跟上面一樣就留白。」
-2. `result` 的 `dcaPlan({...})` 加 `holdYears: s.holdYears || 0, holdReturn: Number.isFinite(s.holdRet) ? s.holdRet / 100 : s.ret / 100`。
-3. `explain` 第 1 項（{years} 年後的資產）**後面**，`s.holdYears > 0` 時插一項 **停扣後再放 {holdYears} 年** `fmtMoney(r.heldValue)`；how：「{years} 年後資產 {fmtMoney(r.finalValue)} × (1＋{停扣後年報酬}%)^{holdYears}，不再扣款、不收手續費。」（停扣後年報酬＝holdRet 有填用它，否則用 ret）；means：「從開始扣款算起，共 {r.totalYears} 年。」
-4. 「每月約可買」那項之後、`逐年變化` 標題之前，加：
-   ```js
-   h('p', { class: 'tip' }, h('a', { href: `retire.html?pool=${Math.round(r.heldValue)}` }, '把這筆錢帶到「退休提領」，算每月能領多少 →'))
-   ```
-5. `example` 加 `holdYears: 0, holdRet: NaN`（範例數字不變）。
-
-## 4. 生兩張卡通圖（用你的生圖功能）
+## 3. 生兩張卡通圖（用你的生圖功能）
 
 每張把 `00-風格與角色.md` 全文＋該張提示全文合在一起當生圖提示，生成直式 1024×1536 PNG：
 
 | 提示檔 | 存成 |
 |---|---|
-| `docs/figures/cartoon/retire-01-一千萬領多久四格.md` | `docs/figures/cartoon/out/retire-comic.png` |
-| `docs/figures/cartoon/retire-02-通膨要越領越多.md` | `docs/figures/cartoon/out/retire-step3.png` |
+| `docs/figures/cartoon/avgcost-01-越跌越買四格.md` | `docs/figures/cartoon/out/avgcost-comic.png` |
+| `docs/figures/cartoon/avgcost-02-均價要照股數算.md` | `docs/figures/cartoon/out/avgcost-step1.png` |
 
 - 生完自己看一遍：中文與數字要和提示一字不差；錯了重生該張，**每張最多重生 2 次**，仍有錯就留最後一張並在回報寫出哪裡錯。
 - 不能生圖就跳過本節，回報寫「無法生圖」，頁面照常交付。
 
-## 5. PROOF_CMD（必跑，貼結果）
+## 4. PROOF_CMD（必跑，貼結果）
 
 ```
 npm.cmd test
-node -e "import('./js/core/retire.js').then(m=>{const r=m.retirePlan({pool:1e7,years:25,annualReturn:0.035,inflation:0.02,otherIncome:15000,targetSpend:50000});console.log(Math.round(r.firstWithdraw),Math.round(r.lastWithdraw),Math.round(r.firstTotal),(r.withdrawRate*100).toFixed(2),Math.round(r.gap),Math.round(r.needPool),Math.round(r.totalWithdrawn),r.rows.length)})"
-node --check js/pages/retire.js
-node --check js/pages/dca.js
+node -e "import('./js/core/avgcost.js').then(m=>{const r=m.avgCostPlan({kind:'stock',lots:[{shares:1000,price:100},{shares:1000,price:90}],nowPrice:80,add:{price:80,shares:2000},targetAvg:88});console.log(r.before.avgWithFee.toFixed(2),r.before.gain,r.before.breakEvenTick,r.after.avgWithFee.toFixed(2),r.after.breakEvenTick,r.after.gain,r.after.totalCost,r.target.shares,r.target.lot.total)})"
+node --check js/pages/avgcost.js
 ```
-預期：`ℹ tests 95`、`ℹ pass 95`、`ℹ fail 0`；第二行 `39875 65312 54875 4.79 4875 8777360 15466611 25`；後兩行無輸出。
+預期：`ℹ tests 101`、`ℹ pass 101`、`ℹ fail 0`；第二行 `95.14 -30978 95.6 87.62 88.1 -31914 350498 1810 145006`；第三行無輸出。
 
-## 6. 回報 `collab/from-codex.md`（欄位寫死，不貼程式碼）
+## 5. 回報 `collab/from-codex.md`（欄位寫死，不貼程式碼）
 
 ```
 ## 完成項
 - …
-## 新增／修改檔案
+## 新增檔案
 - …
 ## PROOF_CMD 結果
 - npm.cmd test：tests __ pass __ fail __
 - 範例數字：__
 - node --check：__
 ## 卡通圖
-- retire-comic.png：已生成／重生 _ 次／自查有無錯字（列出）
-- retire-step3.png：同上
+- avgcost-comic.png：已生成／重生 _ 次／自查有無錯字（列出）
+- avgcost-step1.png：同上
 ## 偏離規格或自行決定的小事
 - （沒有寫「無」）
 ## 需要 Opus 決定的事
