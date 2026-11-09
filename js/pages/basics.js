@@ -57,10 +57,12 @@ document.getElementById('app').append(
     figure({ src: '../img/basics/comic.webp', alt: FIGURE_TEXT.comic, caption: '送出委託、成交、交割、進集保，是四件不同的事。' }),
     h('p', {}, '這頁收的是下單前最基本的詞：上市櫃、集保、交割、委託單、漲跌停、T+2……每個詞先講白話，再舉例、講常見誤解。'),
     h('p', {}, 'Beta、維持率、殖利率這類計算機會用到的詞，在 ', h('a', { href: 'glossary.html' }, '⑫ 術語辭典'), '。')),
-  h('section', { class: 'card article' }, q, count),
-  h('nav', { class: 'card article', 'aria-label': '本頁目錄' }, h('h2', {}, '這頁有什麼'),
-    h('ol', {}, BASIC_SECTIONS.map(s => h('li', {}, h('a', { href: '#' + s.id }, s.title))), h('li', {}, h('a', { href: '#limits' }, '這頁的限制')))),
-  sections.map(s => s.el),
+  h('nav', { class: 'card article term-index', 'aria-label': '術語索引' }, h('h2', {}, '48 個詞，點了直接跳過去'),
+    BASIC_SECTIONS.map(s => [h('h3', {}, h('a', { href: '#' + s.id }, s.title)),
+      h('div', { class: 'shortcuts' }, s.terms.map(t => h('a', { href: '#' + t.id }, t.term)))]),
+    h('p', {}, h('a', { href: '#limits' }, '這頁的限制'))),
+  h('section', { class: 'card article' }, h('h2', {}, '或輸入關鍵字找'), q, count),
+  ...sections.map(s => s.el),
   h('section', { class: 'card article', id: 'limits' }, h('h2', {}, '這頁的限制'), BASIC_LIMITS.map(t => h('p', {}, t))),
   references(BASIC_REFS), disclaimer('general'));
 q.addEventListener('input', filter);

@@ -149,10 +149,18 @@ export function lineChart({ series, label, yFormat = String, baseline, height = 
 const GENERAL = '僅供試算與教學，不構成投資建議。畫面上的預設數字是範例，不是建議值。';
 export function disclaimer(kind = 'general') {
   if (kind === 'executable') return h('aside', { class: 'disclaimer' },
+    pageFoot(),
     h('p', {}, '「可以執行」只代表資金夠，不代表下跌時撐得住。'),
     h('p', {}, h('a', { href: rootPath() + 'tools/pledge.html' }, '用壓力測試看看跌 10–50% 會怎樣 →')),
     h('p', {}, GENERAL));
-  return h('aside', { class: 'disclaimer' }, h('p', {}, GENERAL));
+  return h('aside', { class: 'disclaimer' }, pageFoot(), h('p', {}, GENERAL));
+}
+
+// 頁底導覽（使用者 2026-11-09）：每個工具頁最下面都有「回到頂部」「回工具箱」。首頁不放回工具箱。
+function pageFoot() {
+  return h('nav', { class: 'page-foot', 'aria-label': '頁底導覽' },
+    h('a', { href: '#', onclick: e => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); } }, '↑ 回到頂部'),
+    rootPath() ? h('a', { href: rootPath() + 'index.html' }, '← 回工具箱') : null);
 }
 
 // 首頁在根目錄、工具頁在 tools/，連結用相對路徑才能部署在任何子路徑（GitHub Pages 的 /repo/）。

@@ -49,6 +49,7 @@ async function check(name, url, fn) {
   if (errors.length) problems.push('JS 例外：' + errors.join(' | '));
   const scroll = await ev('document.documentElement.scrollWidth > window.innerWidth');
   if (scroll) problems.push('手機寬度出現水平捲動');
+  if (await ev('document.body.innerText.includes("[object ")')) problems.push('頁面出現「[object …]」：陣列或物件被當文字印出（append 要展開陣列）');
   results.push({ name, ok: problems.length === 0, problems });
 }
 await check('home', 'index.html', async () => {

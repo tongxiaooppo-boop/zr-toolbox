@@ -202,3 +202,7 @@ main:has(.wizard-layout){max-width:1120px}
 .article .compare-wrap caption{text-align:left;padding:12px;color:var(--text)}
 .article .compare-wrap th[scope=row]{background:var(--card);color:var(--text)}
 
+
+/* 頁底導覽：回到頂部、回工具箱（2026-11-09） */
+.page-foot{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 14px}
+.page-foot a{background:var(--card);color:var(--text);border:var(--bw) solid var(--line);border-radius:var(--r-in);box-shadow:var(--shadow-sm);padding:8px 14px;text-decoration:none;font-size:15px;font-weight:700}

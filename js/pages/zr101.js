@@ -29,7 +29,7 @@ document.getElementById('app').append(
     h('p', {}, '這頁從頭講一遍：正二是什麼、為什麼放久了不是整段 2 倍、常見的幾種用法，以及一份常被引用的 50/50 回測結果。每一節都接到可以算你自己數字的工具。')),
   h('nav', { class: 'card article', 'aria-label': '本頁目錄' }, h('h2', {}, '這頁有什麼'),
     h('ol', {}, ZR_SECTIONS.map(s => h('li', {}, h('a', { href: '#' + s.id }, s.title))), h('li', {}, h('a', { href: '#limits' }, '這頁的限制')))),
-  ZR_SECTIONS.map(s => h('section', { class: 'card article', id: s.id }, h('h2', {}, s.title),
+  ...ZR_SECTIONS.map(s => h('section', { class: 'card article', id: s.id }, h('h2', {}, s.title),
     s.id === 'dajen' ? h('p', { class: 'muted' }, h('strong', {}, '原作者回測，工具箱未重算')) : null,
     s.id === 'ways' ? figure({ src: '../img/zr101/map.webp', alt: FIGURE_TEXT.map, caption: '先看資金如何分配，再看何時配回與借款風險。' }) : null,
     h('p', {}, s.intro),
