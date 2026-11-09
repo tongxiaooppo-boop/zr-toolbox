@@ -17,7 +17,7 @@ export const TOOLS = Object.freeze([
   { id: 'exposure', no: '⑪', group: 'leverage', title: '我現在等於幾倍大盤', oneLine: '持股＋正二＋借款的整體曝險倍數', href: 'tools/exposure.html', gate: 2, status: 'ready', terms: ['exposure', 'beta', 'net-assets', 'basis', 'leverage-ratio'] },
   { id: 'pledge', no: '④', group: 'leverage', title: '質押壓力測試', oneLine: '大盤跌多少會被追繳？還款與補擔保分開算', href: 'tools/pledge.html', gate: 2, status: 'ready', terms: ['pledge', 'maintenance-ratio', 'margin-call'] },
   { id: 'drawdown', no: '⑧', group: 'stock', title: '跌多少要漲多少才回本', oneLine: '最大回撤與回本所需漲幅', href: 'tools/drawdown.html', gate: 2, status: 'ready', terms: ['drawdown', 'recovery-gain'] },
-  { id: 'margin', no: '⑤', group: 'stock', title: '融資融券維持率', oneLine: '融資、融券、整戶維持率：跌多少被追繳、要補多少', href: 'tools/margin.html', gate: 4, status: 'planned', terms: ['margin-trading', 'short-selling', 'account-ratio', 'margin-call'] },
+  { id: 'margin', no: '⑤', group: 'stock', title: '融資融券維持率', oneLine: '融資、融券、整戶維持率：跌多少被追繳、要補多少', href: 'tools/margin.html', gate: 4, status: 'ready', terms: ['margin-trading', 'short-selling', 'account-ratio', 'margin-call'] },
   { id: 'dca', no: '⑦', group: 'stock', title: '定期定額與年化報酬', oneLine: '每月扣款滾出多少、年化報酬怎麼算', href: 'tools/dca.html', gate: 4, status: 'ready', terms: ['dca', 'compound-interest', 'cagr'] },
   { id: 'cost', no: '⑨', group: 'stock', title: '買賣成本與損益', oneLine: '手續費、證交稅、零股、當沖，賣多少才不虧', href: 'tools/cost.html', gate: 4, status: 'ready', terms: ['broker-fee', 'transaction-tax', 'break-even-price', 'tick-size'] },
   { id: 'dividend', no: '⑩', group: 'stock', title: '股息與除權息', oneLine: '領多少股利、扣多少健保費、除息後股價、填息', href: 'tools/dividend.html', gate: 4, status: 'ready', terms: ['ex-dividend', 'dividend-yield', 'fill-dividend', 'nhi-premium'] }
