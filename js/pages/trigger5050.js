@@ -3,7 +3,8 @@ import { h, toolHeader, selectField, disclaimer, figure } from '../ui/components
 import { wizard, holdingsInput, readHoldings, tokenBox, numberInput, explain, withHelp } from '../ui/wizard.js';
 import { holdingSummary } from '../core/holdings.js';
 import { trigger5050Plan } from '../core/trigger.js';
-import { fetchCloseOn, getToken, setToken } from '../net/price.js';
+import { fetchCloseOn, fetchEvents, getToken, setToken } from '../net/price.js';
+import { normalizeEvents, adjustBasePrice } from '../core/events.js';
 import { parseNum, fmtMoney, fmtPct } from '../core/format.js';
 import { STOCK_NAMES } from '../data/stocks.js';
 import { TOOLS } from '../data/tools.js';
@@ -17,7 +18,7 @@ const link = (href, text) => h('a', { href }, text);
 const steps = [
   {
     title: '你的正二',
-    hint: '只填這個 50/50 策略裡的那一檔正二。打開券商 App 的庫存，照下圖找數字。',
+    hint: '只填這個 50/50 策略裡的那一檔正二。股數和成本均價照券商 App「現在」顯示的填（分割、除權後券商會自動換算）。',
     about: '這一步記下正二現在值多少。現價填好代號會自動抓最近收盤價。',
     figure: { src: '../img/common/step-holdings.svg', alt: '券商 App 庫存畫面示意：代號 0050 元大台灣50、股數 10,000、成本均價 80.00、現價 100.00。股票代號填 0050，買入股數填 10000（1 張＝1000 股），買入價填 80；現價會自動抓，不用填。' },
     body: s => [holdingsInput({ id: 'lever', rows: s.lever || [{}], max: 1, label: '你的正二' }), tokenBox()],
@@ -33,7 +34,7 @@ const steps = [
         { value: 'buy', label: '從沒配回過（用買入價）' },
         { value: 'date', label: '配回過，我記得日期' },
         { value: 'manual', label: '我有記下當時的價格' }
-      ], value: s.baseFrom || 'buy' }), { text: ['從沒配回過：基準價就是你當初的買入價。', '配回過：填配回那天的日期，工具抓那天的收盤價當基準價。', '有記下價格：直接在下面填。'] });
+      ], value: s.baseFrom || 'buy' }), { text: ['從沒配回過：基準價就是你當初的買入價。', '配回過：填配回那天的日期，工具抓那天的收盤價當基準價。', '有記下價格：直接在下面填。如果之後有分割或除權息，要填換算後的價格；不確定就改選「我記得日期」讓工具換算。'] });
       const maxDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
       const date = h('input', { id: 'baseDate', type: 'date', value: s.baseDate || '', max: maxDate });
       const status = h('small', { id: 'date-status', class: 'holding-status', 'aria-live': 'polite' });
@@ -49,14 +50,34 @@ const steps = [
       const lookup = async () => {
         const request = ++seq, requestedDate = date.value;
         if (from.value !== 'date' || !requestedDate) { status.textContent = ''; return; }
+        s.baseRaw = NaN; s.baseEvents = [];
         status.textContent = '查詢中…';
         try {
           const r = await fetchCloseOn(s.lever[0].code, requestedDate, { token: getToken() });
           if (request !== seq || from.value !== 'date' || !date.isConnected) return;
           if (r.clearToken) setToken('');
           if (r.ok) {
-            base.value = r.close;
-            status.textContent = `抓到 ${r.date} 的收盤價 ${r.close} 元。` + (r.date !== requestedDate ? `（${requestedDate} 沒開盤，用前一個交易日）` : '');
+            status.textContent = `抓到 ${r.date} 的收盤價 ${r.close} 元，查詢之後的股票事件中…`;
+            const ev = await fetchEvents(s.lever[0].code, r.date, { token: getToken() });
+            if (request !== seq || from.value !== 'date' || !date.isConnected) return;
+            if (ev.clearToken) setToken('');
+            if (!ev.ok) {
+              base.value = '';
+              s.baseRaw = NaN; s.baseEvents = [];
+              status.textContent = `抓到 ${r.date} 的收盤價 ${r.close} 元，但查不到之後的分割、除權息資料（${ev.message}），沒辦法換算。請改選「從沒配回過」用券商 App 的成本均價，或自己填換算後的價格。`;
+              return;
+            }
+            const list = normalizeEvents(ev.raw);
+            const a = adjustBasePrice(r.close, r.date, list);
+            base.value = +a.adjusted.toFixed(4);
+            s.baseRaw = r.close; s.baseRawDate = r.date; s.baseEvents = a.applied; s.baseAdjusted = +a.adjusted.toFixed(4);
+            const fallback = r.date !== requestedDate ? `（${requestedDate} 沒開盤，用前一個交易日）` : '';
+            if (a.applied.length === 0) {
+              status.replaceChildren(`抓到 ${r.date} 的收盤價 ${r.close} 元；之後沒有分割、除權息。${fallback}`);
+            } else {
+              status.replaceChildren(`抓到 ${r.date} 的收盤價 ${r.close} 元；之後有 ${a.applied.length} 個股票事件，已換算成現在的基準 ${price(a.adjusted)}：`,
+                h('ul', {}, a.applied.map(e => h('li', {}, `${e.date} ${e.note}`))), fallback);
+            }
           } else status.textContent = r.message;
         } catch {
           if (request === seq && from.value === 'date' && date.isConnected) status.textContent = '查詢失敗，請稍後再試，或直接手動填基準價。';
@@ -66,11 +87,12 @@ const steps = [
         ++seq;
         status.textContent = '';
         dateField.hidden = from.value !== 'date';
+        if (from.value !== 'date') { s.baseEvents = []; s.baseRaw = NaN; }
         if (from.value === 'buy') base.value = s.lever[0].buyPrice;
         if (from.value === 'date' && date.value) lookup();
       });
       date.addEventListener('change', lookup);
-      base.addEventListener('input', () => { ++seq; status.textContent = ''; });
+      base.addEventListener('input', () => { ++seq; status.textContent = ''; s.baseEvents = []; s.baseRaw = NaN; });
       dateField.hidden = from.value !== 'date';
       if (from.value === 'buy') base.value = s.lever[0].buyPrice; // 「用買入價」一律跟第 1 步的買入價同步
       return [sourceField, dateField, baseField];
@@ -79,6 +101,7 @@ const steps = [
       s.baseFrom = document.getElementById('from').value;
       s.baseDate = document.getElementById('baseDate').value;
       s.basePrice = num('basePrice');
+      s.baseEvents ??= [];
       if (!(s.basePrice > 0)) throw new Error(s.baseFrom === 'date' ? '基準價還沒抓到：確認日期，或直接手動填基準價。' : '基準價要大於 0。');
     }
   },
@@ -102,6 +125,12 @@ function result(s) {
   const L = s.lever[0], t = Number.isNaN(s.threshold) ? 50 : s.threshold;
   const r = trigger5050Plan({ shares: L.shares, nowPrice: L.nowPrice, basePrice: s.basePrice, cash: s.cash, threshold: t / 100 });
   const name = named(L.code);
+  const adjustment = s.baseFrom === 'date' && s.baseEvents?.length && s.basePrice === s.baseAdjusted
+    ? [explain({ label: '基準價已換算股票事件', value: price(s.basePrice), tone: 'info',
+      how: `${s.baseRawDate} 收盤 ${price(s.baseRaw)}` + s.baseEvents.map(e => ` × ${e.after} ÷ ${e.before}（${e.date} ${e.note}）`).join('') + `＝${price(s.basePrice)}。`,
+      means: '分割、除權息之後股價會變，不換算就會把它誤當成漲跌。換算後才能跟現價比。',
+      todo: s.baseEvents.some(e => e.kind === 'dividend') ? '領到的現金股利，記得加進第 3 步的策略現金。' : null })]
+    : [];
   const change = explain({ label: `${name} 相對基準價`, value: (r.change > 0 ? '+' : '') + fmtPct(r.change), tone: r.hit ? 'warn' : 'info',
       how: `現價 ${price(L.nowPrice)} ÷ 基準價 ${price(s.basePrice)} − 1。`,
       means: '漲跌是跟上次配回時比，不是跟買入價比。' });
@@ -109,18 +138,18 @@ function result(s) {
     h('p', {}, '只算這個策略裡的正二和現金；沒算手續費和稅。'),
     h('p', {}, '做法出自大仁「50 正 2 槓桿 ETF 搭配再平衡」：一半正二、一半現金，正二相對基準價漲跌 50% 就配回。'));
   // 疑似分割：漲跌幅不可信，不給「要買賣幾股」，只請使用者先換算基準價（Opus 2026-11-09：實測 00631L 分割前後 375.25→26.3）
-  if (r.suspectSplit) return [change, explain({ label: '價格差很多倍', value: '先確認基準價', tone: 'bad',
+  if (r.suspectSplit) return [...adjustment, change, explain({ label: '價格差很多倍', value: '先確認基準價', tone: 'bad',
     how: `現價 ${price(L.nowPrice)} 和基準價 ${price(s.basePrice)} 差 5 倍以上。`,
     means: '中間可能有分割或合併（例：1 股拆成好幾股）。工具抓的是當天的原始價格，沒有換算，所以上面的漲跌幅不能用，也先不算要買賣幾股。',
-    todo: '到第 2 步改成換算後的基準價：分割前的價格 ÷ 分割比例（例：1 股拆成 10 股就除以 10）。比例看發行投信的公告。' }), note];
-  const out = [change,
+    todo: ['① 打開券商 App，照現在的股數和成本均價重填第 1 步，第 2 步選「從沒配回過」；', '② 第 2 步選「我記得日期」，工具會自動換算分割和除權息。'] }), note];
+  const out = [...adjustment, change,
     explain({ label: '到門檻了嗎', value: r.hit ? (r.direction === 'up' ? '漲到了，要配回' : '跌到了，要配回') : '還沒，不用動', tone: r.hit ? 'warn' : 'ok',
       how: `門檻 ${t}%：漲到 ${price(r.upPrice)}（${price(s.basePrice)} ×（1＋${t}%））或跌到 ${price(r.downPrice)}（${price(s.basePrice)} ×（1−${t}%））才要動。`,
       means: r.hit ? '用現在的總額配回正二、現金各半。' : `價格在 ${price(r.downPrice)}～${price(r.upPrice)} 之間都不用動，下次再來看。` })
   ];
   if (r.hit) out.push(explain({ label: r.tradeShares >= 0 ? '要買進' : '要賣出', value: `${Math.abs(r.tradeShares).toLocaleString('en-US')} 股`, tone: 'warn',
     how: `正二 ${L.shares.toLocaleString('en-US')} 股 × ${price(L.nowPrice)}＝${fmtMoney(r.value)}，加現金 ${fmtMoney(s.cash)}＝${fmtMoney(r.total)}，各一半＝${fmtMoney(r.target)}；（${fmtMoney(r.target)} − ${fmtMoney(r.value)}）÷ ${price(L.nowPrice)}，${r.tradeShares >= 0 ? '無條件捨去' : '四捨五入'}。`,
-    means: `約 ${fmtMoney(Math.abs(r.tradeAmount))}。做完後正二約 ${fmtMoney(r.leverAfter)}、現金約 ${fmtMoney(r.cashAfter)}。` + (r.tradeShares >= 0 ? '跌到時補進去的錢，如果之後繼續跌，一樣會跟著跌。' : ''),
+    means: `約 ${fmtMoney(Math.abs(r.tradeAmount))}。做完後正二約 ${fmtMoney(r.leverAfter)}、現金約 ${fmtMoney(r.cashAfter)}。` + (r.tradeShares >= 0 ? '買進去的錢，如果之後下跌，一樣會跟著跌。' : ''),
     todo: ['下單前用 ', link('cost.html', '⑨ 買賣成本與損益'), ' 算手續費和稅；這裡沒算。'] }));
   out.push(explain({ label: '下次的觸發價', value: `${price(r.nextDown)}／${price(r.nextUp)}`, tone: 'info',
     how: r.hit ? `配回後基準價換成今天的 ${price(r.newBase)}；× (1 ± ${t}%)。` : `基準價還是 ${price(r.newBase)}；× (1 ± ${t}%)。`,
