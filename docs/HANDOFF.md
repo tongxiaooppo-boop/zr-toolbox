@@ -84,7 +84,10 @@
   - **科普二任務書（2026-11-09，Opus）**：`tools.js` 加 ㉓ `basics`（科普組）、㉔ `zr101`（放「正二教學」組第一張，`planned`）；Opus 寫 [research/R6-正二教學素材.md](research/R6-正二教學素材.md)（由 zr-calc 正二策略重新調查第一、二、五節＋交接檔大仁數字重寫，數字手算核對）；驗收 `scripts/check-kepu2.mjs`（R5 48 術語一字不差全收、ZR_MIXES／DAJEN／ZR_WAYS／ZR_STEPS 逐字比對、百分比與網址溯源、頁面元件、PNG、⑳ leveraged 節加 ㉔ 連結）；卡通提示四張 `basics-01/02`、`zr101-01/02`（→ `out/<id>-comic.png`、`<id>-map.png`）；任務書 `collab/to-codex.md`（科普二 v1）待 Codex 面板做。Codex 回報後 Opus：核對圖、轉 `img/<id>/comic.webp`、`map.webp`、改 ready、跑 smoke（預期 24 頁）、抽查白話。
   - **科普二已上線（2026-11-09）**：Codex 一輪過（四張圖：zr101-comic、zr101-map 各重生 1 次），Opus 只改兩個 html 的 `<title>`（Codex 照抄樣板沒改成「股票基本術語」「正二教學」）；四張圖逐字核對無誤（basics-comic 手機多一顆裝飾用「買進」鈕，不影響），轉 `img/basics/`、`img/zr101/` 的 `comic.webp`、`map.webp`，兩張卡片 ready。check-kepu2 OK、tests 155、smoke 24 全過。Codex 自行加 `ZR_PERIODIC`（配回例子與近似倍數放資料檔）。術語例子仍偏制度用語，文案統一修時再白話化。
 - **網站改名（使用者 2026-11-09）**：「正2工具箱與股市學堂」（主畫面短名「正2工具箱」）；各頁 `<title>` 格式「頁名｜正2工具箱與股市學堂」，新頁照此。
-- **下次開工**：科普全部完成（⑳–㉔）。剩：文案統一白話化（使用者看過再說）、115 年度基本生活費公告後改 `divtax.js`。
+- **現況（2026-11-09）**：計算機 ②–⑲、科普 ⑳–㉔ 全部完成，沒有排定的工作。
+- **待考慮（使用者 2026-11-09：先列考慮，不主動做）**：
+  1. 115 年度基本生活費（財政部約 11 月下旬公告）→ 改 `js/core/divtax.js` 的 `TAX_YEARS[115].basicLiving` 與 `provisional:false`。使用者說要做再做。
+  2. 文案統一白話化（術語例子、科普表格偏制度用語）：使用者看過覺得要改再做。
 - **① 移除（使用者 2026-11-09：「工具箱本身就有，就連到那裡；舊版那個不同專案留著」）**：首頁拿掉 ① 卡片與捷徑；⑪ 副標加「朋友那格『正二平衡計算器』的新版」；`tools/calc-guide.html` 改成轉址（`#token` → `token.html`，其他 → `exposure.html`）；FinMind token 教學搬到 `tools/token.html`＋`js/data/token.js`（文案改成工具箱用法，不是首頁卡片），各計算機 token 欄連到這裡；刪 `js/pages/calc-guide.js`、`js/data/calcGuide.js`、`img/calc-guide/`。舊專案 `zr-calc` 不動。同時修 ⑪ 對照表 ⑬⑭ 還寫「製作中」→ 改成連結。smoke 19 頁（少了 ①）。
 - **引用規則（使用者 2026-11-09）**：外部網站內容預設**完全 AI 重寫**（原文最多引一句加引號，做法出處寫「做法出自 某某」＋連結）；要照抄文字或圖必須網站同意並標「引用自」，目前無同意 → 不照抄。UI 美化時每頁底部加「參考資料」（名稱＋連結），科普頁照此格式。
 - **科普範圍再追加（使用者 2026-11-09）**：④ **股票基本術語**（補辭典沒有的最基本詞：上市櫃、集保、交割、委託單、漲跌停、T+2…）；⑤ **個人（非專業投資人）可交易的股票相關商品與獲利方式圖文詳解**（股票、零股、興櫃、ETF、ETN、權證、期貨、選擇權、可轉債、債券、基金、複委託、TDR、REITs、借券出借、當沖；價差、股利、利息等）。研究 **R5** 任務書 `collab/to-codex-r5.md`（R4 做完才做，回報 `collab/from-codex-r5.md`），驗收 `node scripts/check-r5.mjs`。科普頁共五頁：ETF 入門（R3）、借錢管道（R4）、商品與獲利方式（R5）、股票基本術語（R5，併入辭典或獨立頁待定）、正二教學。
