@@ -1,35 +1,42 @@
 ﻿## 完成項
-- ③「定期配比再平衡」改為四步精靈：選配置、你的持股、現金與目標比例、多久配回一次（日期選填）。
-- 支援混合多檔持股、模板切換、空白股數當 0、代號自動抓價、比例即時加總、零股／整張，以及逐檔買賣、現金與曝險解說。
-- 計算與驗證只呼叫既有 rebalancePlan；未修改 core。
-- betaHoldingsInput 新增 kind: 'mix'，stock／lever 的既有行為、欄名與 class 保留。
-- 更新③ oneLine、兩張完整圖文 alt 與頁尾「怎麼讀」。
-- 兩張卡通圖已生成、目視核對並存入指定位置。
+- ⑥、⑧ 整檔改成三步驟精靈，沿用 ② 的 steps／explain／example／怎麼讀結構。
+- ⑥ 支援震盪／同方向、金額換算、選填內扣費用、原本折線圖及逐項解說。
+- ⑧ 支援持股／最高點／跌幅／紀錄四種方式，含驗證、回本報酬、帳面虧損、選填回本年數、無虧損分支與對照表。
+- 保留兩頁原有三段「怎麼讀」文字，更新漫畫與步驟插圖引用及完整文字 alt。
+- 四張 PNG 已生成、目視校對並存入指定目錄，皆為 1024×1536。
 
 ## 修改檔案
-- js/pages/rebalance.js
-- js/ui/wizard.js
-- js/data/tools.js（只修改③ oneLine）
-- docs/figures/cartoon/out/rebalance-comic.png
-- docs/figures/cartoon/out/rebalance-step1.png
+- js/pages/decay.js
+- js/pages/drawdown.js
+- docs/figures/cartoon/out/decay-comic.png
+- docs/figures/cartoon/out/decay-step1.png
+- docs/figures/cartoon/out/drawdown-comic.png
+- docs/figures/cartoon/out/drawdown-step1.png
 - collab/from-codex.md
 
 ## PROOF_CMD 結果
-- npm.cmd test：tests 131 pass 131 fail 0（exit 0）
-- 範例數字：850000 173,695 170200 1.08 1.10 2026-11-08 true（exit 0）
-- node --check（兩檔）：js/pages/rebalance.js、js/ui/wizard.js 均無輸出，exit 0。
-- git diff --check：exit 0，無空白錯誤；僅有頁面檔 LF 將轉為 CRLF 的提示。
+- npm.cmd test：tests 138 pass 138 fail 0
+- 範例數字：975279 950559 904382 -46177 0.25 0.3333 50000 3.7
+- node --check（兩檔）：皆成功，無輸出。
+- 額外以記憶體內元件替身檢查頁面接線、兩頁範例、⑥ 同方向／空白必填、⑧ 四種輸入／空白年報酬／已獲利／零跌幅／非數字紀錄，通過。這不是瀏覽器 smoke。
+- git diff --check：無空白錯誤，僅 Git 的 LF→CRLF 提示。
 
 ## 生圖（每張重生幾次、有沒有殘留錯字）
-- 使用內建 image_gen；每張提示均為 00-風格與角色.md 全文加該張提示檔全文，未另增文案。
-- docs/figures/cartoon/out/rebalance-comic.png：1024×1536 PNG；生成 1 次、重生 0 次，目視未發現殘留錯字或數字差異。
-- docs/figures/cartoon/out/rebalance-step1.png：1024×1536 PNG；生成 1 次、重生 0 次，目視未發現殘留錯字或數字差異。
-- out 目錄受既有 Git 忽略規則影響，圖片已落地，但 git status 不會列出。
+- 使用內建 image_gen，未使用 CLI 或網路查詢。
+- 提示集：每張均使用 docs/figures/cartoon/00-風格與角色.md 全文，加上 to-codex.md 第 3 節對應提示檔全文。
+- decay-comic.png：重生 1 次。初版多加總標題，重生補充「只包含四格及最底小字，禁止增加文字和數字」。最終目視未見殘留錯字或數字錯誤。
+- decay-step1.png：重生 0 次。目視未見指定文字或數字錯誤；生成器另加角色名牌「小安」「老師」。
+- drawdown-comic.png：重生 1 次。初版第三格老師對話多出 %，重生補充第三格對話必須逐字相同、不可增加符號。最終目視未見殘留錯字或數字錯誤。
+- drawdown-step1.png：重生 0 次。目視未見殘留錯字或數字錯誤。
+- 最終檔案皆在上列 docs/figures/cartoon/out/ 路徑；未轉檔或搬到 img/。
 
 ## 偏離規格或自行決定的小事
-- 無功能規格偏離；比例加總在 body 尚未插入文件前用根節點 querySelector 計算，確保首次顯示即有數字。
-- 依要求未上網查詢、未 commit、未執行 npm.cmd run smoke，未建立暫存檔。
-- 未執行瀏覽器 smoke 或實際股價網路查詢；上述驗證為指定測試、範例運算與語法檢查。
+- pct 模式填 0 時沒有買入價／最高點名稱，無虧損結果使用「剛好回到原本水準」，避免顯示 undefined。
+- 第二步標題／提示／插圖隨第一步選擇更新；範例結果也同步這些資訊，避免從範例跳回第二步時沿用上一種模式的標題。
+- ⑥ 未加入沒有用途的 named／price 及 STOCK_NAMES 匯入；依指定 import 清單保留所需輔助。
+- 生圖的換行、字距與部分標點字形由生成器排版；decay-step1 另有上述角色名牌。
+- 未改核心公式或其他禁止修改檔案，未 commit，未執行 smoke，未留下暫存檔。
 
 ## 需要 Opus 決定的事
-- 無新增決策事項。請依原分工將兩張 PNG 轉為 img/rebalance/comic.webp、step1.webp，並執行 smoke；頁面已引用這兩個 WebP 路徑。
+- 四張 PNG 請依原分工轉成 WebP，搬到 img/decay/、img/drawdown/ 對應位置，並執行 smoke。頁面已引用這四個 WebP 路徑。
+- docs/figures/cartoon/out/ 的 PNG 未出現在一般 git status 輸出中，交接時請確認四張實體檔一併收取。
