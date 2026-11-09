@@ -65,12 +65,19 @@ const steps = [
         help: { text: ['定期定額適合長期；年數越長，複利的效果越明顯。'] } }),
       numberInput({ id: 'ret', label: '假設年報酬', termId: 'compound-interest', plain: '自己設的假設，例：6', value: s.ret ?? '', suffix: '%',
         help: { text: ['這是假設每年都一樣的報酬，真實市場會有漲有跌，也可能虧損。', 'ETF 的內扣費用已經反映在淨值裡，用歷史報酬當假設時不要再扣一次。'] } }),
-      selectField({ id: 'timing', label: '每月什麼時候扣款', options: [{ value: 'start', label: '月初（當月就開始滾）' }, { value: 'end', label: '月底（下個月才開始滾）' }], value: s.timing || 'start' })],
+      selectField({ id: 'timing', label: '每月什麼時候扣款', options: [{ value: 'start', label: '月初（當月就開始滾）' }, { value: 'end', label: '月底（下個月才開始滾）' }], value: s.timing || 'start' }),
+      numberInput({ id: 'holdyears', label: '停扣後再放幾年（選填）', plain: '例：45 歲停扣、65 歲退休就填 20；不放填 0', value: s.holdYears ?? 0, suffix: '年',
+        help: { text: ['停止扣款後不賣，讓錢繼續滾到退休。', '這段期間不再扣款，也不收手續費。'] } }),
+      numberInput({ id: 'holdret', label: '停扣後年報酬（選填）', plain: '快退休了常放保守一點，例：3；留白＝跟上面一樣', value: s.holdRet, suffix: '%',
+        help: { text: ['留白就用上面的假設年報酬。'] } })],
     read: s => {
       s.years = num('years'); s.ret = num('ret');
       s.timing = document.getElementById('timing').value;
+      s.holdYears = num('holdyears'); if (Number.isNaN(s.holdYears)) s.holdYears = 0; s.holdRet = num('holdret');
       if (!Number.isInteger(s.years) || s.years < 1 || s.years > 60) throw new Error('投資年數填 1–60 的整數，例：20。');
       if (!(s.ret > -99 && s.ret < 99)) throw new Error('假設年報酬填 −99 到 99，例：6。');
+      if (!Number.isInteger(s.holdYears) || s.holdYears < 0 || s.holdYears > 60) throw new Error('停扣後再放幾年填 0–60 的整數，不放填 0。');
+      if (!Number.isNaN(s.holdRet) && !(s.holdRet > -99 && s.holdRet < 99)) throw new Error('停扣後年報酬填 −99 到 99，例：3；跟上面一樣就留白。');
     }
   }
 ];
@@ -78,13 +85,17 @@ const steps = [
 function result(s) {
   const [x] = s.holdings;
   const r = dcaPlan({ initial: s.initial, monthly: s.monthly, years: s.years, annualReturn: s.ret / 100, timing: s.timing,
-    stepUp: s.stepUp / 100, discount: s.discount / 10, minFee: s.minFee });
+    stepUp: s.stepUp / 100, discount: s.discount / 10, minFee: s.minFee,
+    holdYears: s.holdYears || 0, holdReturn: Number.isFinite(s.holdRet) ? s.holdRet / 100 : s.ret / 100 });
   const last = r.rows[r.rows.length - 1];
   const name = STOCK_NAMES[x.code] ? `${x.code} ${STOCK_NAMES[x.code]}` : x.code;
   const out = [
     explain({ label: `${s.years} 年後的資產`, value: fmtMoney(r.finalValue),
       how: `${name}：每月 ${s.monthly} 元，共 ${r.months} 次；年報酬 ${s.ret}% 換成每月 ${fmtPct(r.monthlyRate, 3)}（(1＋${s.ret}%) 開 12 次方根 − 1）。` + (s.timing === 'start' ? '月初投入，當月就開始滾。' : '月底投入，下個月才開始滾。'),
       means: '用固定報酬算的情境，不是預測；真實市場有漲有跌，結果可能差很多。' }),
+    ...(s.holdYears > 0 ? [explain({ label: `停扣後再放 ${s.holdYears} 年`, value: fmtMoney(r.heldValue),
+      how: `${s.years} 年後資產 ${fmtMoney(r.finalValue)} × (1＋${Number.isFinite(s.holdRet) ? s.holdRet : s.ret}%)^${s.holdYears}，不再扣款、不收手續費。`,
+      means: `從開始扣款算起，共 ${r.totalYears} 年。` })] : []),
     explain({ label: '投入本金', value: fmtMoney(r.principal),
       how: (s.initial > 0 ? `目前持股市值 ${fmtMoney(s.initial)} ＋ ` : '') + `每月投入合計 ${fmtMoney(r.contributed)}` + (s.stepUp > 0 ? `（每年調升 ${s.stepUp}%，最後一年每月 ${last.amount} 元）` : '') + '。',
       means: '你自己放進去的錢。' }),
@@ -103,7 +114,8 @@ function result(s) {
   if (x.nowPrice > 0) out.push(explain({ label: '每月約可買', value: `${Math.floor(r.rows[0].amount / x.nowPrice).toLocaleString('en-US')} 股`,
     how: `第 1 年每月 ${r.rows[0].amount} 元 ÷ 現價 ${x.nowPrice} 元，取整數。`,
     means: '台股定期定額通常買零股；每月成交價不同，買到的股數也會變。' }));
-  out.push(h('h3', {}, '逐年變化'),
+  out.push(h('p', { class: 'tip' }, h('a', { href: `retire.html?pool=${Math.round(r.heldValue)}` }, '把這筆錢帶到「退休提領」，算每月能領多少 →')),
+    h('h3', {}, '逐年變化'),
     h('table', { class: 'trade-table' },
       h('thead', {}, h('tr', {}, ['年', '每月投入（元）', '累計投入（元）', '累計手續費（元）', '年底資產（元）'].map(t => h('th', { scope: 'col' }, t)))),
       h('tbody', {}, r.rows.map(row => h('tr', {},
@@ -119,7 +131,7 @@ function result(s) {
 }
 
 const example = { have: 'no', holdings: [{ code: '0050', nowPrice: 50 }], initial: 0,
-  monthly: 5000, stepUp: 0, discount: 10, minFee: 1, years: 20, ret: 6, timing: 'start' };
+  monthly: 5000, stepUp: 0, discount: 10, minFee: 1, years: 20, ret: 6, timing: 'start', holdYears: 0, holdRet: NaN };
 
 document.getElementById('app').append(
   toolHeader(tool),
