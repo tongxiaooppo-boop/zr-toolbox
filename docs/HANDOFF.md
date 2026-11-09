@@ -41,7 +41,7 @@
 - **⑤ 進度（2026-11-09）**：Opus 寫好 `js/core/margin.js`（`marginPlan`、`shortSummary`；融資／融券／整戶一個函式）＋`tests/margin.test.js`（7 項，預期值手算對上 R2-06 原頁：60 萬融資、市值 76 萬 → 126.67%；6／5／4 成跌 22／35／48% 碰 130%；融券漲 46.15%；目標 1÷0.6 時補現金 240,000、還融資 144,000；整戶 177.27% 不是平均 178.33%）、3 個術語（融資、融券、整戶維持率）、`holdingsInput` 新增 `side: 'short'`（欄名改融券股數／融券賣出價；向下相容）、卡通提示 `margin-01`→`out/margin-comic.png`、`margin-02`→`out/margin-step1.png`；任務書 `collab/to-codex.md`（⑤ v1，頁面＋生圖一份）待 Codex 面板做。tests 87、smoke 12 全過。
   - 簡化（頁面註明）：不算券商把融資金額／保證金取整數、融券價款不扣費用與借券費、不算假除權息。
   - **已上線（2026-11-09）**：Codex 一輪過（頁面＋兩張圖，0 次重生）；兩張圖逐字核對無誤，轉 `img/margin/*.webp`，卡片 ready。Opus 只改一處文案：已低於追繳線時，參考價說明改成「要漲回／跌回這個價格」。無頭 Chrome 實測範例與「融資＋融券」手動流程數字全對。tests 87、smoke 13 全過。
-- **UI demo（2026-11-09，Sonnet）**：`D:\ok\zr-ui-demo\`（不在 repo），5 套風格同一畫面（⑦ 第 2 步＋結果），等使用者挑；挑完記在這裡，UI 統一美化時照用。
+- **UI 風格已定（使用者 2026-11-09）：第 5 套 Neo-brutalism 粗框硬陰影**。樣板 [ui/style-5-neo-brutalism.html](ui/style-5-neo-brutalism.html)＋截圖 `docs/ui/style-5-*.png`（5 套原 demo 在 `D:\ok\zr-ui-demo\`，不在 repo）。重點：米黃底 `#fff4c9`、白卡片、3px 黑框、`5px 5px 0` 硬陰影、橘紅主按鈕 `#ff5a36`、結果卡依語意填色（藍資訊、綠賺、黃警告、紅錯誤）、表頭橘紅、小圓角 6px；深色模式框線與陰影改淺色。計算機都做完後統一改 `css/app.css`（＋`components.js`／`wizard.js` 需要時），不逐頁改。注意：深色模式 demo 沒截圖驗證過；Sonnet 評「可信感較低」，數字區要保持好讀。
 - **再下一步**：⑲ 退休提領。（原文：⑤ 融資融券（core 由 Opus 寫：研究 R2-06 RSI20 融資融券試算＋R2-01 證交所指南；併融券、整戶維持率；任務書照 ⑦ 格式「頁面＋生圖一份」）→ ⑲ 退休提領（使用者 2026-11-09 定：todo2 財務計算機只納入退休提領，⑦ 之後加「停扣後再滾」選項；詳見 [research/候選清單.md](research/候選清單.md) 末節）。）
 
 **下次開工順序（Opus）**：

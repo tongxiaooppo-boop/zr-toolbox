@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>風格五　Neo-brutalism 粗框硬陰影｜定期定額 UI demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff4c9;--card:#fff;--text:#111;--muted:#444;--line:#111;--accent:#ff5a36;--on-accent:#111;--ok:#0a7a35;--warn:#a84a00;--bad:#c00;--bad-bg:#ffd9d4;--soft:#d9f0ff;--input:#fff;--r:6px;--r-in:4px;--r-btn:6px;--bw:3px;--shadow:5px 5px 0 #111;--font:"Noto Sans TC",-apple-system,"Segoe UI",sans-serif;--head:var(--font)}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#17141f;--card:#22202c;--text:#f5f2ff;--muted:#c9c4dd;--line:#f5f2ff;--accent:#ff7a59;--on-accent:#111;--ok:#5ee08b;--warn:#ffc04d;--bad:#ff8a80;--bad-bg:#3d1a1a;--soft:#2f4a66;--input:#17141f;--shadow:5px 5px 0 #f5f2ff}}
+h1{font-weight:900;font-size:26px}
+h2{font-weight:900}
+.card{margin-bottom:22px}
+.col-side .card{background:var(--soft)}
+.dots li{height:12px;border:2px solid var(--line);border-radius:0;background:var(--card)}
+.dots li.done{background:var(--accent);opacity:1}
+.dots li.now{background:var(--accent);box-shadow:3px 3px 0 var(--line)}
+input{font-weight:700;border-color:var(--line)}
+.btn{font-weight:700;box-shadow:3px 3px 0 var(--line);border-color:var(--line)}
+.btn:active{transform:translate(3px,3px);box-shadow:none}
+.btn.primary{border-color:var(--line)}
+.help-btn{border:2px solid var(--line);color:var(--text);background:var(--soft);font-weight:700;border-radius:4px}
+.help-card{border:2px solid var(--line);background:var(--soft)}
+.explain{border:3px solid var(--line);border-left-width:3px;background:var(--card);box-shadow:4px 4px 0 var(--line)}
+.explain.ok{background:#c7f5d3;color:#111}
+.explain.warn{background:#ffe08a;color:#111}
+.explain.ok .ex-label,.explain.warn .ex-label{color:#222}
+.explain.ok .ex-value,.explain.warn .ex-value{color:#111}
+.explain.ok summary,.explain.warn summary{color:#0a2a8a;font-weight:700}
+.ex-value{font-weight:900;font-size:28px}
+.wizard-error{border:3px solid var(--line);font-weight:700}
+.table-wrap{border:3px solid var(--line)}
+th{background:var(--accent);color:#111;border-bottom:3px solid var(--line);font-size:12px}
+td{border-bottom:2px solid var(--line)}
+.figure img{border:3px solid var(--line);border-radius:4px}
+.ex-grid{gap:16px}
+.step-no{font-weight:700;color:var(--text)}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 var(--font);font-variant-numeric:tabular-nums;overflow-x:hidden}
+main{max-width:680px;margin:0 auto;padding:16px 16px 48px}
+h1{font-size:22px;line-height:1.3;margin:6px 0 4px;font-family:var(--head)}
+h2{font-size:18px;margin:0 0 8px;font-family:var(--head)}
+h3{font-size:16px;margin:20px 0 8px}
+a{color:var(--accent)}
+p{margin:6px 0}
+.back{font-size:14px;text-decoration:none}
+.no{color:var(--accent)}
+.one-line{color:var(--muted);margin:0 0 14px}
+.muted{color:var(--muted);font-weight:400}
+.col-main,.col-side{min-width:0}
+.card{background:var(--card);border:var(--bw) solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.dots{display:flex;gap:6px;list-style:none;padding:0;margin:0 0 8px}
+.dots li{flex:1;height:6px;border-radius:99px;background:var(--line)}
+.dots li.done{background:var(--accent);opacity:.5}
+.dots li.now{background:var(--accent)}
+.step-no{font-size:13px;color:var(--muted)}
+.hint{color:var(--muted);font-size:14px;margin:0 0 14px}
+.field{margin-bottom:14px}
+.lab{display:flex;align-items:center;gap:6px}
+.lab label{font-size:15px;font-weight:700}
+.plain-sub{display:block;color:var(--muted);font-size:13px;margin-bottom:5px}
+.input-row{display:flex;align-items:center;gap:8px}
+.suffix{color:var(--muted);font-size:14px;white-space:nowrap;min-width:1.6em}
+input{width:100%;min-width:0;padding:10px 12px;border:var(--bw) solid var(--line-strong,var(--line));border-radius:var(--r-in);background:var(--input);color:var(--text);font:inherit;font-variant-numeric:tabular-nums}
+input:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button{font:inherit;cursor:pointer;color:var(--text)}
+.help-btn{margin-left:auto;font-size:13px;padding:2px 12px;border-radius:99px;border:1px solid var(--accent);color:var(--accent);background:transparent}
+.help-btn[aria-expanded="true"]{background:var(--soft)}
+.help-card{background:var(--soft);border-radius:var(--r-in);padding:10px 12px;margin-top:8px;font-size:14px}
+.help-card[hidden]{display:none}
+.wizard-error{display:flex;align-items:center;gap:8px;flex-wrap:wrap;color:var(--bad);background:var(--bad-bg);border-radius:var(--r-in);padding:8px 12px;font-size:14px;margin:8px 0 0}
+.wizard-error small{color:var(--muted)}
+.wizard-error .ico{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--bad);color:#fff;font-weight:700;font-size:13px;flex:none}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:14px}
+.btn{padding:10px 18px;border:var(--bw) solid var(--line-strong,var(--line));border-radius:var(--r-btn);background:var(--card);min-height:44px}
+.btn.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent);font-weight:700}
+.ex-grid{display:grid;grid-template-columns:1fr;gap:10px}
+.explain{background:var(--soft);border-radius:var(--r-in);padding:12px 14px;border-left:4px solid var(--line)}
+.explain.ok{border-left-color:var(--ok)}
+.explain.warn{border-left-color:var(--warn)}
+.ex-label{font-size:14px;color:var(--muted)}
+.ex-value{font-size:26px;font-weight:700;line-height:1.3;overflow-wrap:anywhere}
+.explain.ok .ex-value{color:var(--ok)}
+.explain.warn .ex-value{color:var(--warn)}
+.explain.bad .ex-value{color:var(--bad)}
+details{margin-top:4px}
+summary::-webkit-details-marker{display:none}
+summary{list-style:none;cursor:pointer;color:var(--accent);font-size:14px;padding:4px 0;min-height:32px}
+details p{font-size:14px;margin:4px 0 6px}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px;table-layout:fixed}
+th,td{padding:7px 4px;border-bottom:1px solid var(--line);text-align:right;overflow-wrap:anywhere}
+th{font-size:12px;color:var(--muted);font-weight:600;vertical-align:bottom}
+th:first-child,td:first-child{text-align:left;width:2.4em}
+.note{font-size:14px;color:var(--warn)}
+.figure{margin:8px 0 12px}
+.figure img{display:block;width:100%;height:auto;border-radius:var(--r-in)}
+.disclaimer{margin-top:8px;padding-top:12px;border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+@media (min-width:900px){
+  main{max-width:1120px}
+  .layout{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:20px;align-items:start}
+  .col-side{position:sticky;top:12px}
+  .ex-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:420px){th{font-size:11px}th,td{padding:6px 2px;font-size:13px}}
+</style>
+</head>
+<body>
+
+<main>
+<header class="tool-header">
+  <a class="back" href="index.html">← 回風格總覽</a>
+  <h1><span class="no">⑦</span> 定期定額與年化報酬</h1>
+  <p class="one-line">每月固定投入，算 20 年後大約有多少錢，還有真正的年化報酬是多少。</p>
+</header>
+<div class="layout">
+<div class="col-main">
+<section class="card wizard" aria-labelledby="st">
+  <ol class="dots" aria-label="進度 2／4"><li class="done"></li><li class="now"></li><li></li><li></li></ol>
+  <div class="step-no">第 2 步／共 4 步</div>
+  <h2 id="st">每月扣多少</h2>
+  <p class="hint">填每次扣款金額和券商的手續費設定。不知道就先用預設值。</p>
+  
+<div class="field">
+  <div class="lab"><label for="monthly">每月投入</label><button type="button" class="help-btn" aria-expanded="false" aria-controls="h-monthly">說明</button></div>
+  <span class="plain-sub">每個月扣款多少錢</span>
+  <div class="input-row"><input id="monthly" inputmode="decimal" value="5000"><span class="suffix">元</span></div>
+  <div class="help-card" id="h-monthly" hidden><p>一個月扣好幾次（例：6、16、26 日），把每次金額加起來填。</p><p>券商通常有最低扣款金額（常見 1,000 元或 3,000 元），依券商。</p></div>
+</div>
+  
+<div class="field">
+  <div class="lab"><label for="stepup">每年調升</label><button type="button" class="help-btn" aria-expanded="false" aria-controls="h-stepup">說明</button></div>
+  <span class="plain-sub">薪水變多想多扣就填；不調填 0</span>
+  <div class="input-row"><input id="stepup" inputmode="decimal" value="0"><span class="suffix">%</span></div>
+  <div class="help-card" id="h-stepup" hidden><p>例：填 5，第 2 年每月投入變成 1.05 倍，第 3 年再乘 1.05。</p></div>
+</div>
+  
+<div class="field">
+  <div class="lab"><label for="discount">手續費折扣</label><button type="button" class="help-btn" aria-expanded="false" aria-controls="h-discount">說明</button></div>
+  <span class="plain-sub">2.8 折填 2.8；沒打折填 10</span>
+  <div class="input-row"><input id="discount" inputmode="decimal" value="10"><span class="suffix">折</span></div>
+  <div class="help-card" id="h-discount" hidden><p>定期定額的手續費常有專屬優惠，看券商的定期定額說明。</p></div>
+</div>
+  
+<div class="field">
+  <div class="lab"><label for="minfee">每次最低手續費</label><button type="button" class="help-btn" aria-expanded="false" aria-controls="h-minfee">說明</button></div>
+  <span class="plain-sub">定期定額常見 1 元</span>
+  <div class="input-row"><input id="minfee" inputmode="decimal" value="1"><span class="suffix">元</span></div>
+  <div class="help-card" id="h-minfee" hidden><p>手續費算出來比這個少，就收這個數字。</p></div>
+</div>
+  <p class="wizard-error" role="alert"><span class="ico" aria-hidden="true">!</span>每月投入要大於 0，例：5000。<small>（錯誤訊息示意）</small></p>
+  <div class="nav"><button type="button" class="btn">← 上一步</button><button type="button" class="btn primary">下一步 →</button></div>
+</section>
+
+<section class="card results" aria-labelledby="rs">
+  <h2 id="rs">算出來的結果</h2>
+  <div class="ex-grid">
+  
+<article class="explain ">
+  <div class="ex-label">20 年後的資產</div>
+  <div class="ex-value">NT$ 2,278,229</div>
+  <details><summary>▸ 怎麼來的</summary><p>0050 元大台灣50：每月 5000 元，共 240 次；年報酬 6% 換成每月 0.487%（(1＋6%) 開 12 次方根 − 1）。月初投入，當月就開始滾。</p></details>
+  <details><summary>▸ 代表什麼</summary><p>用固定報酬算的情境，不是預測；真實市場有漲有跌，結果可能差很多。</p></details>
+</article>
+  
+<article class="explain ">
+  <div class="ex-label">投入本金</div>
+  <div class="ex-value">NT$ 1,200,000</div>
+  <details><summary>▸ 怎麼來的</summary><p>每月投入合計 NT$ 1,200,000。</p></details>
+  <details><summary>▸ 代表什麼</summary><p>你自己放進去的錢。</p></details>
+</article>
+  
+<article class="explain ">
+  <div class="ex-label">手續費合計</div>
+  <div class="ex-value">NT$ 1,680</div>
+  <details><summary>▸ 怎麼來的</summary><p>第 1 年每次 5000 元 × 0.1425%，元以下捨去、最低 1 元＝7 元，共扣 240 次。</p></details>
+  <details><summary>▸ 代表什麼</summary><p>手續費另外付，不從扣款金額裡扣（依券商可能不同）。</p></details>
+</article>
+  
+<article class="explain ok">
+  <div class="ex-label">累積賺到</div>
+  <div class="ex-value">+NT$ 1,076,549</div>
+  <details><summary>▸ 怎麼來的</summary><p>20 年後資產 − 投入本金 − 手續費。</p></details>
+  <details><summary>▸ 代表什麼</summary><p>占你總共付出的 89.52%。</p></details>
+</article>
+  
+<article class="explain warn">
+  <div class="ex-label">年化報酬別算錯</div>
+  <div class="ex-value">6.00%</div>
+  <details><summary>▸ 怎麼來的</summary><p>在這個情境裡，每一筆錢都是年 6%。如果用『投入本金 NT$ 1,200,000 → 期末 NT$ 2,278,229』硬套年化公式，會算出約 3.3%。</p></details>
+  <details><summary>▸ 代表什麼</summary><p>後面投入的錢只放了很短時間，所以硬算會偏低。定期定額要看年化，要用每筆錢的投入日期算（IRR），不要用單筆的年化公式。</p></details>
+</article>
+  </div>
+  <h3>逐年變化 <small class="muted">（前 5 年；數字為示意）</small></h3>
+  <div class="table-wrap"><table>
+    <thead><tr><th scope="col">年</th><th scope="col">每月投入（元）</th><th scope="col">累計投入（元）</th><th scope="col">累計手續費（元）</th><th scope="col">年底資產（元）</th></tr></thead>
+    <tbody><tr><td>1</td><td>5,000</td><td>60,000</td><td>84</td><td>61,933</td></tr><tr><td>2</td><td>5,000</td><td>120,000</td><td>168</td><td>127,581</td></tr><tr><td>3</td><td>5,000</td><td>180,000</td><td>252</td><td>197,169</td></tr><tr><td>4</td><td>5,000</td><td>240,000</td><td>336</td><td>270,932</td></tr><tr><td>5</td><td>5,000</td><td>300,000</td><td>420</td><td>349,120</td></tr></tbody>
+  </table></div>
+  <p class="note">這是固定報酬的情境，沒有模擬漲跌的先後順序；配息如果沒有再投入，期末資產會比這裡少。</p>
+</section>
+</div>
+
+<aside class="col-side">
+<section class="card how" aria-labelledby="hw">
+  <h2 id="hw">怎麼讀</h2>
+  <figure class="figure"><img src="../zr-toolbox/img/dca/comic.webp" alt="四格漫畫：小安設定每月扣款 5,000 元，20 年投入 1,200,000 元，假設年報酬 6%，約 2,278,000 元；老師提醒 6% 是假設不是保證。"></figure>
+  <p>定期定額＝每月固定日期、固定金額自動買進，不用挑時間。它不保證賺錢，賺多少還是看你買的東西。</p>
+  <p>複利：賺到的錢繼續放著，下一期連它一起賺。所以時間越長，『賺的錢』占的比例越大。</p>
+  <p>年化報酬只適用一筆錢從頭放到尾；定期定額每筆錢放的時間不同，不能拿總本金直接套。</p>
+</section>
+</aside>
+</div>
+<footer class="disclaimer"><p>這是教學用的試算，不是投資建議；報酬率是你自己設的假設，不保證獲利，也可能虧損。實際手續費與規則以券商為準。</p></footer>
+</main>
+<script>
+document.querySelectorAll('.help-btn').forEach(function(b){b.addEventListener('click',function(){
+  var c=document.getElementById(b.getAttribute('aria-controls')),o=b.getAttribute('aria-expanded')==='true';
+  b.setAttribute('aria-expanded',String(!o));c.hidden=o;});});
+</script>
+</body>
+</html>
