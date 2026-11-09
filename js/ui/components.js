@@ -11,6 +11,7 @@
 //   showResult(box, ...nodes) / showError(box, message)
 //   metric(label, value, tone)              結果數字塊；tone: 'ok'|'bad'|'warn'|undefined
 //   disclaimer(kind)                        固定免責區；kind: 'general' | 'executable'
+//   references(items)                       頁底參考資料卡；items＝[{ name, url, note? }]，url 必須 https://
 //   figure({ src, alt, caption })           圖解（img/<工具id>/*.svg 或卡通 *.webp）；alt 必填，caption 一句白話；點圖開原圖
 //   lineChart({ series, label, yFormat, baseline, height })   折線圖（Gate 2 新增）
 //       series：[{ name, values:number[] }]，1–3 條，values 等長且 ≥ 2；顏色依序 accent／muted／warn
@@ -30,6 +31,16 @@ export function h(tag, attrs = {}, ...children) {
   }
   for (const c of children.flat(Infinity)) if (c != null && c !== false) el.append(c instanceof Node ? c : document.createTextNode(String(c)));
   return el;
+}
+
+export function references(items) {
+  return h('section', { class: 'card refs' },
+    h('h2', {}, '參考資料'),
+    h('ol', {}, items.map(({ name, url, note }) => {
+      if (typeof url !== 'string' || !url.startsWith('https://')) throw new Error('references 需要 https 網址');
+      return h('li', {}, h('a', { href: url, target: '_blank', rel: 'noopener noreferrer' }, name),
+        note ? [' ', h('small', {}, note)] : null);
+    })));
 }
 
 export function toolHeader({ no, title, oneLine }) {
