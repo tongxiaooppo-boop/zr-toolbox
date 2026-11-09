@@ -29,7 +29,9 @@
 - 框架 **v5** 完成（Opus 自己寫）：`js/ui/wizard.js`、`js/net/price.js`、`js/core/holdings.js`、`js/data/stocks.js`、`pledgePlan`；④ 已改成精靈樣板。tests 60、smoke 9 全過；無頭 Chrome 實測輸入 0050 真的抓到 FinMind 收盤價、四步走完、回第 1 步值還在、390px 無水平捲動。
 - 小調整（使用者第 5 點的延伸）：沒有 token 也先匿名抓（每小時 300 次，原計算機就是這樣），抓不到才手動填。
 - v5.1（同日，使用者要求）：桌面左計算機、右說明欄，手機說明在下方；④ 三張步驟圖＋兩張格子小圖（成本均價、認列成數），sol 畫、Opus 核對數字。
-- **下一步**：等使用者看過 ④ 樣板（線上或本機）點頭 → Opus 定 ⑨ 的 core（`cost.js`：手續費、證交稅、ETF 0.1%、當沖 0.15%、零股低消、損益兩平）＋測試預期值 → 寫 `collab/to-codex.md` 派 Codex 做 ⑨ 頁（照抄 `js/pages/pledge.js`）。
+- **UI 美化延後**（使用者 2026-11-09：「ui 有點醜，程式完成再調」）：計算機都做完後統一改 `css/app.css`＋`components.js`／`wizard.js`；調之前請使用者指出哪裡醜或給參考網站。圖的風格（SVG 內配色字型）若要改要早說，否則整批重畫。
+- ④ 樣板使用者 2026-11-09 已點頭。
+- **下一步（新對話開工）**：Opus 定 ⑨ 的 core（`cost.js`：手續費、證交稅、ETF 0.1%、當沖 0.15%、零股低消、損益兩平）＋測試預期值 → 寫 `collab/to-codex.md` 派 Codex 做 ⑨ 頁（照抄 `js/pages/pledge.js`）。
 
 **下次開工順序（Opus）**：
 1. 先跟使用者確認上面「目標樣子」，用 1–2 個畫面草圖（ASCII 或 artifact）對齊，**沒對齊不寫程式**。
