@@ -24,6 +24,9 @@ export const TOOLS = Object.freeze([
   { id: 'cost', no: '⑨', group: 'stock', title: '買賣成本與損益', oneLine: '手續費、證交稅、零股、當沖，賣多少才不虧', href: 'tools/cost.html', gate: 4, status: 'ready', terms: ['broker-fee', 'transaction-tax', 'break-even-price', 'tick-size'] },
   { id: 'avgcost', no: '⑮', group: 'stock', title: '平均成本與攤平', oneLine: '分好幾次買，平均每股多少錢？再買多少能攤到目標價', href: 'tools/avgcost.html', gate: 4, status: 'ready', terms: ['average-cost', 'averaging-down', 'broker-fee', 'break-even-price'] },
   { id: 'dividend', no: '⑩', group: 'stock', title: '股息與除權息', oneLine: '領多少股利、扣多少健保費、除息後股價、填息', href: 'tools/dividend.html', gate: 4, status: 'ready', terms: ['ex-dividend', 'dividend-yield', 'fill-dividend', 'nhi-premium'] },
+  { id: 'valuation', no: '⑯', group: 'stock', title: '股價估價', oneLine: '用本益比、本淨比、殖利率算便宜價、合理價、昂貴價', href: 'tools/valuation.html', gate: 4, status: 'planned', terms: ['eps', 'pe-ratio', 'pb-ratio', 'dividend-yield'] },
+  { id: 'divtax', no: '⑰', group: 'stock', title: '股利要怎麼報稅', oneLine: '股利合併計稅還是分開計稅，哪一種繳比較少', href: 'tools/divtax.html', gate: 4, status: 'planned', terms: ['dividend-tax', 'dividend-yield', 'nhi-premium'] },
+  { id: 'fx', no: '⑱', group: 'stock', title: '換匯成本與海外損益', oneLine: '換外幣的價差、匯率變動，換回台幣到底賺多少', href: 'tools/fx.html', gate: 4, status: 'planned', terms: ['fx-spread'] },
   { id: 'retire', no: '⑲', group: 'stock', title: '退休提領', oneLine: '退休存的錢每月能領多少、要存多少才夠', href: 'tools/retire.html', gate: 4, status: 'ready', terms: ['four-percent-rule', 'inflation', 'real-value', 'compound-interest'] }
 ]);
 

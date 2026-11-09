@@ -98,6 +98,68 @@ export async function fetchEvents(code, since, { token = '', fetchFn = globalThi
   return { ok: true, raw, clearToken };
 }
 
+/**
+ * 通用：查一個 FinMind 資料集（v5.11）。token 壞掉照 fetchClose 的規則改匿名重試一次。
+ * @param {string} dataset
+ * @param {Record<string,string>} params data_id、start_date、end_date…
+ * @returns {Promise<{ok:true, rows:object[], clearToken:boolean} | {ok:false, action:string, message:string}>}
+ */
+export async function fetchDataset(dataset, params, { token = '', fetchFn = globalThis.fetch } = {}) {
+  const get = async t => {
+    const u = new URL(API);
+    u.searchParams.set('dataset', dataset);
+    for (const [k, v] of Object.entries(params)) if (v) u.searchParams.set(k, v);
+    if (t) u.searchParams.set('token', t);
+    try {
+      const res = await fetchFn(u.toString());
+      let j = null; try { j = await res.json(); } catch { /* 非 JSON 回應 */ }
+      return { status: j?.status ?? res.status, data: j?.data };
+    } catch { return { status: 0, data: null }; }
+  };
+  let r = await get(token);
+  let a = finmindAction({ status: r.status, usedToken: !!token, retried: false });
+  let clearToken = false;
+  if (a.action === 'retry-without-token') {
+    r = await get('');
+    a = finmindAction({ status: r.status, usedToken: false, retried: true });
+    clearToken = a.action === 'ok';
+  }
+  if (a.action !== 'ok') return { ok: false, action: a.action, message: a.message };
+  return { ok: true, rows: Array.isArray(r.data) ? r.data : [], clearToken };
+}
+
+/**
+ * ⑯ 本益比／淨值比／殖利率（證交所每日，FinMind TaiwanStockPER，v5.11）：today 往前 years 年到今天的每一天。
+ * 最後一列＝最近一天（給 core/valuation.js 的 ratiosToBase）；全部列給 historyBands。
+ * ETF 沒有本益比、淨值比（PER／PBR 是 0）。查無資料 → ok:false（action 'stop'）。
+ * @returns {Promise<{ok:true, rows:object[], last:object, clearToken:boolean} | {ok:false, action:string, message:string}>}
+ */
+export async function fetchRatios(code, { years = 5, token = '', fetchFn = globalThis.fetch, today = new Date() } = {}) {
+  const start = new Date(today); start.setFullYear(start.getFullYear() - years);
+  const r = await fetchDataset('TaiwanStockPER', { data_id: code, start_date: ymdOf(start) }, { token, fetchFn });
+  if (!r.ok) return r;
+  if (!r.rows.length) return { ok: false, action: 'stop', message: `查無 ${code} 的本益比資料（上櫃、興櫃或 ETF 可能沒有），請自己填 EPS、每股淨值、股利。` };
+  return { ok: true, rows: r.rows, last: r.rows[r.rows.length - 1], clearToken: r.clearToken };
+}
+
+/**
+ * ⑱ 臺灣銀行牌告匯率（FinMind TaiwanExchangeRate，v5.11）：date 當天或之前最近一個營業日（往前找 14 天）。
+ * @param {string} currency FX_CURRENCIES 的 code
+ * @param {{date?:string}} opt date 'YYYY-MM-DD'，留白＝今天
+ * @returns {Promise<{ok:true, row:object, date:string, clearToken:boolean} | {ok:false, action:string, message:string}>}
+ *   row 原樣給 core/fx.js 的 ratePair。
+ */
+export async function fetchFxRate(currency, { date = '', token = '', fetchFn = globalThis.fetch, today = new Date() } = {}) {
+  if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) return { ok: false, action: 'stop', message: '日期格式不對。' };
+  const end = date ? new Date(+date.slice(0, 4), +date.slice(5, 7) - 1, +date.slice(8, 10)) : today;
+  const r = await fetchDataset('TaiwanExchangeRate', { data_id: currency, start_date: ymdOf(new Date(end.getTime() - 14 * 864e5)), end_date: ymdOf(end) }, { token, fetchFn });
+  if (!r.ok) return r;
+  const rows = r.rows.filter(x => x.date <= ymdOf(end));
+  const last = rows[rows.length - 1];
+  if (!last) return { ok: false, action: 'stop', message: `查無 ${currency} 在 ${ymdOf(end)} 前後的匯率，請自己填銀行的買入、賣出匯率。` };
+  return { ok: true, row: last, date: last.date, clearToken: r.clearToken };
+}
+
 // localStorage 在私密模式或被封鎖時會丟例外，一律包起來；讀不到就當沒有 token。
 export function getToken() { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch { return ''; } }
 export function setToken(t) { try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); return true; } catch { return false; } }

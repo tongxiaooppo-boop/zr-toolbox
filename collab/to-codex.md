@@ -1,181 +1,217 @@
-# 任務 ⑬⑭ v1：「人生槓桿體檢」「幾倍槓桿最划算」兩個新精靈＋兩個輸入元件＋四張卡通圖
+# 任務 ⑯⑰⑱ v1：「股價估價」「股利要怎麼報稅」「換匯成本與海外損益」三個新精靈＋六張卡通圖
 
-- 版本：2026-11-09 v1（框架 v5.10）。上一份（⑥⑧ v1）已完成上線，以本檔為準。
+- 版本：2026-11-09 v1（框架 v5.11）。上一份（⑬⑭ v1）已完成上線，以本檔為準。
 - 執行者：訂閱 Codex sol，直接在本 repo（`D:\ok\zr-toolbox`）工作。**不要上網。不要 commit**。做完寫 `collab/from-codex.md`（覆蓋舊的）就停。
 - 指令一律用 `npm.cmd`／`node`；**不要跑 `npm.cmd run smoke`**（Opus 會跑）。暫存檔只准放本 repo 內，結束前刪掉。
 
 ## 0. 要讀的檔案（只准讀這些）
 
-- `js/pages/rebalance.js`（全檔，**照抄它的寫法**：import、`steps`、`explain`、`example`、持股步驟自動抓價、頁尾「怎麼讀」）
-- `js/pages/decay.js` 第 60–80 行（`lineChart` 用法）
-- `js/ui/wizard.js` 第 1–50 行（介面註解，含本次新增的 `kind:'life'`、`debtsInput`、`readDebts`）、第 230–345 行（`betaHoldingsInput`、`lotsInput` 實作，新元件照它們的寫法）
-- `js/core/lifelev.js`、`js/core/kelly.js`（全檔，**只准呼叫**，JSDoc 是規格）
-- `tools/rebalance.html`
-- `docs/figures/cartoon/00-風格與角色.md` 和第 4 節表裡的四個提示檔
+- `js/pages/kelly.js`（全檔，**照抄它的寫法**：import、`steps`、`explain`、`example`、頁尾「怎麼讀」）
+- `js/pages/trigger5050.js` 第 30–95 行（**頁面自己做日期欄＋自動抓資料**的寫法：`withHelp(h('div',{class:'field'},…))`、`seq` 防舊回應、`isConnected`、`clearToken` 時 `setToken('')`）
+- `js/ui/wizard.js` 第 1–50 行（介面註解）、第 160–216 行（代號欄自動抓價的寫法，⑯ 代號欄照它做）
+- `js/core/valuation.js`、`js/core/divtax.js`、`js/core/fx.js`（全檔，**只准呼叫**，JSDoc 是規格）
+- `js/net/price.js` 第 95 行以後（`fetchDataset`、`fetchRatios`、`fetchFxRate`）
+- `tools/kelly.html`
+- `docs/figures/cartoon/00-風格與角色.md` 和第 4 節表裡的六個提示檔
 
 ## 1. 只准改／新增這些檔
 
-- `js/ui/wizard.js`：只准 (a) `betaHoldingsInput` 加 `kind:'life'`；(b) 檔尾新增 `debtsInput`、`readDebts`。**不准改其他函式的行為與簽名、不准改檔頭註解**。
-- 新增 `js/pages/lifelev.js`、`js/pages/kelly.js`、`tools/lifelev.html`、`tools/kelly.html`（html 照抄 `tools/rebalance.html`，只改 `<title>`〔「人生槓桿體檢｜正二工具箱」「幾倍槓桿最划算｜正二工具箱」〕和頁面 script 路徑）。
-- `css/app.css`：只准**在檔尾追加**新元件需要的幾行（若需要）。
-- `docs/figures/cartoon/out/` 底下四張 PNG（第 4 節）。
+- 新增 `js/pages/valuation.js`、`js/pages/divtax.js`、`js/pages/fx.js`、`tools/valuation.html`、`tools/divtax.html`、`tools/fx.html`（html 照抄 `tools/kelly.html`，只改 `<title>`〔「股價估價｜正二工具箱」「股利要怎麼報稅｜正二工具箱」「換匯成本與海外損益｜正二工具箱」〕和頁面 script 路徑）。
+- `css/app.css`：只准**在檔尾追加**需要的幾行（若需要）。
+- `docs/figures/cartoon/out/` 底下六張 PNG（第 4 節）。
 - `collab/from-codex.md`。
 
-**不准改**：`js/core/`、`js/data/`（`tools.js` 的 status 由 Opus 改）、`tests/`、`img/`、其他頁面、`docs/`（`docs/figures/cartoon/out/` 除外）。覺得要改就停下寫進回報。
+**不准改**：`js/core/`、`js/net/`、`js/ui/`、`js/data/`（`tools.js` 的 status 由 Opus 改）、`tests/`、`img/`、其他頁面、`docs/`（`docs/figures/cartoon/out/` 除外）。覺得要改就停下寫進回報。
 
-共用輔助（兩頁各自寫在檔內）：`num`、`named`、`link` 照抄 ③ 頁；`blank = v => v === undefined || v === null || Number.isNaN(v)`；`signedMoney = n => (n < 0 ? '−' : '+') + fmtMoney(Math.abs(n))`。
+共用輔助（三頁各自寫在檔內）：`num`、`named`、`link` 照抄 kelly／③ 頁；`blank = v => v === undefined || v === null || Number.isNaN(v)`；`signedMoney = n => (n < 0 ? '−' : '+') + fmtMoney(Math.abs(n))`；`signedPct = (x, d = 1) => (x < 0 ? '−' : '+') + fmtPct(Math.abs(x), d)`；`price2 = n => (+n.toFixed(2)).toLocaleString('zh-TW') + ' 元'`。
+自動抓資料的狀態文字一律用 `h('small', { class: 'holding-status', 'aria-live': 'polite' })`；失敗時 `r.message`，`r.action === 'show-quota-guide'` 再接「 申請方式見下方 token 說明。」；有 `clearToken` 就 `setToken('')`。
 
-## 2. 元件（`js/ui/wizard.js`）
+## 2. ⑯ `js/pages/valuation.js`
 
-### 2.1 `betaHoldingsInput` 的 `kind:'life'`
-- 行為同 `'stock'`：可以全部刪光、刪光顯示既有空白提示；max 預設 10；label 預設「你所有的股票和 ETF」。
-- 股數副標「1 張＝1000 股」、股數說明同 `'stock'`；**Beta** placeholder 空白、副標「留白＝看代號猜」、說明文字同 `'mix'`、ⓘ 用 `'beta'`。
-- `readBetaHoldings` 不用改。
+import：`h, toolHeader, disclaimer, figure`（components）、`wizard, numberInput, explain, withHelp, tokenBox`（wizard）、`valuationPlan, ratiosToBase, historyBands, METHODS`（core/valuation）、`normalizeCode`（core/holdings）、`fetchClose, fetchRatios, getToken, setToken`（net/price）、`parseNum, fmtMoney, fmtPct`（format）、`STOCK_NAMES`、`TOOLS`。
 
-### 2.2 `debtsInput({ id, rows = [], max = 8, label = '你的借款' })`／`readDebts(id)`
-- 結構照 `lotsInput`：外框 `div#id.holdings.debts`、`h3` 標題、清單、「＋ 再加一筆借款」（新列種類預設 `'mortgage'`，focus 到餘額）、每列「刪掉這筆」。清單空時顯示 `p.muted`「沒有借款：直接按「下一步」。」，有列時移除。到 max 隱藏新增鈕。每列標題 `strong`「第 N 筆」。
-- 每列 class `holding debt`，欄位（都用 `withHelp`，class 前綴 `d-`）：
-  | class | 標籤 | 副標 | 說明（help text） |
-  |---|---|---|---|
-  | `d-kind`（select，選項 `DEBT_KINDS` 的 value／label，從 `../core/lifelev.js` import） | 種類 | 借來做什麼不影響這格 | 「房貸、信貸、股票質押、融資、其他（車貸、保單借款、親友借款…）。」「融資、質押這類用股票擔保的，追繳風險請用 ④、⑤ 另外算。」 |
-  | `d-balance` | 還欠多少（元） | 看銀行 App 的剩餘本金 | 「現在還沒還的本金，不是當初借的金額。」 |
-  | `d-monthly` | 每月繳多少（元） | 知道就填，不知道留白 | 「看扣款紀錄或繳款通知。」「留白就用下面的利率（和剩幾年）幫你算。」 |
-  | `d-rate` | 年利率（%） | 例：2.2 | 「借款合約或 App 上的年利率。」「只填利率、不填剩幾年，就當作只繳利息（質押、融資常見）。」 |
-  | `d-years` | 還剩幾年 | 例：25 | 「還要繳幾年；填了會用本息平均攤還算每月繳款。」 |
-  | `d-invest` | 拿去投資多少（元） | placeholder 依種類：`investAll ? '留白＝全部' : '留白＝0'`；換種類時要更新 | 「這筆借款有多少拿去買股票、ETF。」「房貸買房子就留白；房貸增貸拿去買股票，填那一部分。」 |
-- 數字欄 `inputmode="decimal"`，值用檔內 `show()` 帶入（NaN 留白）。
-- `readDebts(id)` → `[{ kind, balance, monthly, ratePct, years, invest }]`，數字用 `parseNum`（空白＝NaN），不檢查。
+頁內變數 `let fetched = null;`（`{ code, rows, last }`）。state：`code, price, eps, bvps, dividend, pe[3], pb[3], yieldPct[3]`（殖利率存百分比數字）、`bands`、`ratioDate`、`autoFrom`。
+`params(s)`：`{ price: s.price, eps: s.eps, bvps: s.bvps, dividend: s.dividend, pe: s.pe, pb: s.pb, yields: (s.yieldPct || []).map(x => x / 100) }`。
 
-## 3. 頁面
+**步驟 1「哪一檔、現在多少錢」**
+- hint：「填代號會自動抓收盤價和證交所的本益比資料；沒有代號（或上櫃、ETF 抓不到）就自己填現價。」
+- about：「估價是拿現價跟你算出來的便宜價、合理價、昂貴價比。」
+- body：代號欄（照 wizard.js 第 186–209 行的寫法，id `code`，標籤「股票代號（選填）」＋名稱 span，副標「例：2330；ETF 沒有本益比」）＋`numberInput({ id: 'price', label: '現價', plain: '輸入代號後自動帶入', suffix: '元', value: s.price })`＋`tokenBox()`。
+  代號 change：`normalizeCode` → 同時 `fetchClose(c, { token })` 填 `price`、`fetchRatios(c, { token })`：成功就 `fetched = { code: c, rows: r.rows, last: r.last }`，狀態「現價 {close}（{date} 收盤）；證交所 {last.date}：本益比 {PER || '—'}、淨值比 {PBR || '—'}、殖利率 {dividend_yield}%，下一步自動帶入。」；失敗 `fetched = null`，狀態顯示 message。
+- read：`s.code = normalizeCode(code 欄) || ''`；`s.price = num('price')`，`!(s.price > 0)` → 錯誤「請填現價。」。
+  若 `fetched && fetched.code === s.code && s.autoFrom !== s.code`：`const b = ratiosToBase(s.price, fetched.last)`；`s.eps = b.eps ?? NaN; s.bvps = b.bvps ?? NaN; s.dividend = b.dividend ?? NaN; s.bands = historyBands(fetched.rows); s.ratioDate = fetched.last.date; s.autoFrom = s.code;`。
+  若 `s.code` 和 `s.autoFrom` 不同（也沒抓到）：`s.bands = null; s.ratioDate = ''; s.autoFrom = ''`（eps 等不清，讓使用者自己改）。
 
-### 3.1 ⑬ `js/pages/lifelev.js`
-import：`h, toolHeader, disclaimer, figure`（components）、`wizard, betaHoldingsInput, readBetaHoldings, debtsInput, readDebts, tokenBox, numberInput, explain`（wizard）、`lifeLeveragePlan`（core/lifelev）、`guessBeta`（core/rebalance）、`parseNum, fmtMoney, fmtPct, fmtX`（format）、`STOCK_NAMES`、`TOOLS`。
+**步驟 2「每股數字」**
+- hint：`s.ratioDate ? '已用證交所 ' + s.ratioDate + ' 的資料反推帶入，可以改成你自己的數字。' : '到公司財報或財經網站查；不知道的留白，那個方法就不算。'`（hint 依 state 變：照 ⑥⑧ 的做法在前一步 read 裡改 `steps[1].hint`）
+- about：「三種方法各用一個每股數字：EPS 給本益比法、每股淨值給本淨比法、每年股利給殖利率法。」
+- body 三格（suffix 都是「元」）：
+  - `eps`「每股盈餘 EPS」termId `'eps'`，plain「近四季加起來；虧損填負數」，help `['證交所的本益比用最近四季的 EPS。', '用財經網站的「預估 EPS」也可以，但那是別人的猜測，要記得是哪一年的預估。']`
+  - `bvps`「每股淨值」termId `'pb-ratio'`，plain「最近一季財報」，help `['公司資產減負債，平均到每一股。']`
+  - `dividend`「每年每股股利」termId `'dividend-yield'`，plain「一年配的加起來」，help `['一年內每次配息加起來，例：季配 4 次各 4 元填 16。', '證交所帶入的數字含股票股利；只想看現金股利就改成現金的部分。']`
+- read：存三格；`valuationPlan({ ...params(s), pe: [1, 2, 3], pb: [1, 2, 3], yields: [0.03, 0.02, 0.01] })` 檢查（錯誤丟出去）。
 
-`params(s, over = {})`：
-```
-{ holdings: s.rows || [], cash: s.cash, realEstate: s.realEstate, otherAssets: s.otherAssets,
-  debts: (s.debts || []).map(d => ({ kind: d.kind, balance: d.balance, monthly: d.monthly, rate: d.ratePct / 100, years: d.years, invest: d.invest })),
-  monthlyExpense: s.monthlyExpense, monthlyIncome: s.monthlyIncome, stressDrop: s.stressPct / 100, ...over }
-```
-（NaN 直接傳，core 會當作沒填。）各步檢查用 `lifeLeveragePlan(params(s, {…還沒填的欄位給假值}))`，錯誤丟出去。
+**步驟 3「你的三個倍數」**
+- hint：`s.bands && (s.bands.pe || s.bands.pb || s.bands.yields) ? '按「用這檔過去 5 年的區間」會帶入它自己的 25／50／75 分位數；也可以自己填。' : '倍數由你自己定：可以參考這檔過去的本益比區間，或同產業的公司。'`（同上，在前一步 read 改 `steps[2].hint`）
+- about：「便宜、合理、昂貴各填一個倍數。本益比、本淨比由小到大；殖利率由大到小（殖利率越高，價格越便宜）。」
+- figure：`../img/valuation/step3.webp`，alt 照第 4 節圖 2 的文字完整寫出。
+- body：只放「步驟 2 有填每股數字」的方法（`blank(s.eps)` 等判斷），每個方法一個 `h('div', { class: 'triple' })` 三格：
+  - 本益比：ids `pe0 pe1 pe2`，標籤「本益比：便宜」「合理」「昂貴」，suffix「倍」，termId 只放第一格 `'pe-ratio'`
+  - 本淨比：`pb0 pb1 pb2`，「本淨比：便宜」「合理」「昂貴」，suffix「倍」，termId `'pb-ratio'`
+  - 殖利率：`y0 y1 y2`，「殖利率：便宜」「合理」「昂貴」，suffix「%」，termId `'dividend-yield'`
+  - 有 `s.bands` 且至少一個方法的 band 不是 null → 最上面放按鈕 `h('button', { type: 'button', class: 'secondary' }, '用這檔過去 5 年的區間（' + s.bands.from + '～' + s.bands.to + '）')`，按下把有 band 的方法填進格子（pe／pb 取 2 位小數；yields × 100 取 2 位小數）。band 是 null 的方法不動，並在按鈕下 `p.muted` 寫「{方法} 資料不夠 20 天，沒有帶入。」（只在按過之後顯示）。
+- read：`s.pe = [num('pe0'), …]`（該方法沒顯示就 `[]`），`s.pb`、`s.yieldPct` 同理；`valuationPlan(params(s))` 檢查。
 
-**步驟 1「你的持股」**
-- hint：「填你全部的股票和 ETF，不只一個策略。股數看券商 App 的庫存；沒有股票就全部刪掉。」
-- about：「每檔市值 × Beta 加起來，就是你整體跟著大盤漲跌的金額（曝險）。」
-- figure：`../img/common/step-holdings.svg`，alt 照抄 ③ 頁步驟 2。
-- body：`betaHoldingsInput({ id: 'rows', rows: s.rows || [{}], kind: 'life' })`＋`tokenBox()`，自動抓價的寫法照 ③ 頁。
-- read：`s.rows = readBetaHoldings('rows')`；檢查 `params(s, { cash: 0, debts: [], monthlyExpense: 1 })`。
-
-**步驟 2「現金和房子」**
-- hint：「現金含活存、定存；房子填現在大概能賣多少，沒有就留白。」
-- about：「總資產＝現金＋股票＋房子＋其他。房子和其他資產不算進金融淨資產。」
-- body：`numberInput` 三格：`cash`「現金」plain「活存＋定存＋證券戶交割款，沒有填 0」；`realEstate`「房子市價（選填）」plain「實價登錄或估價，留白＝0」help「自住、出租都算。房子的漲跌在這裡當作 1 倍，是簡化。」；`otherAssets`「其他資產（選填）」plain「車子、保單價值準備金…留白＝0」。suffix 都是「元」。
-- read：`cash` 空白 → 錯誤「請填現金，沒有就填 0。」；存三格；檢查 `params(s, { debts: [], monthlyExpense: 1 })`。
-
-**步驟 3「你的借款」**
-- hint：「每筆借款一列；看銀行、券商 App 的剩餘本金和每月扣款。沒有借款就全部刪掉。」
-- about：「拿去買股票的借款要從金融淨資產扣掉；拿去買房子的不扣，但每月還款照算。」
-- figure：`../img/lifelev/step3.webp`，alt 照第 4 節圖 2 的文字完整寫出。
-- body：`debtsInput({ id: 'debts', rows: s.debts || [] })`。
-- read：`s.debts = readDebts('debts')`；檢查 `params(s, { monthlyExpense: 1 })`。
-
-**步驟 4「生活費和收入」**
-- hint：「生活費不含還款（還款上一步填過了）。收入填每月實拿。」
-- body：`monthlyExpense`「每月生活費」plain「吃住交通保險…不含還款」；`monthlyIncome`「每月收入（選填）」plain「薪水等實拿，留白就不算結餘」；`stressPct`「大跌情境（選填）」plain「大盤跌幾 %，留白＝30」suffix「%」。前兩格 suffix「元」。
-- read：存三格；檢查 `params(s)`。
-
-**結果**（`const r = lifeLeveragePlan(params(s))`），依序：
-1. `explain({ label: '金融淨資產', value: fmtMoney(r.financialNet), tone: r.financialNet > 0 ? 'info' : 'bad', how: '現金 {cash} ＋ 股票 {stockValue} − 拿去投資的借款 {investDebt} ＝ {financialNet}。', means: '能拿來投資、會跟著市場漲跌的自己的錢。房子不算；房貸買房不扣。' })`
-2. 市場曝險倍數：`r.marketLeverage === null` → value「算不出來」、tone bad、means「金融淨資產是 0 或負的：借來投資的錢比現金加股票還多。」；否則 value `fmtX(r.marketLeverage)`（fmtX 已帶「倍」），tone `> 2 ? 'bad' : > 1 ? 'warn' : 'ok'`，how「每檔市值 × Beta：」＋每檔「{named(code)} {fmtMoney(value)} × {beta}{beta 是猜的就加（看代號猜）}」用「＋」接，＋「＝ {fmtMoney(exposure)}；÷ 金融淨資產 {fmtMoney(financialNet)}。」，means「大盤漲跌 1%，你的金融淨資產大約漲跌 {marketLeverage.toFixed(2)}%。」，todo `['想調整倍數，看 ', link('exposure.html', '⑪ 正二要買多少'), '。']`。（「是猜的」＝ `blank(s.rows[i].beta)`。）
-3. `explain({ label: '帳面槓桿', value: …, how: '總資產 {assets} ÷ 總淨資產 {net}。', means: '把房子、房貸都算進來，總共借了多少錢來撐資產。總淨資產＝總資產 {assets} − 全部借款 {debt}。' })`；`r.bookLeverage === null` → value「總淨資產是負的」tone bad。
-4. `explain({ label: '總曝險槓桿', value: fmtX(r.totalLeverage), how: '（房子 {realEstate} ＋ 股票曝險 {exposure}）÷ 總淨資產 {net}。', means: '房價和股市一起跌時，總淨資產會放大幾倍受傷。房子當 1 倍是簡化。' })`；null 時同上。
-5. 每月現金流：`r.monthlyFree === null` → label「每月要付」、value `fmtMoney(r.monthlyOut)`、tone info；否則 label「每月結餘」、value `signedMoney(r.monthlyFree)`、tone `r.monthlyFree < 0 ? 'bad' : 'ok'`。how：（有收入時「收入 {income} − 」）＋「生活費 {expense}」＋每筆借款「 − {label} {fmtMoney(monthly)}」，`payBy === 'amortized'` 加「（用年利率 {ratePct}%、{years} 年本息攤還算的）」、`'interest'` 加「（只繳利息：餘額 × {ratePct}% ÷ 12）」。means：結餘 < 0 時「每月入不敷出，要動用存款或賣股票。」，否則「每月花在生活和還款的錢共 {monthlyOut}。」
-6. `explain({ label: '現金撐幾個月', value: r.cashMonths.toFixed(1) + ' 個月', tone: < 3 ? 'bad' : < 6 ? 'warn' : 'ok', how: '現金 {cash} ÷ 每月要付 {monthlyOut}。', means: '收入突然停了，不賣股票能撐多久。大跌時常常也是最不想賣的時候。' })`
-7. 生活費倍數：value `r.lifeMultiple > 0 ? r.lifeMultiple.toFixed(1) + ' 倍' : '0 倍'`，tone info，how「金融淨資產 {financialNet} ÷ 一年生活費 {12×expense}。」，means `r.withdrawRate ? '相當於每年領 ' + fmtPct(r.withdrawRate) + '。對照：4% 法則約 25 倍。' : '金融淨資產不是正的。'`，todo `['退休要存多少，看 ', link('retire.html', '⑲ 退休提領'), '。']`。
-8. 大盤跌多少會歸零：`r.exposure <= 0` 就整項不放。`r.zeroDrop === null`（金融淨資產 ≤ 0）→ value「已經是負的」tone bad；`r.zeroDrop > 1` → value「大盤跌光也不會」tone ok；否則 value `fmtPct(r.zeroDrop)`、tone `< 0.5 ? 'bad' : 'warn'`。how「金融淨資產 {financialNet} ÷ 股票曝險 {exposure}。」，means「直線估算：正二每天重新 2 倍，真的大跌時結果會不太一樣。」
-9. 大跌情境：label `'大盤跌 ' + fmtPct(r.stressDrop, 0) + ' 後'`，value `fmtMoney(r.financialNetAfter)`，tone `r.financialNetAfter <= 0 ? 'bad' : 'warn'`，how：每檔「{named(code)} {fmtMoney(value)} → {fmtMoney(valueAfter)}」用「；」接，＋「。金融淨資產 {financialNet} → {financialNetAfter}；借款不會跟著變少。」，means `r.marketLeverageAfter === null ? '金融淨資產變成 0 或負的。' : '曝險倍數 ' + fmtX(r.marketLeverage) + ' → ' + fmtX(r.marketLeverageAfter) + '：越跌倍數越高。'`，todo：借款裡有 `pledge` 就放 `['有股票質押，追繳線看 ', link('pledge.html', '④ 質押壓力測試'), '。']`；有 `margin` 就放 ⑤ `margin.html`「⑤ 融資融券維持率」（兩個都有就兩句接在一起；都沒有就不放）。
-10. `h('p', { class: 'note' }, '只做體檢、不給建議倍數。Beta 是估計值、房子當 1 倍；沒算稅、手續費、利率變動。')`
-
-**example**：
-```
-{ rows: [{ code: '0050', shares: 10000, price: 195.5, beta: NaN }, { code: '00631L', shares: 20000, price: 26.3, beta: NaN }],
-  cash: 500000, realEstate: 12000000, otherAssets: NaN,
-  debts: [{ kind: 'mortgage', balance: 8000000, monthly: NaN, ratePct: 2.2, years: 25, invest: NaN },
-          { kind: 'credit', balance: 1000000, monthly: 18000, ratePct: NaN, years: NaN, invest: 1000000 }],
-  monthlyExpense: 40000, monthlyIncome: 100000, stressPct: NaN }
-```
-範例結果必須有：金融淨資產 1,981,000；市場曝險 1.52；帳面槓桿 2.50；總曝險槓桿 2.51；房貸月付 34,693；每月結餘 +7,307；現金 5.4 個月；生活費倍數 4.1 倍（每年領 24.2%）；歸零 65.9%；跌 30% 後 1,078,900、曝險 1.52 → 1.66。
-
-**怎麼讀**：`figure({ src: '../img/lifelev/comic.webp', alt: 第 4 節圖 1 四格文字完整寫出 })`，接三段：
-- 「同樣買了正二，有人只用閒錢、有人背著房貸和信貸。這個工具把家裡有的、欠的全部列出來，看你真正開了幾倍槓桿。」
-- 「三種倍數分母不同：市場曝險倍數看金融淨資產（只扣拿去投資的借款）；帳面槓桿、總曝險槓桿看總淨資產（扣全部借款、房子也算）。不要拿不同分母的數字互相比。」
-- 「大跌時股票變少、借款不變，所以越跌倍數越高。現金撐幾個月，決定你大跌時要不要被迫賣股票。」
-
+**結果**（`const r = valuationPlan(params(s))`），依序：
+1. 每個 `m of r.methods`：
+   - `!m.ok` → `explain({ label: m.label, value: '不能用', tone: 'warn', how: m.reason, means: m.key === 'pe' ? '虧損的公司看本淨比或營收比較合適。' : m.key === 'pb' ? '淨值是負的，公司資產不夠還負債。' : '沒有配息的股票不適合用殖利率估。' })`
+   - `m.ok` → `explain({ label: m.label, value: m.zoneLabel, tone: { 'below-cheap': 'ok', 'cheap-fair': 'ok', 'fair-expensive': 'warn', 'above-expensive': 'bad' }[m.zone], how, means })`：
+     - how（pe）：`'EPS ' + m.base.toFixed(2) + ' 元 × ' + a + '／' + b + '／' + c + ' 倍 ＝ 便宜 ' + price2(cheap) + '／合理 ' + price2(fair) + '／昂貴 ' + price2(expensive) + '。'`；pb 同（「每股淨值」）；yield：`'每年股利 ' + m.base.toFixed(2) + ' 元 ÷ ' + 三個殖利率用 fmtPct(x, 2) 以「／」接 + ' ＝ 便宜 …／合理 …／昂貴 …。'`
+     - means（pe／pb）：`'現在' + (pe ? '本益比 ' : '本淨比 ') + m.current.toFixed(2) + ' 倍；現價 ' + price2(r.price) + ' 落在' + m.zoneLabel + '。'`；yield：`'現在殖利率 ' + fmtPct(m.current, 2) + '；現價 ' + price2(r.price) + ' 落在' + m.zoneLabel + '。'`
+2. 只要有 2 個以上 `ok` 的方法：表格 `h('table', { class: 'trade-table' })`，欄「方法｜便宜價｜合理價｜昂貴價｜現價在哪」，每列 `m.label`、三個 `price2`、`m.zoneLabel`。
+3. `s.ratioDate` 有值：`h('p', { class: 'note' }, 'EPS、每股淨值、股利是用證交所 ' + s.ratioDate + ' 的本益比、淨值比、殖利率反推的；證交所的殖利率含股票股利。')`
+4. `h('p', { class: 'note' }, '倍數是你的假設，沒有公定的合理倍數；估出來的價格不是買賣建議。虧損公司、景氣循環股、金融股適合的方法不一樣。')`，接 todo 一段：`['想算領多少股利、除息後股價，看 ', link('dividend.html', '⑩ 股息與除權息'), '。']`
+**example**：`{ code: '', price: 580, eps: 32, bvps: 140, dividend: 16, pe: [15, 20, 25], pb: [3, 4, 5], yieldPct: [4, 3, 2.5], bands: null, ratioDate: '', autoFrom: '' }`
+範例結果必須有：本益比法「便宜價到合理價之間」、480／640／800、現在 18.13 倍；本淨比法「合理價到昂貴價之間」、420／560／700、現在 4.14 倍；殖利率法「合理價到昂貴價之間」、400／533.33／640、現在殖利率 2.76%；比較表 3 列。
+**怎麼讀**：`figure({ src: '../img/valuation/comic.webp', alt: 第 4 節圖 1 四格文字完整寫出 })`，接三段：
+- 「估價就是先決定一把尺：用獲利（本益比）、用公司資產（本淨比）、或用配息（殖利率），乘上或除以你認為合理的倍數，得到便宜、合理、昂貴三個價格。」
+- 「倍數沒有標準答案。比較穩的做法是看這檔股票自己過去幾年的區間：最低的四分之一當便宜、中間當合理、最高的四分之一當昂貴。但公司變了，過去的區間就不一定適用。」
+- 「三把尺給的答案常常不一樣，這很正常。ETF 沒有本益比、本淨比，只能看殖利率；殖利率法要先確認配息是不是能一直配下去。」
 最後 `disclaimer('general')`。
 
-### 3.2 ⑭ `js/pages/kelly.js`
-import：`h, toolHeader, disclaimer, figure, lineChart`（components）、`wizard, numberInput, explain`（wizard）、`kellyPlan`（core/kelly）、`parseNum, fmtPct`（format）、`TOOLS`。
+## 3. ⑰ `js/pages/divtax.js`
 
-`params(s)`：`{ cagr1x: s.cagrPct / 100, vol: s.volPct / 100, borrowRate: s.borrowPct / 100, cashRate: blank(s.cashPct) ? 0 : s.cashPct / 100, current: s.current }`
-`x2 = L => L.toFixed(2) + ' 倍'`。
+import：`h, toolHeader, disclaimer, figure, selectField`（components）、`wizard, numberInput, explain, withHelp`（wizard）、`dividendTaxPlan, TAX_YEARS, DEFAULT_TAX_YEAR, DIVIDEND_CREDIT_CAP`（core/divtax）、`parseNum, fmtMoney, fmtPct`（format）、`TOOLS`。
+`params(s)`：`{ year: +s.year, married: s.married === 'yes', people: s.people, elderly: s.elderly, salaries: s.salaries || [], otherIncome: s.otherIncome, dividends: s.dividends, itemized: s.itemized, otherSpecial: s.otherSpecial }`
+`pay = p => p < 0 ? '可退 ' + fmtMoney(-p) : '要繳 ' + fmtMoney(p)`。
 
-**步驟 1「大盤的假設」**
-- hint：「不知道就先用範例：每年 8%、波動 20%，這只是常見的假設，不是預測。」
-- about：「凱利倍數只看兩件事：平均每年賺多少、漲跌有多劇烈。兩個都是你猜的，結果對它們非常敏感。」
-- figure：`../img/kelly/step1.webp`，alt 照第 4 節圖 2 的文字完整寫出。
-- body：`numberInput({ id: 'cagrPct', label: '1 倍每年平均賺多少', plain: '例：全部買 0050 的長期年化報酬', suffix: '%', value: s.cagrPct, help: { text: ['長期年化報酬（含息）。這是對未來的假設，過去的報酬不代表未來。', '填保守一點比較安全。'] } })`；`numberInput({ id: 'volPct', label: '每年波動', termId: 'volatility', plain: '例：20', suffix: '%', value: s.volPct, help: { text: ['一年裡漲跌的典型幅度（標準差）。', '大盤 ETF 常見大約 15%–25%；個股通常更大。'] } })`
-- read：空白 → 錯誤「請填每年報酬和波動。」；存；`kellyPlan({ ...params({ ...s, borrowPct: 0, cashPct: 0, current: NaN }) })` 檢查。
+**步驟 1「申報年度和家裡幾個人」**
+- hint：「申報戶＝同一份報稅書上的人：本人、一起申報的配偶、扶養的家人。」
+- about：「人數決定免稅額和扣除額，扣越多，股利併進來時適用的稅率越低。」
+- body：
+  - `withHelp(selectField({ id: 'year', label: '哪一年的所得', options: Object.values(TAX_YEARS).map(p => ({ value: String(p.year), label: p.year + ' 年度所得（' + p.fileIn + ' 年 5 月報稅）' })), value: String(s.year || DEFAULT_TAX_YEAR) }), { text: ['報稅是報「前一年」的所得：2027 年 5 月報的是 115 年度（2026 年）的所得。', '各年度的免稅額、扣除額、稅率級距不同。'] })`
+  - `selectField({ id: 'married', label: '有沒有配偶一起申報', options: [{ value: 'no', label: '沒有（單身或分開申報）' }, { value: 'yes', label: '有，夫妻一起申報' }], value: s.married || 'no' })`
+  - `numberInput({ id: 'people', label: '申報戶總人數', plain: '本人＋配偶＋扶養的家人', suffix: '人', value: s.people })`
+  - `numberInput({ id: 'elderly', label: '其中 70 歲以上（選填）', plain: '留白＝0', suffix: '人', value: s.elderly, help: { text: ['70 歲以上的本人、配偶、扶養的直系尊親屬，免稅額比較高。'] } })`
+- read：存四格（year、married 存字串）；`people` 空白 → 錯誤「請填申報戶總人數。」；`dividendTaxPlan(params({ ...s, salaries: [], dividends: 0 }))` 檢查。
 
-**步驟 2「利率和你現在的倍數」**
-- hint：「借錢利率填你實際借得到的（質押、信貸、融資）；現金利率填定存或活存。」
-- body：`borrowPct`「借錢的年利率」plain「例：質押約 2.5–3」suffix「%」；`cashPct`「現金的年利率（選填）」plain「留白＝0」suffix「%」；`current`「你現在幾倍（選填）」plain「留白就不比較」suffix「倍」help `{ text: ['不知道自己幾倍，可以先用 ⑬ 人生槓桿體檢或 ⑪ 正二要買多少算。', '例：全部買 0050 是 1 倍；一半 0050、一半正二約 1.5 倍。'] }`。
-- read：`borrowPct` 空白 → 錯誤「請填借錢的年利率。」；存；`kellyPlan(params(s))` 檢查。
+**步驟 2「薪資和其他所得」**
+- hint：「看各人的扣繳憑單或國稅局的所得資料；沒有就留白。」
+- about：「薪資每個人可以分開扣一筆薪資特別扣除額，所以每人一格。」
+- body：`n = Math.min(s.people, 4)` 格 `numberInput({ id: 'sal' + i, …, suffix: '元', value: (s.salaries || [])[i] })`，標籤：第 0 格「本人薪資」；第 1 格 `s.married === 'yes' ? '配偶薪資' : '家人 1 薪資'`；其餘「家人 k 薪資」（k 接著編號）；plain 都是「一年的薪資總額，沒有就留白」；第 0 格 help `{ text: ['薪資特別扣除額每人最多 ' + fmtMoney(TAX_YEARS[s.year].salaryCap) + '，不能合併給別人用。'] }`。`s.people > 4` 時下方 `h('p', { class: 'muted' }, '超過 4 個人有薪資時，把其他人的薪資加在最後一格（薪資扣除額會少算一些）。')`。
+  再一格 `numberInput({ id: 'otherIncome', label: '其他所得（選填）', plain: '利息、租金、執行業務…合計，留白＝0', suffix: '元', value: s.otherIncome })`。
+- read：`s.salaries = [num('sal0'), …]`（n 格）；存 `otherIncome`；`dividendTaxPlan(params({ ...s, dividends: 0 }))` 檢查。
 
-**結果**（`const r = kellyPlan(params(s)); const by = Object.fromEntries(r.rows.map(x => [x.key, x]));`）依序：
-1. `explain({ label: '全凱利（長期成長最快）', value: x2(r.full), tone: 'info', how: r.full >= 1 ? '先把年化 ' + s.cagrPct + '% 換成每年平均 μ＝ln(1 + ' + s.cagrPct + '%) ＋ ' + s.volPct + '%² ÷ 2 ＝ ' + fmtPct(r.mu, 2) + '；再算（μ − ln(1 + 借錢利率 ' + s.borrowPct + '%)）÷ ' + s.volPct + '%² ＝ ' + r.full.toFixed(2) + ' 倍。' : '報酬扣掉借錢利率後不夠付波動的代價，借錢不划算；最好的倍數在 1 倍以內（多出來的放現金）。', means: r.full === 0 ? '報酬比現金利率還低：照這個假設，不投入最好。' : '這個倍數長期年化最高，約 ' + fmtPct(r.maxCagr) + '。' })`
-2. `explain({ label: '半凱利', value: x2(r.half), tone: 'ok', how: '全凱利 ÷ 2。', means: '長期年化 ' + fmtPct(by.half.cagr) + '，比全凱利少一點，但腰斬機率從 ' + fmtPct(by.full.halveProb) + ' 降到 ' + fmtPct(by.half.halveProb) + '。四分之一凱利是 ' + x2(r.quarter) + '。' })`
-3. 對照表 `h('table', { class: 'trade-table' })`，欄「倍數｜長期年化｜曾經腰斬機率」，每列：`x.label + '（' + x2(x.L) + '）'`（`cash`／`one`／`two` 的 label 已含倍數，就只放 label）、`fmtPct(x.cagr)`、`fmtPct(x.halveProb)`。表下 `h('p', { class: 'note' }, '曾經腰斬機率：在這個模型裡，資產曾經跌到起點一半的機率（時間拉到無限長的理論值）。')`
-4. 有 `by.current`：`explain({ label: '你現在 ' + x2(by.current.L), value: fmtPct(by.current.cagr), tone: r.breakEven !== null && by.current.L >= r.breakEven ? 'bad' : by.current.L > r.full ? 'warn' : 'ok', how: '照同樣的假設，' + x2(by.current.L) + '的長期年化。', means: by.current.L > r.full ? '已經過了山頂：再加倍數，長期報酬只會變少，腰斬機率（現在 ' + fmtPct(by.current.halveProb) + '）繼續變大。' : '還在山頂左邊：加倍數報酬會增加，但腰斬機率（現在 ' + fmtPct(by.current.halveProb) + '）也會跟著變大。' })`
-5. `r.breakEven !== null`：`explain({ label: '超過幾倍長期會虧', value: x2(r.breakEven), tone: 'bad', how: '長期年化掉回 0 的倍數。', means: '倍數太高時，波動拖累比多賺的還多，放越久越虧。正二全押是 2 倍。' })`
-6. `lineChart({ series: [{ name: '長期年化報酬', values: r.curve.map(p => p.cagr) }], label: '倍數 0 到 4 倍的長期年化報酬曲線', yFormat: v => { const t = (v * 100).toFixed(0); return (t === '-0' ? '0' : t) + '%'; }, baseline: 0 })`，下面 `h('p', { class: 'note' }, '橫軸：最左邊 0 倍、最右邊 4 倍，每格 0.1 倍。')`
-7. `h('p', { class: 'note' }, '理論模型：每年報酬、波動、利率都固定，每天調回同樣倍數；沒算內扣費用、追蹤誤差、追繳和斷頭。對假設非常敏感：每年 8% 改成 6%（其他不變），全凱利就從 1.69 倍掉到約 1.22 倍。')`
+**步驟 3「股利和扣除額」**
+- hint：「股利看國稅局的所得資料或券商寄的股利憑單，全家加起來。」
+- about：「8.5% 抵減每戶最多 8 萬元；股利很多、所得很高時，分開計稅才可能比較省。」
+- figure：`../img/divtax/step3.webp`，alt 照第 4 節圖 4 的文字完整寫出。
+- body：
+  - `numberInput({ id: 'dividends', label: '一年的股利所得', termId: 'dividend-tax', plain: '全家加起來', suffix: '元', value: s.dividends, help: { text: ['現金股利加股票股利；股票股利按面額算（每股配 1 元股票股利、持有 1 張＝1,000 元）。', 'ETF 配息只有「股利」那一部分算這裡，利息、收益平準金不是；以基金公司寄的所得明細為準。'] } })`
+  - `numberInput({ id: 'itemized', label: '列舉扣除額（選填）', plain: '保險費、醫藥費、房貸利息、捐款…合計；留白＝用標準扣除額', suffix: '元', value: s.itemized })`
+  - `numberInput({ id: 'otherSpecial', label: '其他特別扣除額（選填）', plain: '身障、教育學費、幼兒、長照、房租…合計，薪資的不用填', suffix: '元', value: s.otherSpecial })`
+- read：`dividends` 空白 → 錯誤「請填一年的股利所得，沒有就填 0。」；存三格；`dividendTaxPlan(params(s))` 檢查。
 
-**example**：`{ cagrPct: 8, volPct: 20, borrowPct: 3, cashPct: 1, current: 1.4 }`；範例結果必須有：全凱利 1.69 倍、年化 9.0%；半凱利 0.84 倍（7.2%、腰斬 3.4%）；2 倍 8.8%／48.1%；你現在 1.40 倍 8.8%／22.4%；超過 3.76 倍長期會虧。
-
-**怎麼讀**：`figure({ src: '../img/kelly/comic.webp', alt: 第 4 節圖 3 四格文字完整寫出 })`，接三段：
-- 「倍數越高不一定賺越多。每天調回固定倍數時，波動會吃掉複利：倍數太低賺太少、太高被波動拖垮，中間有一個長期成長最快的點，叫凱利倍數。」
-- 「過了凱利倍數，報酬開始變少、風險繼續變大；大約到兩倍凱利，長期報酬就掉回跟現金差不多。」
-- 「報酬和波動都是猜的，猜錯一點凱利倍數就差很多，所以很多人只用一半（半凱利）。這裡也沒算追繳：借錢的人在跌到凱利模型說的谷底之前，可能就先被追繳了。」
-
+**結果**（`const r = dividendTaxPlan(params(s)); const c = r.combined, p = r.separate; const minus = r.exemption + r.deduction + r.salarySpecial + r.otherSpecial + r.basicLivingDiff;`）依序：
+1. `explain({ label: '建議', value: { combined: '合併計稅', separate: '分開計稅', same: '兩種一樣' }[r.best], tone: 'ok', how: '合併計稅' + pay(c.payable) + '；分開計稅' + pay(p.payable) + '。', means: r.best === 'same' ? '兩種算法繳的一樣。' : '選這個少繳 ' + fmtMoney(r.saving) + '。報稅時系統也會幫你比，選少的那個。' })`
+2. `explain({ label: '兩種都先扣掉', value: fmtMoney(minus), tone: 'info', how: '免稅額 ' + fmtMoney(r.exemption) + '（' + s.people + ' 人' + (elderly > 0 ? '，其中 70 歲以上 ' + elderly + ' 人' : '') + '）＋ ' + (r.deductionKind === 'itemized' ? '列舉' : '標準') + '扣除額 ' + fmtMoney(r.deduction) + ' ＋ 薪資特別扣除額 ' + fmtMoney(r.salarySpecial) + ' ＋ 其他特別扣除額 ' + fmtMoney(r.otherSpecial) + ' ＋ 基本生活費差額 ' + fmtMoney(r.basicLivingDiff) + '。', means: r.basicLivingDiff > 0 ? '基本生活費 ' + fmtMoney(r.basicLiving) + '（每人 ' + fmtMoney(r.params.basicLiving) + ' × ' + s.people + ' 人）比免稅額加扣除額還多，差額也可以扣。' : '兩種算法扣的一樣，差別只在股利怎麼算。' })`（`elderly = blank(s.elderly) ? 0 : s.elderly`）
+3. `explain({ label: '合併計稅', value: pay(c.payable), tone: r.best === 'combined' ? 'ok' : 'info', how: '所得總額 ' + fmtMoney(c.income) + '（含股利 ' + fmtMoney(s.dividends) + '）− ' + fmtMoney(minus) + ' ＝ 所得淨額 ' + fmtMoney(c.net) + '；× ' + fmtPct(c.rate, 0) + ' − 累進差額 ' + fmtMoney(c.diff) + ' ＝ ' + fmtMoney(c.taxBefore) + '；減股利抵減 ' + fmtMoney(c.credit) + '（股利 × 8.5%' + (c.creditCapped ? '，超過上限只能抵 ' + fmtMoney(DIVIDEND_CREDIT_CAP) : '') + '）。', means: c.payable < 0 ? '抵減比稅還多，差額可以退稅。' : '股利跟其他所得一起照級距算，你最高那一級是 ' + fmtPct(c.rate, 0) + '。' })`
+4. `explain({ label: '分開計稅', value: pay(p.payable), tone: r.best === 'separate' ? 'ok' : 'info', how: '不含股利的所得總額 ' + fmtMoney(p.income) + ' − ' + fmtMoney(minus) + ' ＝ 所得淨額 ' + fmtMoney(p.net) + '；× ' + fmtPct(p.rate, 0) + ' − 累進差額 ' + fmtMoney(p.diff) + ' ＝ ' + fmtMoney(p.taxBefore) + '；股利 ' + fmtMoney(s.dividends) + ' × 28% ＝ ' + fmtMoney(p.dividendTax) + '；合計 ' + fmtMoney(p.payable) + '。', means: '股利不管多少都是 28%；所得級距到 40% 的人比較可能划算。' })`
+5. `r.provisional`：`h('p', { class: 'note' }, r.year + ' 年度的基本生活費財政部還沒公告（通常 11 月下旬），先用每人 ' + fmtMoney(r.params.basicLiving) + ' 估；只影響家裡人多、收入低的情況。')`
+6. `h('p', { class: 'note' }, '只算一個申報戶的綜合所得稅；沒算最低稅負制、已經被扣繳的稅、二代健保補充保費。實際以報稅系統試算為準。')`，接 todo：`['股利的二代健保補充保費，看 ', link('dividend.html', '⑩ 股息與除權息'), '。']`
+**example**：`{ year: '115', married: 'no', people: 1, elderly: NaN, salaries: [800000], otherIncome: NaN, dividends: 300000, itemized: NaN, otherSpecial: NaN }`
+範例結果必須有：建議「合併計稅」、少繳 92,680；兩種都先扣掉 464,000；合併要繳 8,120（所得淨額 636,000、12%、累進差額 42,700、33,620、抵減 25,500）；分開要繳 100,800（336,000、5%、16,800、84,000）；有「基本生活費還沒公告」那段 note。
+**怎麼讀**：`figure({ src: '../img/divtax/comic.webp', alt: 第 4 節圖 3 四格文字完整寫出 })`，接三段：
+- 「股利要報綜合所得稅，有兩種算法擇一：合併計稅是把股利加進所得照級距算，再減股利的 8.5%（每戶最多 8 萬，抵不完可以退）；分開計稅是股利單獨按 28% 算。」
+- 「大多數人合併比較省：級距 5%、12%、20% 的人，減掉 8.5% 之後股利的稅率遠低於 28%，甚至可以退稅。所得到 40% 級距、股利又多的人，分開才可能比較省。」
+- 「這裡用的是財政部公告的免稅額、扣除額和級距；每年會依物價調整，報稅時以報稅系統為準。」
 最後 `disclaimer('general')`。
 
-## 4. 生四張卡通圖（用你的生圖功能）
+## 4. ⑱ `js/pages/fx.js`
+
+import：`h, toolHeader, disclaimer, figure, selectField`（components）、`wizard, numberInput, explain, withHelp, tokenBox`（wizard）、`fxPlan, ratePair, FX_CURRENCIES`（core/fx）、`fetchFxRate, getToken, setToken`（net/price）、`parseNum, fmtMoney, fmtPct`（format）、`TOOLS`。
+`params(s)`：`{ twdIn: s.twdIn, rateIn: { buy: s.inBuy, sell: s.inSell }, feeIn: blank(s.feeIn) ? 0 : s.feeIn, foreignNow: s.foreignNow, rateNow: { buy: s.nowBuy, sell: s.nowSell }, feeOut: blank(s.feeOut) ? 0 : s.feeOut }`
+`cur = s => FX_CURRENCIES.find(c => c.code === s.currency)?.label || s.currency`；`rate4 = x => (+x.toFixed(4)).toString()`；`fx2 = x => (+x.toFixed(2)).toLocaleString('zh-TW')`。
+自動抓匯率共用一個頁內函式 `fillRates(currency, kind, date, buyInput, sellInput, status)`：`fetchFxRate(currency, { date, token: getToken() })` → `ratePair(r.row, kind)`；有值就填兩格，狀態「臺灣銀行 {r.date} 牌告{kind === 'cash' ? '（現鈔）' : '（即期）'}：買入 {buy}、賣出 {sell}。你的銀行可能不同，可以改。」；`ratePair` 是 null →「臺灣銀行 {r.date} 沒有{現鈔／即期}報價，請自己填。」；失敗顯示 message。用 `seq` 防舊回應、`isConnected` 檢查（照 trigger5050.js）。
+
+**步驟 1「當初換匯」**
+- hint：「看銀行 App 的換匯紀錄：付了多少台幣、成交匯率。只記得日期的話，填日期會自動抓那天的牌告匯率。」
+- about：「台幣換外幣用『銀行賣出』匯率；同一天的『銀行買入』匯率用來算價差。」
+- figure：`../img/fx/step1.webp`，alt 照第 4 節圖 6 的文字完整寫出。
+- body：
+  - `selectField({ id: 'currency', label: '幣別', options: FX_CURRENCIES.map(c => ({ value: c.code, label: c.label + '（' + c.code + '）' })), value: s.currency || 'USD' })`
+  - `withHelp(selectField({ id: 'kind', label: '換的是', termId: 'fx-spread', options: [{ value: 'spot', label: '即期（存進外幣帳戶、複委託）' }, { value: 'cash', label: '現鈔（領現金）' }], value: s.kind || 'spot' }), { text: ['投資海外股票通常是即期：錢在帳戶裡，不領現金。', '現鈔的價差比較大。'] })`
+  - 日期欄（照 trigger5050.js 的日期欄寫法，id `dateIn`，標籤「哪一天換的（選填）」，副標「填了會自動抓臺灣銀行那天的牌告匯率」，`max` 今天）；幣別、種類、日期任一改變且日期有值 → `fillRates(…, 'inBuy', 'inSell')`。
+  - `numberInput({ id: 'twdIn', label: '付出的台幣', plain: '含手續費，總共花了多少', suffix: '元', value: s.twdIn })`
+  - `numberInput({ id: 'inSell', label: '銀行賣出匯率', termId: 'fx-spread', plain: '台幣換外幣用這個', value: s.inSell, help: { text: ['1 外幣＝多少台幣。換匯紀錄上的成交匯率就是這個。', '有議價或優惠的話填你實際成交的。'] } })`
+  - `numberInput({ id: 'inBuy', label: '銀行買入匯率', plain: '同一天的另一個價格，用來算價差', value: s.inBuy })`
+  - `numberInput({ id: 'feeIn', label: '換匯手續費（選填）', plain: '留白＝0', suffix: '元', value: s.feeIn })`
+  - `tokenBox()`
+- read：存 `currency, kind, dateIn, twdIn, inSell, inBuy, feeIn`；`twdIn`、兩個匯率任一空白 → 錯誤「請填付出的台幣和兩個匯率。」；`fxPlan(params({ ...s, nowBuy: s.inBuy, nowSell: s.inSell, foreignNow: NaN }))` 檢查。
+
+**步驟 2「外幣現在值多少」**
+- hint：「看外幣帳戶或複委託 App：股票市值＋剩下的外幣現金。只想知道換匯來回少多少，就留白。」
+- about：「外幣的漲跌和匯率的漲跌分開算，最後再合起來看換回台幣賺多少。」
+- body：先放 `h('p', { class: 'muted' }, '當初換到約 ' + fx2((s.twdIn - (blank(s.feeIn) ? 0 : s.feeIn)) / s.inSell) + ' ' + cur(s) + '。')`；再 `numberInput({ id: 'foreignNow', label: '現在外幣總值（選填）', plain: '留白＝跟換到的一樣', suffix: s.currency, value: s.foreignNow })`
+- read：存；`fxPlan(params({ ...s, nowBuy: s.inBuy, nowSell: s.inSell }))` 檢查。
+
+**步驟 3「現在換回台幣」**
+- hint：「換回台幣用『銀行買入』匯率。已經自動帶入今天的臺灣銀行牌告，可以改成你銀行的。」
+- body：狀態文字＋`numberInput({ id: 'nowBuy', label: '銀行買入匯率', plain: '外幣換回台幣用這個', value: s.nowBuy })`、`numberInput({ id: 'nowSell', label: '銀行賣出匯率', plain: '用來算現在的價差', value: s.nowSell })`、`numberInput({ id: 'feeOut', label: '換回手續費（選填）', plain: '留白＝0', suffix: '元', value: s.feeOut })`。
+  **只有 `blank(s.nowBuy) && blank(s.nowSell)` 時**，render 後呼叫 `fillRates(s.currency, s.kind, '', …)` 抓今天的匯率。
+- read：兩個匯率任一空白 → 錯誤「請填現在的兩個匯率。」；存；`fxPlan(params(s))` 檢查。
+
+**結果**（`const r = fxPlan(params(s))`）依序：
+1. `explain({ label: '換回台幣', value: fmtMoney(r.twdOut), tone: 'info', how: fx2(r.foreignNow) + ' ' + cur(s) + ' × 銀行買入 ' + s.nowBuy + ' − 手續費 ' + fmtMoney(params(s).feeOut) + ' ＝ ' + fmtMoney(r.twdOut) + '。', means: '當初付出 ' + fmtMoney(s.twdIn) + '。' })`
+2. `explain({ label: '台幣損益', value: signedMoney(r.pnl) + '（' + signedPct(r.ret, 2) + '）', tone: r.pnl >= 0 ? 'ok' : 'bad', how: fmtMoney(r.twdOut) + ' − ' + fmtMoney(s.twdIn) + '。', means: '用外幣看是 ' + signedPct(r.assetRet) + '，換回台幣變成 ' + signedPct(r.ret, 2) + '，差在匯率和價差。' })`
+3. 「錢去哪了」：`h('h3', {}, '錢去哪了')`＋表格 `h('table', { class: 'trade-table' })`，欄「項目｜金額｜怎麼算」，6 列（金額用 `signedMoney(Math.round(x))`，合計用 `signedMoney(Math.round(r.pnl))`）：
+   - 外幣資產漲跌｜parts.asset｜`'外幣多了 ' + fx2(r.foreignNow - r.foreignIn) + ' × 當初中間價 ' + rate4(r.midIn)`
+   - 匯率變動｜parts.fx｜`'現在外幣 × 中間價 ' + rate4(r.midIn) + ' → ' + rate4(r.midNow) + '（' + signedPct(r.fxRet, 2) + '）'`
+   - 換入價差｜parts.spreadIn｜`'賣出 ' + s.inSell + ' 比中間價貴 ' + rate4(s.inSell - r.midIn)`
+   - 換回價差｜parts.spreadOut｜`'買入 ' + s.nowBuy + ' 比中間價便宜 ' + rate4(r.midNow - s.nowBuy)`
+   - 手續費｜parts.fees｜「換入＋換回」
+   - 合計｜pnl｜「＝ 台幣損益」
+   表下 `h('p', { class: 'note' }, '中間價＝(銀行買入＋銀行賣出) ÷ 2，用來把匯率的漲跌和銀行的價差分開。')`
+4. `explain({ label: '換完馬上換回會少', value: fmtPct(r.spreadPctIn, 2), tone: 'warn', how: '(賣出 ' + s.inSell + ' − 買入 ' + s.inBuy + ') ÷ 賣出 ' + s.inSell + '。', means: '只換匯、什麼都不做的成本，還沒算手續費。' + (s.kind === 'cash' ? '現鈔的價差比即期大。' : '') })`
+5. `r.breakEvenBuy !== null`：`explain({ label: '不虧的匯率', value: rate4(r.breakEvenBuy), tone: s.nowBuy >= r.breakEvenBuy ? 'ok' : 'warn', how: '(付出 ' + fmtMoney(s.twdIn) + ' ＋ 換回手續費 ' + fmtMoney(params(s).feeOut) + ') ÷ 現在外幣 ' + fx2(r.foreignNow) + '。', means: '銀行買入匯率要高於這個，換回台幣才不虧；現在是 ' + s.nowBuy + '。' })`
+6. `h('p', { class: 'note' }, '匯率是臺灣銀行牌告（經 FinMind）或你填的數字，實際以你的銀行成交為準；沒算海外股票的稅（例：美股股利預扣）和券商手續費。')`
+**example**：`{ currency: 'USD', kind: 'spot', dateIn: '', twdIn: 330000, inBuy: 32.9, inSell: 33, feeIn: NaN, foreignNow: 11000, nowBuy: 31.4, nowSell: 31.5, feeOut: NaN }`
+範例結果必須有：換回 345,400；台幣損益 +15,400（+4.67%）、外幣 +10.0%；錢去哪了 +32,950／−16,500／−500／−550／+0（或 −0 顯示成「+0」都可，回報註明）／+15,400；中間價 32.95 → 31.45（−4.55%）；換完馬上換回會少 0.30%；不虧的匯率 30。
+**怎麼讀**：`figure({ src: '../img/fx/comic.webp', alt: 第 4 節圖 5 四格文字完整寫出 })`，接三段：
+- 「投資海外要換兩次匯：台幣換外幣時用銀行賣出匯率（比較貴），換回台幣時用銀行買入匯率（比較便宜），中間差的就是銀行的價差。」
+- 「外幣資產漲了，換回台幣不一定賺一樣多：外幣變便宜（台幣升值）會吃掉一部分報酬，外幣變貴則會多賺。」
+- 「這裡把台幣損益拆成四塊：資產漲跌、匯率變動、兩次換匯價差、手續費，加起來剛好等於總損益。」
+最後 `disclaimer('general')`。
+
+## 5. 生六張卡通圖（用你的生圖功能）
 
 每張把 `00-風格與角色.md` 全文＋該張提示全文合在一起當生圖提示，生成直式 1024×1536 PNG：
 
 | # | 提示檔 | 存成 |
 |---|---|---|
-| 1 | `docs/figures/cartoon/lifelev-01-人生槓桿體檢四格.md` | `docs/figures/cartoon/out/lifelev-comic.png` |
-| 2 | `docs/figures/cartoon/lifelev-02-借的錢拿去哪.md` | `docs/figures/cartoon/out/lifelev-step3.png` |
-| 3 | `docs/figures/cartoon/kelly-01-幾倍最划算四格.md` | `docs/figures/cartoon/out/kelly-comic.png` |
-| 4 | `docs/figures/cartoon/kelly-02-報酬和波動.md` | `docs/figures/cartoon/out/kelly-step1.png` |
+| 1 | `docs/figures/cartoon/valuation-01-估價三把尺四格.md` | `docs/figures/cartoon/out/valuation-comic.png` |
+| 2 | `docs/figures/cartoon/valuation-02-用自己的歷史當尺.md` | `docs/figures/cartoon/out/valuation-step3.png` |
+| 3 | `docs/figures/cartoon/divtax-01-股利報稅二選一四格.md` | `docs/figures/cartoon/out/divtax-comic.png` |
+| 4 | `docs/figures/cartoon/divtax-02-抵減有上限.md` | `docs/figures/cartoon/out/divtax-step3.png` |
+| 5 | `docs/figures/cartoon/fx-01-換過去再換回來四格.md` | `docs/figures/cartoon/out/fx-comic.png` |
+| 6 | `docs/figures/cartoon/fx-02-買入賣出別看反.md` | `docs/figures/cartoon/out/fx-step1.png` |
 
 - 生完自己看一遍：中文與數字要和提示一字不差；錯了重生該張，**每張最多重生 2 次**，仍有錯就留最後一張並在回報寫出哪裡錯。
-- 頁面引用 `img/lifelev/comic.webp`、`step3.webp`、`img/kelly/comic.webp`、`step1.webp`（Opus 轉檔搬過去，你不用做）。
+- 頁面引用 `img/valuation/comic.webp`、`step3.webp`、`img/divtax/comic.webp`、`step3.webp`、`img/fx/comic.webp`、`step1.webp`（Opus 轉檔搬過去，你不用做）。
 - 不能生圖就跳過本節，回報寫「無法生圖」，頁面照常交付。
 
-## 5. PROOF_CMD（必跑，貼結果）
+## 6. PROOF_CMD（必跑，貼結果）
 
 ```
 npm.cmd test
-node -e "Promise.all([import('./js/core/lifelev.js'),import('./js/core/kelly.js')]).then(([a,b])=>{const r=a.lifeLeveragePlan({holdings:[{code:'0050',shares:10000,price:195.5},{code:'00631L',shares:20000,price:26.3}],cash:500000,realEstate:12000000,debts:[{kind:'mortgage',balance:8000000,rate:.022,years:25},{kind:'credit',balance:1000000,monthly:18000,invest:1000000}],monthlyExpense:40000,monthlyIncome:100000});const k=b.kellyPlan({cagr1x:.08,vol:.2,borrowRate:.03,cashRate:.01,current:1.4});console.log(r.financialNet,r.marketLeverage.toFixed(2),Math.round(r.monthlyFree),r.marketLeverageAfter.toFixed(2),k.full.toFixed(2),k.breakEven.toFixed(2),k.rows.length)})"
-node --check js/pages/lifelev.js
-node --check js/pages/kelly.js
-node --check js/ui/wizard.js
+node -e "Promise.all([import('./js/core/valuation.js'),import('./js/core/divtax.js'),import('./js/core/fx.js')]).then(([v,t,f])=>{const a=v.valuationPlan({price:580,eps:32,bvps:140,dividend:16,pe:[15,20,25],pb:[3,4,5],yields:[.04,.03,.025]});const b=t.dividendTaxPlan({people:1,salaries:[800000],dividends:300000});const c=f.fxPlan({twdIn:330000,rateIn:{buy:32.9,sell:33},foreignNow:11000,rateNow:{buy:31.4,sell:31.5}});console.log(a.methods.map(m=>m.zone).join(','),Math.round(b.combined.payable),Math.round(b.separate.payable),b.best,Math.round(c.pnl),c.breakEvenBuy)})"
+node --check js/pages/valuation.js
+node --check js/pages/divtax.js
+node --check js/pages/fx.js
 ```
-預期：`ℹ tests 145`、`ℹ pass 145`、`ℹ fail 0`；第二行 `1981000 1.52 7307 1.66 1.69 3.76 7`；後三行無輸出。
+預期：`ℹ tests 155`、`ℹ pass 155`、`ℹ fail 0`；第二行 `cheap-fair,fair-expensive,fair-expensive 8120 100800 combined 15400 30`；後三行無輸出。
 
-## 6. 回報 `collab/from-codex.md`（欄位寫死，不貼程式碼）
+## 7. 回報 `collab/from-codex.md`（欄位寫死，不貼程式碼）
 
 ```
 ## 完成項
