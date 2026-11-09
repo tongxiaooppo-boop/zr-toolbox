@@ -20,7 +20,7 @@ export const TOOLS = Object.freeze([
   { id: 'margin', no: '⑤', group: 'stock', title: '融資維持率', oneLine: '融資買股，跌到多少會被追繳', href: 'tools/margin.html', gate: 4, status: 'planned', terms: [] },
   { id: 'dca', no: '⑦', group: 'stock', title: '定期定額與年化報酬', oneLine: '每月扣款滾出多少、年化報酬怎麼算', href: 'tools/dca.html', gate: 4, status: 'planned', terms: [] },
   { id: 'cost', no: '⑨', group: 'stock', title: '買賣成本與損益', oneLine: '手續費、證交稅、零股、當沖，賣多少才不虧', href: 'tools/cost.html', gate: 4, status: 'ready', terms: ['broker-fee', 'transaction-tax', 'break-even-price', 'tick-size'] },
-  { id: 'dividend', no: '⑩', group: 'stock', title: '股息與除權息', oneLine: '領多少股利、扣多少健保費、除息後股價、填息', href: 'tools/dividend.html', gate: 4, status: 'planned', terms: ['ex-dividend', 'dividend-yield', 'fill-dividend', 'nhi-premium'] }
+  { id: 'dividend', no: '⑩', group: 'stock', title: '股息與除權息', oneLine: '領多少股利、扣多少健保費、除息後股價、填息', href: 'tools/dividend.html', gate: 4, status: 'ready', terms: ['ex-dividend', 'dividend-yield', 'fill-dividend', 'nhi-premium'] }
 ]);
 
 export const SHORTCUTS = Object.freeze([
