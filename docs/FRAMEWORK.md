@@ -1,6 +1,6 @@
 # zr-toolbox 框架（Gate 0 定稿）
 
-- 版本：**2026-11-08 v4**（v2＝加入圖解流程、首頁四大分組、Gate 4；v3＝`components.js` 新增 `lineChart`、Gate 2 拆 2a／2b、Codex 只跑單元測試；v4＝PWA 定案（network-first、不做新版提示）、頁殼加 manifest／`pwa.js`、Gate 3 拆 3a／3b、① 文案放 `js/data/calcGuide.js`）。改介面要改這份並升版，所有還寫舊行為的段落一起改。
+- 版本：**2026-11-09 v5**（v5＝逐步精靈：新增 `js/ui/wizard.js`、`js/net/price.js`、`js/core/holdings.js`、`js/data/stocks.js`、`pledgePlan`；④ 改為精靈樣板；FinMind 抓價與 token 存瀏覽器；第 4 節樣板改為 `js/pages/pledge.js`。v2＝加入圖解流程、首頁四大分組、Gate 4；v3＝`components.js` 新增 `lineChart`、Gate 2 拆 2a／2b、Codex 只跑單元測試；v4＝PWA 定案（network-first、不做新版提示）、頁殼加 manifest／`pwa.js`、Gate 3 拆 3a／3b、① 文案放 `js/data/calcGuide.js`）。改介面要改這份並升版，所有還寫舊行為的段落一起改。
 - 依據：[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)、[HANDOFF.md](HANDOFF.md)。
 
 ## 1. 技術約定
@@ -9,7 +9,8 @@
 - 所有連結用相對路徑（部署在 GitHub Pages 的 `/<repo>/` 底下也能用）。
 - 手機優先：390px 寬不得水平捲動（冒煙測試會檢查）。
 - 不用 `innerHTML` 組畫面，一律用 `js/ui/components.js` 的 `h()` 與元件（防 XSS、樣式一致）。
-- 不用 localStorage 存計算輸入（v1 不做）。工具箱本身不抓 FinMind（token 教學只教原計算機怎麼用），所以也不存 token；`finmind.js` 留給日後要抓股價的工具。
+- 不用 localStorage 存計算輸入。**例外（v5，使用者 2026-11-08）**：FinMind token 存在使用者自己的瀏覽器（`js/net/price.js` 的 `getToken`／`setToken`，key `zr-toolbox.finmind-token`），只送給 FinMind；讀寫一律 try/catch。
+- 抓股價只能經 `js/net/price.js` 的 `fetchClose`（沒 token 先匿名查，每小時 300 次；錯誤照 `finmindAction`）；頁面與 core 不准自己 `fetch`。
 - PWA：network-first（有網路永遠拿新版，離線用最後看過的版本），所以**不做新版提示**、不用維護快取版本號（使用者 2026-11-08 授權 Opus 定）。
 
 ## 2. 目錄與模組邊界
@@ -27,12 +28,15 @@ js/data/calcGuide.js       ① 原計算機逐欄教程＋FinMind token 教學�
 js/pwa.js                  每頁載入，註冊 sw.js
 sw.js、manifest.webmanifest、icon-192.png、icon-512.png   PWA（根目錄）
 js/ui/components.js        共用 UI 元件（簽名見檔頭註解；Gate 0 定死，v3 加 lineChart）
+js/ui/wizard.js            精靈元件（v5）：wizard、holdingsInput／readHoldings、tokenBox、explain、numberInput（簽名見檔頭註解，外包不得改）
+js/net/price.js            唯一連網模組（v5）：priceUrl、fetchClose（可注入 fetchFn 測試）、getToken／setToken
+js/data/stocks.js          常見代號 → 名稱（只顯示用）
 js/pages/<id>.js           各工具頁：組欄位 → 呼叫 core → 顯示結果。不寫公式。
 tests/*.test.js            node:test 單元測試
 scripts/smoke.mjs          冒煙測試（無頭 Chrome，逐頁按「帶入範例」）
 ```
 
-依賴方向只能 `pages → ui, core, data`；`ui → data, core/format`；`core` 不依賴任何其他層。
+依賴方向只能 `pages → ui, core, data`；`ui → data, core, net`；`net → core/finmind`；`core` 不依賴任何其他層。
 
 ## 3. 純函式介面（`js/core`，Gate 0 已實作＋測試）
 
@@ -45,6 +49,8 @@ scripts/smoke.mjs          冒煙測試（無頭 Chrome，逐頁按「帶入範�
 | decay.js | `simulateDaily(indexReturns, {leverage=2, dailyCost=0})` → `{indexPath, leveredPath, indexTotal, leveredTotal, naive, gap}`；`makeScenario('chop'|'trend', days, size)` | ⑥ | 新 |
 | drawdown.js | `recoveryGain(d)`、`maxDrawdown(values)` → `{mdd, peakIndex, troughIndex}`、`yearsToRecover(d, r)` | ⑧ | 新 |
 | exposure.js | `exposureNow({positions:[{value,beta}], cash, debt})` → `{assets, net, exposure, assetBasis, netBasis, leverageRatio}`；`betaPlan(p)` | ⑪（及 ① 教程對照） | betaPlan 為 research-model 移植 |
+| holdings.js | `CODE_RE`、`normalizeCode(text)`、`holdingSummary(list)` → `{rows, cost, value, gain, gainPct}`（錯誤訊息標明第幾檔） | 所有精靈的持股步驟 | v5 新 |
+| pledge.js（v5） | `pledgePlan({holdings, debt, rate, days, call, target, collateralQ, use})` → `{summary, rows, nowRatio, callDrop, interest, perStock[{code, callPrice, vsBuy}], useFactor, useLossAtCall}`；多檔擔保品視為同時同幅漲跌；`use`：'cash' 0 倍、'same' 1 倍、'lever' 2 倍（粗估） | ④ 精靈 | v5 新，內部呼叫 `pledgeTable` |
 | finmind.js | `finmindAction({status, usedToken, retried})` → `{action, message}` | 日後抓股價的工具（v1 工具箱不抓 FinMind） | 新 |
 
 **單位規約**：core 一律用小數，不用百分比數字——比例、跌幅、利率、維持率都是小數（利率 3%＝`0.03`、追繳線 130%＝`1.3`、跌 30%＝`0.3`、權重 40%＝`0.4`）；金額為新台幣元；`days` 為日曆天整數。頁面欄位讓使用者輸入百分比數字（例 130），**頁面自己除以 100** 再傳進 core，顯示時用 `fmtPct`。
@@ -53,17 +59,21 @@ scripts/smoke.mjs          冒煙測試（無頭 Chrome，逐頁按「帶入範�
 
 **FinMind 回應規則**（`finmindAction`，決策 D5 的落實版）：200 正常；402 顯示「申請免費會員 token（每小時 600 次）」教學；**403 一律停止**（可能是 IP 被封 30 分鐘，清 token 或重試只會更糟）；400／401 且有帶 token 且還沒重試 → 不帶 token 重試一次，**重試回 200 才清掉 token**（400 也可能是參數錯，不能直接判定 token 壞）；其他一律停止並請使用者手動輸入股價。
 
-## 4. 工具頁樣板（照抄 `js/pages/trigger5050.js`）
+## 4. 工具頁樣板（v5：精靈，照抄 `js/pages/pledge.js`）
 
-每頁由上到下固定五段：
+每頁由上到下：
 
-1. `toolHeader(tool)`（tool 從 `TOOLS` 依 id 取）
-2. 輸入卡：每個欄位 `numberField`／`selectField`，`label`＝正式名稱，`plain`＝一句白話副標，有術語就給 `termId`（ⓘ，一欄最多一顆）；卡片最後一個是 `exampleButton(values, update)`
-3. 結果卡：`<div class="result" aria-live="polite">`，`app` 的 `input` 事件即時重算；有缺欄位時顯示「填完 N 格就會算」；錯誤用 `showError(result, e.message)`
-4. 「怎麼讀」卡：**先放至少一張圖解** `figure({src, alt, caption})`，再 2–3 段白話
-5. `disclaimer('general')`；**原計算機教程與 ⑪ 用 `disclaimer('executable')`**（決策補充 1：可執行不等於安全）
+1. `toolHeader(tool)`
+2. `wizard({ steps, result, example })`：
+   - 輸入步驟每步一個主題（例 ④：持股 → 借款 → 契約規則），每步 `hint` 一句「去哪裡找這個數字」；欄位用 `numberInput`／`selectField`，`plain` 寫白話與例子，有術語給 `termId`。
+   - 有持股的工具第 1 步用 `holdingsInput`＋`tokenBox`，`read` 裡呼叫 `holdingSummary` 檢查。
+   - `read` 把百分比照使用者輸入存（例 130），`result` 裡才除以 100 傳進 core。
+   - `result` 用一串 `explain({label, value, tone, how, means, todo})`：**每個數字都要有「怎麼來的」（帶入使用者自己的數字寫出算式）與「代表什麼」**，有行動就寫「要做什麼」；表格放最後。
+   - `example`：完整 state，數字和圖解一致；第 1 步的「帶入範例」直接跳到結果（冒煙測試靠它）。
+3. 「怎麼讀」卡：至少一張圖解＋2–3 段白話（同 v4）。
+4. `disclaimer(...)` 放最後。
 
-做完一個工具：在 `tools.js` 把 `status` 改成 `'ready'`、填 `terms`；用到的術語必須已在 `glossary.js`。
+舊的單一表單頁（②③⑥⑧⑪）在改成精靈之前照舊運作；改的時候公式不動，只換輸入流程。
 
 ## 5. 圖解（使用者 2026-11-08：每個工具都要圖文解說，圖交給 sol 畫）
 

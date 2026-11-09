@@ -1,6 +1,7 @@
 // 工具④：質押維持率壓力測試。公式自 D:\ok\zr-calc\research-model.js 的 stress() 移植，
 // 只把 remedy 值改名：'repay'＝拿現金還款、'collateral'＝補擔保品（舊名 'cash'）。兩種算法不同，要分開教。
 import { nonnegative } from './validate.js';
+import { holdingSummary } from './holdings.js';
 
 /**
  * @param p {shares, pledgePrice, price, collateralQ, debt, newDebt, credit, investRatio, purchasePrice,
@@ -44,4 +45,33 @@ export function pledgeStress(p, decline) {
 /** 一次算多個跌幅（預設 10–50%），頁面畫表用 */
 export function pledgeTable(p, declines = [.1, .2, .3, .4, .5]) {
   return declines.map(d => ({ decline: d, ...pledgeStress(p, d) }));
+}
+
+/**
+ * ④ 精靈用（v5 新增）：多檔擔保品＋借款 → 壓測表與逐項解說要用的數字。
+ * 假設所有擔保品同時跌一樣多（質押 0050 這類大盤 ETF 時接近事實），所以把總市值當成一檔來壓測。
+ * @param {{holdings:{code,shares,buyPrice,nowPrice}[], debt:number, rate:number, days:number,
+ *          call:number, target:number, collateralQ:number, use:'cash'|'same'|'lever'}} p
+ *   rate、call、target、collateralQ 都是小數（3%＝0.03、130%＝1.3）；use＝借來的錢拿去做什麼：
+ *   'cash' 留現金、'same' 買同一類大盤 ETF（跟著跌 1 倍）、'lever' 買正二（粗估跟著跌 2 倍）
+ * @returns {{summary, rows, collateral, interest, stressedDebt, nowRatio, callDrop,
+ *           perStock:{code, nowPrice, callPrice, vsBuy}[], useFactor, useLossAtCall}}
+ */
+export function pledgePlan(p) {
+  const summary = holdingSummary(p.holdings);
+  if (!['cash', 'same', 'lever'].includes(p.use)) throw new Error('請選擇借來的錢拿去做什麼。');
+  if (!(p.debt > 0)) throw new Error('借款要大於 0；沒有借款就不會被追繳。');
+  const v = summary.value;
+  const rows = pledgeTable({ shares: 1, pledgePrice: v, price: v, purchasePrice: v, collateralQ: p.collateralQ,
+    debt: p.debt, newDebt: 0, credit: 0, investRatio: 0, rate: p.rate, days: p.days, call: p.call,
+    restore: p.target, safety: p.target, reserve: 0, remedy: 'repay', q: 1 });
+  const r0 = rows[0];
+  const perStock = summary.rows.map(r => {
+    const callPrice = r.nowPrice * (1 - r0.callDrop);
+    return { code: r.code, nowPrice: r.nowPrice, callPrice, vsBuy: callPrice / r.buyPrice - 1 };
+  });
+  const useFactor = { cash: 0, same: 1, lever: 2 }[p.use];
+  return { summary, rows, collateral: r0.collateral, interest: r0.stressedDebt - p.debt, stressedDebt: r0.stressedDebt,
+    nowRatio: r0.nowRatio, callDrop: r0.callDrop, perStock, useFactor,
+    useLossAtCall: p.debt * Math.min(1, useFactor * Math.max(0, r0.callDrop)) };
 }

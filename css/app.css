@@ -103,3 +103,25 @@ td:first-child,th:first-child{text-align:left}
 .guide-field h3{font-size:16px;margin:0 0 4px}
 .tip{font-size:14px;color:var(--muted)}
 .map{font-size:14px;color:var(--accent)}
+
+/* v5 精靈（js/ui/wizard.js，所有精靈工具共用） */
+.wizard-dots{display:flex;gap:6px;list-style:none;padding:0;margin:0 0 8px}
+.wizard-dots li{flex:1;height:6px;border-radius:3px;background:var(--line)}
+.wizard-dots li.done{background:var(--accent);opacity:.5}
+.wizard-dots li.now{background:var(--accent)}
+.wizard-title:focus{outline:none}
+.wizard-nav{display:flex;justify-content:space-between;gap:8px;margin-top:12px}
+.wizard-error{color:var(--bad);font-size:14px;margin:8px 0 0;min-height:1em}
+.wizard-jump{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:12px}
+.wizard-jump small{color:var(--muted);width:100%}
+.explain{border-top:1px solid var(--line);padding:10px 0}
+.explain:first-child{border-top:0;padding-top:0}
+.explain p{margin:6px 0 0;font-size:14px}
+.holding{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px}
+.holding input{width:100%}
+.holding-grid{display:grid;grid-template-columns:1fr;gap:0}
+@media (min-width:480px){.holding-grid{grid-template-columns:repeat(3,1fr);gap:8px}}
+.holding-name{color:var(--muted);font-weight:400}
+.holding-status{display:block;color:var(--muted);font-size:13px;margin-top:4px}
+.link-button{background:none;border:0;color:var(--bad);padding:0;font-size:14px;cursor:pointer}
+.token-box input{width:100%;margin-top:6px}

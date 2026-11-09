@@ -24,6 +24,12 @@
 5. 沒有 FinMind token → 現價手動填，旁邊放 token 教學連結。
 6. 使用者追加：研究範圍加「圍繞正二與各類 ETF 的股票常識」；調研改派**訂閱 Codex sol**（面板可上網），取代下方第 2、2b 步的 luna／Opus WebSearch。任務書 `collab/to-codex.md`（研究任務 R v4，產出 `docs/research/R1–R3`；R2／R3 的每個網頁留原文全文於 `docs/research/來源/原文/`〔gitignore，只留本機〕＋sol 用自己理解的轉寫筆記於 `docs/research/來源/`〔會 commit〕），驗收 `node scripts/check-research.mjs`。Codex 回報後 Opus 抽查網址與稅率數字，再合併成清單給使用者挑選排序。
 
+**2026-11-09 進度（Opus）**：
+- 研究 R 完成（Codex sol，Opus 驗收：check OK、轉寫筆記與原文 8 字重疊極低、抽查證交稅 0.3%／ETF 0.1%、當沖 0.15% 至 2027-12-31、債券 ETF 免徵至 2026-12-31、二代健保 2.11% 皆與原文一致）。合併清單 [research/候選清單.md](research/候選清單.md)，**使用者照 Opus 建議順序拍板**：④ 樣板 → ⑨ 買賣成本與損益 → ⑩ 股息與除權息 → ⑦ 定期定額 → ⑤ 融資融券 → ⑮ 平均成本 → 其餘 A 類改精靈 → ⑬⑭ → ⑯⑰⑱；歷史回測類不做。
+- 框架 **v5** 完成（Opus 自己寫）：`js/ui/wizard.js`、`js/net/price.js`、`js/core/holdings.js`、`js/data/stocks.js`、`pledgePlan`；④ 已改成精靈樣板。tests 60、smoke 9 全過；無頭 Chrome 實測輸入 0050 真的抓到 FinMind 收盤價、四步走完、回第 1 步值還在、390px 無水平捲動。
+- 小調整（使用者第 5 點的延伸）：沒有 token 也先匿名抓（每小時 300 次，原計算機就是這樣），抓不到才手動填。
+- **下一步**：等使用者看過 ④ 樣板（線上或本機）點頭 → Opus 定 ⑨ 的 core（`cost.js`：手續費、證交稅、ETF 0.1%、當沖 0.15%、零股低消、損益兩平）＋測試預期值 → 寫 `collab/to-codex.md` 派 Codex 做 ⑨ 頁（照抄 `js/pages/pledge.js`）。
+
 **下次開工順序（Opus）**：
 1. 先跟使用者確認上面「目標樣子」，用 1–2 個畫面草圖（ASCII 或 artifact）對齊，**沒對齊不寫程式**。
 2. 派 luna／DeepSeek Flash 讀 77 筆資料，**先分兩類**：(a) 有計算方法 → 整理成「方法 → 需要的輸入 → 輸出 → 對應現有 core 函式或缺什麼」；(b) 純科普 → 只記可用在哪個科普頁或解說。Opus 核對後，把 (a) 交給使用者挑選與排序。
@@ -41,7 +47,7 @@
 4. 之後才分批派 Codex 改各工具、做新工具。
 
 
-- 現行版本：決策 2026-11-08（[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)）；框架 **2026-11-08 v4**（[FRAMEWORK.md](FRAMEWORK.md)）
+- 現行版本：決策 2026-11-08（[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)）；框架 **2026-11-09 v5**（[FRAMEWORK.md](FRAMEWORK.md)）
 - 狀態：**Gate 3a 完成**（2026-11-08，① 逐欄教程＋token 教學，Codex sol 一輪過、Opus 未修改）。PROOF_CMD 實測：tests 51 全過；smoke pages 9 全過。Gate 0–2 同日完成。
 - 手機實機：使用者 2026-11-08 回報線上版可以打開。尚未確認：加到主畫面、離線開啟。
 - （以下 Gate 4–7 計畫已被上方「方向修正」取代，待重排；內容與大仁數字仍可用）
@@ -58,7 +64,7 @@
 - 今天（2026-11-08）結束時：master＝origin/master，工作目錄乾淨；tests 51、smoke pages 9 全過；Codex 面板沒有進行中的任務（`collab/to-codex.md` 是已完成的 3a）。
 - **已部署**（2026-11-08，使用者同意公開）：https://tongxiaooppo-boop.github.io/zr-toolbox/ （GitHub `tongxiaooppo-boop/zr-toolbox`，public，Pages 來源 `master` 根目錄，MIT）。之後每個 Gate 驗收完 `git push` 就會更新（Pages 約 1 分鐘生效）。
 - **Codex 面板環境限制**（Gate 1 發現）：PowerShell 擋 `npm.ps1`，要用 `npm.cmd`；沙箱裡 `npm run smoke` 開不了無頭 Chrome 會卡住。任務書的 PROOF_CMD 改成：Codex 只跑 `npm.cmd test`，smoke 由 Opus 跑。
-- 驗收指令：`npm test && npm run smoke`（現行預期見上方狀態）。
+- 驗收指令：`npm test && npm run smoke`（現行預期：tests 60 全過、smoke pages 9 全過）。
 - 使用者 2026-11-08 補充：工具箱分四大類（正二教學／正二變種／正二槓桿／其他股票計算機，含融資等原 v2 項目），**每個工具都要圖文解說，圖由 sol 畫**（流程見 FRAMEWORK.md 第 5 節）。（「⑪ 擔任白話版、不另做」已被 Gate 7 推翻，見上方追加三件事。）
 
 ## 這是什麼
