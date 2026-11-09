@@ -25,16 +25,31 @@ if (r1ids.length !== new Set(r1ids).size) fail('R1 有重複 ID');
 const cats = { 計算: 0, 科普: 0, 兩者: 0 };
 for (const r of r1) { if (r[1] in cats) cats[r[1]]++; else fail(`R1 ${r[0]} 類別不合法：${r[1]}`); }
 
-// R2、R3：每列最後一欄要有 http 連結
+// R2、R3：最後一欄要有本機來源檔「來源/xxx.md」與原網址；來源檔要有網址、抓取日期、摘錄
+const seen = new Set();
 function urls(file, min, name) {
   const rs = rows(file);
   if (rs.length < min) fail(`${name} 只有 ${rs.length} 列，至少 ${min}`);
-  rs.forEach(r => { if (!/https?:\/\//.test(r[r.length - 1])) fail(`${name}「${r[0]}」最後一欄沒有來源網址`); });
+  rs.forEach(r => {
+    const last = r[r.length - 1];
+    if (!/https?:\/\//.test(last)) fail(`${name}「${r[0]}」最後一欄沒有原網址`);
+    const locals = [...last.matchAll(/來源\/[^\s)\]|]+\.md/g)].map(m => m[0]);
+    if (!locals.length) fail(`${name}「${r[0]}」最後一欄沒有本機來源檔`);
+    for (const l of locals) {
+      const f = 'docs/research/' + l;
+      if (!existsSync(f)) { fail(`${name}「${r[0]}」來源檔不存在：${l}`); continue; }
+      if (seen.has(f)) continue; seen.add(f);
+      const t = readFileSync(f, 'utf8');
+      if (!/網址[:：]\s*https?:\/\//.test(t)) fail(`${l} 沒有「網址：」`);
+      if (!/抓取日期[:：]\s*20\d\d-\d\d-\d\d/.test(t)) fail(`${l} 沒有「抓取日期：YYYY-MM-DD」`);
+      if (!/## 摘錄/.test(t) || t.split('## 摘錄')[1].trim().length < 200) fail(`${l} 的「## 摘錄」少於 200 字`);
+    }
+  });
   return rs.length;
 }
 const n2 = urls('docs/research/R2-常用計算機.md', 25, 'R2');
 const n3 = urls('docs/research/R3-ETF常識.md', 20, 'R3');
 
-console.log(`R1 ${r1.length}/${ids.length}（計算 ${cats.計算}、科普 ${cats.科普}、兩者 ${cats.兩者}）；R2 ${n2} 列；R3 ${n3} 列`);
+console.log(`R1 ${r1.length}/${ids.length}（計算 ${cats.計算}、科普 ${cats.科普}、兩者 ${cats.兩者}）；R2 ${n2} 列；R3 ${n3} 列；本機來源檔 ${seen.size} 個`);
 console.log(bad ? `NG ${bad}` : 'OK');
 process.exit(bad ? 1 : 0);
