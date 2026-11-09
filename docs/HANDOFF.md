@@ -42,7 +42,8 @@
   - 簡化（頁面註明）：不算券商把融資金額／保證金取整數、融券價款不扣費用與借券費、不算假除權息。
   - **已上線（2026-11-09）**：Codex 一輪過（頁面＋兩張圖，0 次重生）；兩張圖逐字核對無誤，轉 `img/margin/*.webp`，卡片 ready。Opus 只改一處文案：已低於追繳線時，參考價說明改成「要漲回／跌回這個價格」。無頭 Chrome 實測範例與「融資＋融券」手動流程數字全對。tests 87、smoke 13 全過。
 - **UI 風格已定（使用者 2026-11-09）：第 5 套 Neo-brutalism 粗框硬陰影**。樣板 [ui/style-5-neo-brutalism.html](ui/style-5-neo-brutalism.html)＋截圖 `docs/ui/style-5-*.png`（5 套原 demo 在 `D:\ok\zr-ui-demo\`，不在 repo）。重點：米黃底 `#fff4c9`、白卡片、3px 黑框、`5px 5px 0` 硬陰影、橘紅主按鈕 `#ff5a36`、結果卡依語意填色（藍資訊、綠賺、黃警告、紅錯誤）、表頭橘紅、小圓角 6px；深色模式框線與陰影改淺色。計算機都做完後統一改 `css/app.css`（＋`components.js`／`wizard.js` 需要時），不逐頁改。注意：深色模式 demo 沒截圖驗證過；Sonnet 評「可信感較低」，數字區要保持好讀。
-- **再下一步**：⑲ 退休提領。（原文：⑤ 融資融券（core 由 Opus 寫：研究 R2-06 RSI20 融資融券試算＋R2-01 證交所指南；併融券、整戶維持率；任務書照 ⑦ 格式「頁面＋生圖一份」）→ ⑲ 退休提領（使用者 2026-11-09 定：todo2 財務計算機只納入退休提領，⑦ 之後加「停扣後再滾」選項；詳見 [research/候選清單.md](research/候選清單.md) 末節）。）
+- **⑲ 進度（2026-11-09）**：Opus 寫好 `js/core/retire.js`（`retirePlan`、`annuityFactor`，移植 todo2 PRD 4.7 成長型年金；改正 todo2 在報酬＝通膨時少除 (1＋i)；勞保月退金改「其他每月固定收入」；加月初／月底領、4% 法則對照、想花多少→要存多少）＋`tests/retire.test.js`（7 項，todo2 三個鎖定值 49,768.29／39,875.32＋65,311.81／36,500.69 全對上，另用逐月加總現值獨立驗算）；⑦ `dcaPlan` 加「停扣後再滾」（`holdYears`／`holdReturn`，+1 項測試）；3 個術語（通膨、實質購買力、4% 法則）；tools.js 加 ⑲（status 先 `planned`，圖到了再改 ready）；卡通提示 `retire-01`→`out/retire-comic.png`、`retire-02`→`out/retire-step3.png`；任務書 `collab/to-codex.md`（⑲ v1：⑲ 頁面＋⑦ 加兩格與「帶到退休提領」連結＋生圖）待 Codex 面板做。tests 95 全過。
+- **再下一步**：Codex 做完 ⑲ → Opus 驗收（轉 webp、status ready、smoke 應為 14）→ ⑮ 平均成本。（原文：⑤ 融資融券（core 由 Opus 寫：研究 R2-06 RSI20 融資融券試算＋R2-01 證交所指南；併融券、整戶維持率；任務書照 ⑦ 格式「頁面＋生圖一份」）→ ⑲ 退休提領（使用者 2026-11-09 定：todo2 財務計算機只納入退休提領，⑦ 之後加「停扣後再滾」選項；詳見 [research/候選清單.md](research/候選清單.md) 末節）。）
 
 **下次開工順序（Opus）**：
 1. 先跟使用者確認上面「目標樣子」，用 1–2 個畫面草圖（ASCII 或 artifact）對齊，**沒對齊不寫程式**。
@@ -61,7 +62,7 @@
 4. 之後才分批派 Codex 改各工具、做新工具。
 
 
-- 現行版本：決策 2026-11-08（[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)）；框架 **2026-11-09 v5.1**（[FRAMEWORK.md](FRAMEWORK.md)）
+- 現行版本：決策 2026-11-08（[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)）；框架 **2026-11-09 v5.3**（[FRAMEWORK.md](FRAMEWORK.md)）
 - 狀態：**Gate 3a 完成**（2026-11-08，① 逐欄教程＋token 教學，Codex sol 一輪過、Opus 未修改）。PROOF_CMD 實測：tests 51 全過；smoke pages 9 全過。Gate 0–2 同日完成。
 - 手機實機：使用者 2026-11-08 回報線上版可以打開。尚未確認：加到主畫面、離線開啟。
 - （以下 Gate 4–7 計畫已被上方「方向修正」取代，待重排；內容與大仁數字仍可用）
@@ -78,7 +79,7 @@
 - 今天（2026-11-08）結束時：master＝origin/master，工作目錄乾淨；tests 51、smoke pages 9 全過；Codex 面板沒有進行中的任務（`collab/to-codex.md` 是已完成的 3a）。
 - **已部署**（2026-11-08，使用者同意公開）：https://tongxiaooppo-boop.github.io/zr-toolbox/ （GitHub `tongxiaooppo-boop/zr-toolbox`，public，Pages 來源 `master` 根目錄，MIT）。之後每個 Gate 驗收完 `git push` 就會更新（Pages 約 1 分鐘生效）。
 - **Codex 面板環境限制**（Gate 1 發現）：PowerShell 擋 `npm.ps1`，要用 `npm.cmd`；沙箱裡 `npm run smoke` 開不了無頭 Chrome 會卡住。任務書的 PROOF_CMD 改成：Codex 只跑 `npm.cmd test`，smoke 由 Opus 跑。
-- 驗收指令：`npm test && npm run smoke`（現行預期：tests 87 全過、smoke pages 13 全過）。
+- 驗收指令：`npm test && npm run smoke`（現行預期：tests 95 全過、smoke pages 13 全過；⑲ 上線後 14）。
 - 使用者 2026-11-08 補充：工具箱分四大類（正二教學／正二變種／正二槓桿／其他股票計算機，含融資等原 v2 項目），**每個工具都要圖文解說，圖由 sol 畫**（流程見 FRAMEWORK.md 第 5 節）。（「⑪ 擔任白話版、不另做」已被 Gate 7 推翻，見上方追加三件事。）
 
 ## 這是什麼

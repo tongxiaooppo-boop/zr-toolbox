@@ -56,3 +56,14 @@ test('dca ⑦: bad inputs give a readable message', () => {
   assert.throws(() => dcaPlan({ monthly: 5000, years: 10, annualReturn: 0.05, initial: -1 }), /持股市值/);
   assert.throws(() => dcaPlan({ monthly: 5000, years: 10, annualReturn: 0.05, stepUp: 2 }), /調升/);
 });
+test('dca ⑦: stop paying, then let it grow (todo2 conservative roll) — 20 years at 6%, then 10 years at 3%', () => {
+  const r = dcaPlan({ monthly: 5000, years: 20, annualReturn: 0.06, holdYears: 10, holdReturn: 0.03 });
+  assert.equal(Math.round(r.heldValue), 3061749); assert.equal(r.totalYears, 30); // 2,278,228.84 × 1.03^10
+  assert.equal(Math.round(r.finalValue), 2278229); assert.equal(r.fees, 1680); assert.equal(r.rows.length, 20);
+  const same = dcaPlan({ monthly: 5000, years: 20, annualReturn: 0.06, holdYears: 5 });
+  close(same.heldValue, same.finalValue * Math.pow(1.06, 5), 1e-6);
+  const none = dcaPlan({ monthly: 5000, years: 20, annualReturn: 0.06 });
+  assert.equal(none.heldValue, none.finalValue); assert.equal(none.totalYears, 20);
+  assert.throws(() => dcaPlan({ monthly: 5000, years: 20, annualReturn: 0.06, holdYears: 1.5 }), /停扣/);
+  assert.throws(() => dcaPlan({ monthly: 5000, years: 20, annualReturn: 0.06, holdYears: 5, holdReturn: 3 }), /停扣後年報酬/);
+});
