@@ -1,6 +1,6 @@
 # zr-toolbox 框架（Gate 0 定稿）
 
-- 版本：**2026-11-09 v5.4**（v5.4＝⑮ `avgcost.js`；`cost.js` 抽出 `breakEvenPrice`、`sellProceeds`（⑨⑮ 共用，tradeCost 行為不變）；`wizard.js` 新增 `lotsInput`／`readLots`（同一檔分次買進）與 `holdingsInput` 的 `side: 'lot'`。v5.3＝⑲ `retire.js`、⑦ `dcaPlan` 加停扣後再滾（`holdYears`／`holdReturn`）；⑲ 頁面讀網址 `?pool=` 接 ⑦ 帶過來的金額，不改 wizard。v5.1＝v5.1＝說明版面：桌面左計算機、右說明欄，手機說明在下方；步驟可帶 `about`＋`figure`；格子用 `withHelp` 掛說明（可附小圖）；共用圖放 `img/common/`。v5＝逐步精靈：新增 `js/ui/wizard.js`、`js/net/price.js`、`js/core/holdings.js`、`js/data/stocks.js`、`pledgePlan`；④ 改為精靈樣板；FinMind 抓價與 token 存瀏覽器；第 4 節樣板改為 `js/pages/pledge.js`。v2＝加入圖解流程、首頁四大分組、Gate 4；v3＝`components.js` 新增 `lineChart`、Gate 2 拆 2a／2b、Codex 只跑單元測試；v4＝PWA 定案（network-first、不做新版提示）、頁殼加 manifest／`pwa.js`、Gate 3 拆 3a／3b、① 文案放 `js/data/calcGuide.js`）。改介面要改這份並升版，所有還寫舊行為的段落一起改。
+- 版本：**2026-11-09 v5.5**（v5.5＝⑪ 改精靈「正二要買多少」：新增 `balance.js`（朋友計算機線上版 `calc()` 照抄移植，`tests/balance.test.js` 直接跑線上版原始碼比對）、`wizard.js` 新增 `betaHoldingsInput`／`readBetaHoldings`；舊 `exposure.js`（`exposureNow`、`betaPlan`）保留不刪、新頁不用。v5.4＝⑮ `avgcost.js`；`cost.js` 抽出 `breakEvenPrice`、`sellProceeds`（⑨⑮ 共用，tradeCost 行為不變）；`wizard.js` 新增 `lotsInput`／`readLots`（同一檔分次買進）與 `holdingsInput` 的 `side: 'lot'`。v5.3＝⑲ `retire.js`、⑦ `dcaPlan` 加停扣後再滾（`holdYears`／`holdReturn`）；⑲ 頁面讀網址 `?pool=` 接 ⑦ 帶過來的金額，不改 wizard。v5.1＝v5.1＝說明版面：桌面左計算機、右說明欄，手機說明在下方；步驟可帶 `about`＋`figure`；格子用 `withHelp` 掛說明（可附小圖）；共用圖放 `img/common/`。v5＝逐步精靈：新增 `js/ui/wizard.js`、`js/net/price.js`、`js/core/holdings.js`、`js/data/stocks.js`、`pledgePlan`；④ 改為精靈樣板；FinMind 抓價與 token 存瀏覽器；第 4 節樣板改為 `js/pages/pledge.js`。v2＝加入圖解流程、首頁四大分組、Gate 4；v3＝`components.js` 新增 `lineChart`、Gate 2 拆 2a／2b、Codex 只跑單元測試；v4＝PWA 定案（network-first、不做新版提示）、頁殼加 manifest／`pwa.js`、Gate 3 拆 3a／3b、① 文案放 `js/data/calcGuide.js`）。改介面要改這份並升版，所有還寫舊行為的段落一起改。
 - 依據：[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)、[HANDOFF.md](HANDOFF.md)。
 
 ## 1. 技術約定
@@ -28,7 +28,7 @@ js/data/calcGuide.js       ① 原計算機逐欄教程＋FinMind token 教學�
 js/pwa.js                  每頁載入，註冊 sw.js
 sw.js、manifest.webmanifest、icon-192.png、icon-512.png   PWA（根目錄）
 js/ui/components.js        共用 UI 元件（簽名見檔頭註解；Gate 0 定死，v3 加 lineChart）
-js/ui/wizard.js            精靈元件（v5）：wizard、holdingsInput／readHoldings、tokenBox、explain、numberInput（簽名見檔頭註解，外包不得改）
+js/ui/wizard.js            精靈元件（v5）：wizard、holdingsInput／readHoldings、betaHoldingsInput／readBetaHoldings（v5.5）、lotsInput／readLots、tokenBox、explain、numberInput（簽名見檔頭註解，外包不得改）
 js/net/price.js            唯一連網模組（v5）：priceUrl、fetchClose（可注入 fetchFn 測試）、getToken／setToken
 js/data/stocks.js          常見代號 → 名稱（只顯示用）
 js/pages/<id>.js           各工具頁：組欄位 → 呼叫 core → 顯示結果。不寫公式。
@@ -55,6 +55,7 @@ scripts/smoke.mjs          冒煙測試（無頭 Chrome，逐頁按「帶入範�
 | dca.js（v5.3） | `monthlyRate(annual)`、`cagr(start, end, years)`、`dcaPlan({initial, monthly, years, annualReturn, timing, stepUp, discount, minFee, holdYears, holdReturn})` → `{monthlyRate, months, principal, contributed, fees, finalValue, gain, gainPct, lumpValue, lumpFee, lumpGain, naiveCagr, heldValue, totalYears, rows}` | ⑦ | v5 新；holdYears 為 v5.3 |
 | retire.js（v5.3） | `annuityFactor(i, g, n, timing)`、`retirePlan({pool, years, annualReturn, inflation, residual, timing, otherIncome, targetSpend})` → `{monthlyRate, monthlyGrowth, months, pvResidual, available, factor, firstWithdraw, lastWithdraw, firstTotal, lastTotal, lastOtherReal, totalWithdrawn, withdrawRate, rule4Monthly, needWithdraw, needPool, gap, endBalance, rows}`；成長型年金（每月照通膨調高），i＝g 時 A＝N÷(1＋i)（改正 todo2 的 ÷N） | ⑲ | todo2 PRD 4.7 移植 |
 | avgcost.js（v5.4） | `lotMinFee(shares, {minFeeBoard, minFeeOdd})`、`buyLot(shares, price, opt)`、`avgCostPlan({kind, lots:[{shares, price}], nowPrice, discount, minFeeBoard, minFeeOdd, add:{price, shares?}, targetAvg})` → `{rate, feeRate, before, addLot, after, target}`；Summary＝`{lots, shares, amount, fees, totalCost, avgNoFee, avgWithFee, breakEven, breakEvenTick, sell, gain, gainPct, needRise}`；手續費逐筆算、整股／零股各自低消；target 到不了回 `{ok:false, message}` | ⑮ | R2-11 |
+| balance.js（v5.5） | `checkBalanceRows(list, kind)` → `{value, exposure}`；`balanceSnap(stocks, cash, debt, bexp)`；`balancePlan({stocks, levers, cash, debt, target, minCash, basis, allowBorrow, fullRebalance})` → `{fullMode, label, S, D, L, LB, bw, bwDefaulted, base, targetExposure, X, delta, available, canBuy, shortage, borrow, cashAfter, debtAfter, before, after, rows, achieved, enough, reached, capped, borrowCantReach, notes}`；算法照抄朋友線上版（含 X<0 設 0、現金不足不自動借、總資產口徑借款分支）；weight 為百分比數字（例外於單位規約，照原頁） | ⑪ | 朋友計算機線上版 calc() |
 | finmind.js | `finmindAction({status, usedToken, retried})` → `{action, message}` | 日後抓股價的工具（v1 工具箱不抓 FinMind） | 新 |
 
 **單位規約**：core 一律用小數，不用百分比數字——比例、跌幅、利率、維持率都是小數（利率 3%＝`0.03`、追繳線 130%＝`1.3`、跌 30%＝`0.3`、權重 40%＝`0.4`）；金額為新台幣元；`days` 為日曆天整數。頁面欄位讓使用者輸入百分比數字（例 130），**頁面自己除以 100** 再傳進 core，顯示時用 `fmtPct`。

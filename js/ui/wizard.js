@@ -21,6 +21,11 @@
 //   lotsInput({ id, rows, max, label, first })  同一檔分次買進（v5.4，⑮）：每筆「股數＋買入價」，可「＋再加一筆」、刪掉
 //     rows：[{ shares, price }]；max 預設 10；first：第 1 筆的編號（預設 1，⑮ 第 1 筆在持股格裡時傳 2）
 //   readLots(id) → [{ shares, price }]       只讀畫面，檢查交給 core
+//   betaHoldingsInput({ id, rows, max, label, kind })  ⑪ 持股（v5.5）：每列「代號／名稱＋股數＋現價＋Beta」，沒有買入價
+//     kind：'stock'（其他持股：max 預設 10，可以全部刪光，刪光時顯示「沒有其他持股」一行）｜'lever'（正二：max 預設 3，至少留 1 列）
+//     rows：[{ code, shares, price, beta }]（數字可為 NaN／空；beta 空白＝core 預設 stock 1、lever 2）
+//     代號是台股代號（normalizeCode 通過）→ 跟 holdingsInput 一樣自動抓收盤價並顯示名稱；不是 → 不抓價，提示「現價自己填」
+//   readBetaHoldings(id) → [{ code, shares, price, beta }]   只讀畫面，檢查交給 core 的 checkBalanceRows
 //   tokenBox()                               FinMind token（選填）：存在這台裝置、清除、連到申請教學
 //   explain({ label, value, tone, how, means, todo })   結果的一項：大數字＋▸怎麼來的／▸代表什麼／▸要做什麼
 import { h, infoChip, metric, figure } from './components.js';

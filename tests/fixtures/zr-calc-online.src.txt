@@ -1,0 +1,189 @@
+// 朋友計算機線上版 https://tongxiaooppo-boop.github.io/zr-calc/ 的 <script> 原文（從 const $ 到 FinMind 區塊之前），逐字複製，不准改。
+// 來源：docs/research/來源/原文/O-01_朋友計算機線上版.html（研究 O 2026-11-09 抓取；原文資料夾只留本機）。tests/balance.test.js 用假 DOM 執行它的 calc()。
+const $ = id => document.getElementById(id);
+const num = v => { const n = parseFloat(String(v).replace(/,/g, '')); return isFinite(n) ? n : 0; };
+const fmt = n => Math.round(n).toLocaleString('zh-TW');
+const pct = n => isFinite(n) ? (n * 100).toFixed(1) + '%' : '—';
+const x2 = n => isFinite(n) ? n.toFixed(2) : '—';
+const KEY = 'zr-calc-v2';
+const CODE_RE = /^[0-9A-Za-z]{4,8}$/;
+
+function addRow(o = {}) {
+  const d = document.createElement('div');
+  d.className = 'item';
+  d.innerHTML =
+    '<div class="g3"><div><label>代號／名稱</label><input class="n" type="text" autocapitalize="characters"></div>' +
+    '<div><label>股數</label><input class="s" type="text" inputmode="decimal" placeholder="0"></div>' +
+    '<div><label>現價</label><input class="p" type="text" inputmode="decimal" placeholder="0"></div></div>' +
+    '<div class="g3"><div><label>Beta</label><input class="b" type="text" inputmode="decimal"></div>' +
+    '<div><label>目標比重 %（選填）</label><input class="w" type="text" inputmode="decimal" placeholder="不填"></div>' +
+    '<div><label>市值（占總資產）</label><div class="mv">0</div></div></div>' +
+    '<div class="act"><span class="pd"></span><button type="button" class="del">✕</button></div>';
+  d.querySelector('.n').value = o.n || '';
+  d.querySelector('.s').value = o.s || '';
+  d.querySelector('.p').value = o.p || '';
+  d.querySelector('.b').value = o.b != null ? o.b : '1';
+  d.querySelector('.w').value = o.w || '';
+  d.querySelector('.pd').textContent = o.d || '';
+  d.querySelector('.del').onclick = () => { d.remove(); update(); };
+  $('rows').appendChild(d);
+}
+
+const esc = t => String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function syncLevBtn() {
+  const n = document.querySelectorAll('#levRows .item').length;
+  $('addLev').style.display = n >= 3 ? 'none' : '';
+  document.querySelectorAll('#levRows .del').forEach(b => { b.style.visibility = n <= 1 ? 'hidden' : 'visible'; });
+}
+
+function addLev(o = {}) {
+  if (document.querySelectorAll('#levRows .item').length >= 3) return;
+  const d = document.createElement('div');
+  d.className = 'item';
+  d.innerHTML =
+    '<div class="g3"><div><label>代號</label><input class="n" type="text" autocapitalize="characters"></div>' +
+    '<div><label>股數</label><input class="s" type="text" inputmode="decimal" placeholder="0"></div>' +
+    '<div><label>現價</label><input class="p" type="text" inputmode="decimal" placeholder="0"></div></div>' +
+    '<div class="g3"><div><label>預估 Beta</label><input class="b" type="text" inputmode="decimal"></div>' +
+    '<div><label>目標比重 %（選填）</label><input class="w" type="text" inputmode="decimal" placeholder="自動"></div>' +
+    '<div><label>市值（占總資產）</label><div class="mv">0</div></div></div>' +
+    '<div class="act"><span class="pd"></span><button type="button" class="del">✕</button></div>';
+  d.querySelector('.n').value = o.n || '';
+  d.querySelector('.s').value = o.s || '';
+  d.querySelector('.p').value = o.p || '';
+  d.querySelector('.b').value = o.b != null && o.b !== '' ? o.b : '2';
+  d.querySelector('.w').value = o.w || '';
+  d.querySelector('.pd').textContent = o.d || '';
+  d.querySelector('.del').onclick = () => { d.remove(); syncLevBtn(); update(); };
+  $('levRows').appendChild(d);
+  syncLevBtn();
+}
+
+function snap(stocks, cash, debt, bexp) {
+  const A = stocks + cash, N = A - debt;
+  return {
+    A, N, stocks, cash,
+    debtRatio: A > 0 ? debt / A : NaN,
+    lev: N > 0 ? A / N : NaN,
+    expNet: N > 0 ? stocks / N : NaN,
+    bA: A > 0 ? bexp / A : NaN,
+    bN: N > 0 ? bexp / N : NaN
+  };
+}
+
+function calc() {
+  const mvs = [];
+  const mk = (r, defB, defName) => {
+    const bs = r.querySelector('.b').value.trim();
+    const price = num(r.querySelector('.p').value);
+    const v = num(r.querySelector('.s').value) * price;
+    mvs.push([r.querySelector('.mv'), v]);
+    return {
+      code: r.querySelector('.n').value.trim().toUpperCase() || defName,
+      price, v, b: bs === '' ? defB : num(bs),
+      w: Math.max(num(r.querySelector('.w').value), 0)
+    };
+  };
+  const ord = [...document.querySelectorAll('#rows .item')].map(r => mk(r, 1, '持股'));
+  const levs = [...document.querySelectorAll('#levRows .item')].map(r => mk(r, 2, '正二'));
+  // 一般持股只要有任一檔填了目標比重 → 全部持股（含正二）依比重重新分配
+  const fullMode = ord.some(o => o.w > 0);
+  const adj = fullMode ? ord.concat(levs) : levs;
+  const S = fullMode ? 0 : ord.reduce((a, o) => a + o.v, 0);
+  const D = fullMode ? 0 : ord.reduce((a, o) => a + o.v * o.b, 0);
+  const tl = fullMode ? '股票' : '正二';
+  const L = adj.reduce((a, l) => a + l.v, 0);
+  const LB = adj.reduce((a, l) => a + l.v * l.b, 0);
+  const wsum = adj.reduce((a, l) => a + l.w, 0);
+  adj.forEach(l => { l.tw = wsum > 0 ? l.w / wsum : (L > 0 ? l.v / L : 1 / adj.length); });
+  let bw = adj.reduce((a, l) => a + l.tw * l.b, 0);
+  if (!(bw > 0)) bw = 2;
+
+  const cash = num($('cash').value), debt = num($('debt').value);
+  const B = num($('B').value), minCash = num($('minCash').value);
+  const basis = $('basis').value, allowBorrow = $('borrow').checked;
+
+  const stocks = S + L;
+  const A0 = stocks + cash;
+  mvs.forEach(([el, v]) => {
+    el.innerHTML = fmt(v) + (A0 > 0 ? '<br><small style="color:var(--muted);font-weight:400">占 ' + pct(v / A0) + '</small>' : '');
+  });
+  const before = snap(stocks, cash, debt, D + LB);
+  const A = before.A, N = before.N;
+
+  if (basis === 'net' && N <= 0) {
+    $('out').innerHTML = '<div class="card err">淨資產 ≤ 0，無法用淨資產口徑計算，請檢查輸入。</div>';
+    return;
+  }
+  if (basis === 'asset' && A <= 0) {
+    $('out').innerHTML = '<div class="card err">總資產 ≤ 0，請檢查輸入。</div>';
+    return;
+  }
+
+  const notes = [];
+  if (fullMode) notes.push('完整重配模式：全部持股（含正二）依各檔目標比重重新分配，沒填比重的視為 0（會建議全賣）。');
+  const base = basis === 'net' ? N : A;
+  let X = (B * base - D) / bw;
+  if (X < 0) { X = 0; notes.push('非正二持股的 Beta 曝險已高於目標，正二目標設為 0，建議檢視是否要降低其他曝險。'); }
+
+  let delta = X - L;
+  const avail = cash - minCash;
+  let borrow = 0, ok = true;
+
+  if (delta > avail) {
+    if (allowBorrow) {
+      if (basis === 'asset' && bw > B) {
+        const X1 = (B * (A - L - avail) - D) / (bw - B);
+        if (X1 > X) { X = X1; delta = X - L; }
+      }
+      borrow = delta - avail;
+      notes.push('現金不足，需新增借款約 NT$ ' + fmt(borrow) + '。');
+    } else {
+      ok = false;
+      notes.push('現金不足（扣除最低保留現金後只能再買 NT$ ' + fmt(Math.max(avail, 0)) + '）。可降低目標 B，或勾選「允許新增借款」。');
+    }
+  }
+
+  const cashAfter = cash - delta + borrow;
+  const debtAfter = debt + borrow;
+  const after = snap(S + X, cashAfter, debtAfter, D + X * bw);
+  const action = delta >= 0 ? '需買進' : '需賣出';
+  const row = (name, a, b, f) => '<tr><td>' + name + '</td><td>' + f(a) + '</td><td>' + f(b) + '</td></tr>';
+
+  const detail = adj.map(l => {
+    const t = X * l.tw, dl = t - l.v;
+    const sh = l.price > 0 ? Math.abs(dl) / l.price : NaN;
+    return '<tr><td>' + esc(l.code) + '</td><td>' + fmt(t) + '</td><td>' + (dl >= 0 ? '買 ' : '賣 ') + fmt(Math.abs(dl)) +
+      (isFinite(sh) ? '<br><small style="color:var(--muted)">約 ' + fmt(sh) + ' 股</small>' : '') + '</td></tr>';
+  }).join('');
+
+  $('out').innerHTML =
+    '<div class="card"><h2>結果</h2>' +
+    '<div class="hero"><div class="sub">' + tl + '目標總市值</div><div class="big">NT$ ' + fmt(X) + '</div>' +
+    '<div class="sub">目前 NT$ ' + fmt(L) + '　→　' + action + ' <b>NT$ ' + fmt(Math.abs(delta)) + '</b></div></div>' +
+    '<table><tr><th>標的</th><th>目標市值</th><th>買賣</th></tr>' + detail + '</table>' +
+    '<table style="margin-top:10px">' +
+    (fullMode ? '' : '<tr><td>非正二 Beta 曝險額 D</td><td>' + fmt(D) + '</td></tr>') +
+    '<tr><td>目標 Beta 曝險額</td><td>' + fmt(B * base) + '</td></tr>' +
+    '<tr><td>' + tl + '加權 Beta</td><td>' + x2(bw) + '</td></tr>' +
+    '<tr><td>平衡後現金</td><td>' + fmt(cashAfter) + '</td></tr>' +
+    '<tr><td>是否可執行</td><td><span class="tag ' + (ok ? 'ok' : 'bad') + '">' + (ok ? '可以' : '不行') + '</span></td></tr>' +
+    '</table>' +
+    notes.map(t => '<p class="note">' + t + '</p>').join('') +
+    '</div>' +
+    '<div class="card"><h2>平衡前後比較</h2><table>' +
+    '<tr><th></th><th>平衡前</th><th>平衡後</th></tr>' +
+    row('總資產', before.A, after.A, fmt) +
+    row('淨資產', before.N, after.N, fmt) +
+    row('負債比', before.debtRatio, after.debtRatio, pct) +
+    row('資產槓桿比', before.lev, after.lev, x2) +
+    row('股票市值曝險', before.stocks, after.stocks, fmt) +
+    row('股票曝險／淨資產', before.expNet, after.expNet, pct) +
+    row('資產口徑 Beta', before.bA, after.bA, x2) +
+    row('淨資產口徑 Beta', before.bN, after.bN, x2) +
+    row(tl + '市值', L, X, fmt) +
+    row('現金', before.cash, after.cash, fmt) +
+    '</table></div>';
+}
+

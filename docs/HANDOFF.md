@@ -50,6 +50,9 @@
   - **更正出處（使用者 2026-11-09）**：朋友那格是使用者請手機版 Claude 依計算模板 md 做的（`docs/research/來源/O-08_原始規格：正二平衡計算器模板.md`），後來小改。Opus 對照結果寫在 O 報告末節「追加：原始規格」：公式、X<0 設 0（第 3 條＝刻意）、現金不足不自動借款都照規格；借款後分母、多檔正二、完整重配是後來補的；第 4 條是規格缺口。
   - Gate 7 備忘：① 方法標「使用者以手機版 Claude 依計算模板製作，後續小改」；② 「可以執行」≠ 達標（D 組可執行但仍 1.0、目標 0.8）；③ 借款後總資產分母要重算，**不移植 T01 補款公式**；④ Opus 任務書的 C 組標錯：B＝1.4 < 正二 Beta 2，不會觸發 DIFFERENCES 第 4 條，Gate 7 寫比對測試時另加 B ≥ 2 且現金不足的案例。
 - **朋友計算機收錄決定（使用者 2026-11-09）**：[decision/決策-2026-11-09-朋友計算機收錄.md](decision/決策-2026-11-09-朋友計算機收錄.md)：⑪ 升級成精靈「正二要買多少」、算法照抄線上版＋比對測試（＝Gate 7＋⑪ 改精靈合併）、七個難懂處都要圖文、網路公開做法不另收（⑪ 說明欄放對照表）、① 保留。原始規格已移到 `docs/research/來源/O-08_原始規格：正二平衡計算器模板.md`。
+- **⑪ 正二要買多少 進度（2026-11-09，Opus）**：照決策 2026-11-09 寫好 `js/core/balance.js`（`balancePlan`＝朋友線上版 `calc()` 照抄移植，加判讀 `enough`／`reached`／`capped`／`borrowCantReach`；`checkBalanceRows` 給步驟檢查）＋`tests/balance.test.js`（15 項：O 組 A–D、B≥2 總資產借款組、現金不足、完整重配等鎖定值手算；另有 17 組輸入直接跑線上版原始碼比對，fixture `tests/fixtures/zr-calc-online.src.txt` 由 O-01 原文逐字抽出）。`calcGuide.js` 的「⑪ 對應」改指新精靈步驟、DIFFERENCES 改寫（仍 4 條）；tools.js ⑪ 標題改「正二要買多少」、加首頁捷徑；`wizard.js` 檔頭定 `betaHoldingsInput`／`readBetaHoldings` 簽名；框架 v5.5。卡通提示 `balance-01`→`out/balance-comic.png`、`balance-02`→`out/balance-step3.png`、`balance-03`→`out/balance-step4.png`；任務書 `collab/to-codex.md`（⑪ v1：元件＋頁面＋① 兩句＋三張圖）待 Codex 面板做。tests 116 全過。
+  - 舊 `exposure.js`（`exposureNow`、`betaPlan`）與其測試保留，新頁不用。① 的 `img/calc-guide/map.svg` 還寫舊 ⑪ 欄位名，UI 統一美化時重畫。
+  - 驗收時：smoke（ready 頁圖要在）、無頭 Chrome 走範例＋手動一組「兩檔正二＋借款＋總資產口徑」，數字對 PROOF_CMD 與 balance.test.js。
 - **再下一步**：之後「其餘 A 類改精靈」（先列清單給使用者看）。原文：⑮ 平均成本（加碼／攤平後均價），照 ⑦ 格式「core＋測試由 Opus 寫，頁面＋生圖一份任務書」。（原文：⑤ 融資融券（core 由 Opus 寫：研究 R2-06 RSI20 融資融券試算＋R2-01 證交所指南；併融券、整戶維持率；任務書照 ⑦ 格式「頁面＋生圖一份」）→ ⑲ 退休提領（使用者 2026-11-09 定：todo2 財務計算機只納入退休提領，⑦ 之後加「停扣後再滾」選項；詳見 [research/候選清單.md](research/候選清單.md) 末節）。）
 
 **下次開工順序（Opus）**：
@@ -69,7 +72,7 @@
 4. 之後才分批派 Codex 改各工具、做新工具。
 
 
-- 現行版本：決策 2026-11-08（[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)）；框架 **2026-11-09 v5.4**（[FRAMEWORK.md](FRAMEWORK.md)）
+- 現行版本：決策 2026-11-08（[decision/決策-2026-11-08.md](decision/決策-2026-11-08.md)）；框架 **2026-11-09 v5.5**（[FRAMEWORK.md](FRAMEWORK.md)）
 - 狀態：**Gate 3a 完成**（2026-11-08，① 逐欄教程＋token 教學，Codex sol 一輪過、Opus 未修改）。PROOF_CMD 實測：tests 51 全過；smoke pages 9 全過。Gate 0–2 同日完成。
 - 手機實機：使用者 2026-11-08 回報線上版可以打開。尚未確認：加到主畫面、離線開啟。
 - （以下 Gate 4–7 計畫已被上方「方向修正」取代，待重排；內容與大仁數字仍可用）
@@ -86,7 +89,7 @@
 - 今天（2026-11-08）結束時：master＝origin/master，工作目錄乾淨；tests 51、smoke pages 9 全過；Codex 面板沒有進行中的任務（`collab/to-codex.md` 是已完成的 3a）。
 - **已部署**（2026-11-08，使用者同意公開）：https://tongxiaooppo-boop.github.io/zr-toolbox/ （GitHub `tongxiaooppo-boop/zr-toolbox`，public，Pages 來源 `master` 根目錄，MIT）。之後每個 Gate 驗收完 `git push` 就會更新（Pages 約 1 分鐘生效）。
 - **Codex 面板環境限制**（Gate 1 發現）：PowerShell 擋 `npm.ps1`，要用 `npm.cmd`；沙箱裡 `npm run smoke` 開不了無頭 Chrome 會卡住。任務書的 PROOF_CMD 改成：Codex 只跑 `npm.cmd test`，smoke 由 Opus 跑。
-- 驗收指令：`npm test && npm run smoke`（現行預期：tests 101 全過、smoke pages 15 全過）。
+- 驗收指令：`npm test && npm run smoke`（現行預期：tests 116 全過、smoke pages 15 全過；⑪ 圖到之前 smoke 的 exposure 頁會缺圖）。
 - 使用者 2026-11-08 補充：工具箱分四大類（正二教學／正二變種／正二槓桿／其他股票計算機，含融資等原 v2 項目），**每個工具都要圖文解說，圖由 sol 畫**（流程見 FRAMEWORK.md 第 5 節）。（「⑪ 擔任白話版、不另做」已被 Gate 7 推翻，見上方追加三件事。）
 
 ## 這是什麼
