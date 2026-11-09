@@ -38,7 +38,9 @@
   - 發現：Codex 面板可以生圖，之後「頁面＋卡通圖」併成一份任務書、使用者只打一句。
 - **⑦ 進度（2026-11-09）**：Opus 寫好 `js/core/dca.js`（`dcaPlan`、`cagr`、`monthlyRate`）＋`tests/dca.test.js`（7 項，預期值用年金公式獨立算：每月 5,000、20 年、6%、月初 → 2,278,229；手續費 1,680；硬算年化 3.26%）、3 個術語（定期定額、複利、年化報酬）、卡通提示 `dca-01`→`out/dca-comic.png`、`dca-02`→`out/dca-step3.png`；任務書 `collab/to-codex.md`（⑦ v1，頁面＋生圖一份）待 Codex 面板做。
   - **已上線（2026-11-09）**：Codex 一輪過（頁面＋兩張圖，0 次重生），Opus 未修改；兩張圖逐字核對無誤，轉 `img/dca/*.webp`，卡片 ready。tests 80、smoke 12 全過。
-- **再下一步（新對話開工）**：⑤ 融資融券（core 由 Opus 寫：研究 R2-06 RSI20 融資融券試算＋R2-01 證交所指南；併融券、整戶維持率；任務書照 ⑦ 格式「頁面＋生圖一份」）→ ⑲ 退休提領（使用者 2026-11-09 定：todo2 財務計算機只納入退休提領，⑦ 之後加「停扣後再滾」選項；詳見 [research/候選清單.md](research/候選清單.md) 末節）。
+- **⑤ 進度（2026-11-09）**：Opus 寫好 `js/core/margin.js`（`marginPlan`、`shortSummary`；融資／融券／整戶一個函式）＋`tests/margin.test.js`（7 項，預期值手算對上 R2-06 原頁：60 萬融資、市值 76 萬 → 126.67%；6／5／4 成跌 22／35／48% 碰 130%；融券漲 46.15%；目標 1÷0.6 時補現金 240,000、還融資 144,000；整戶 177.27% 不是平均 178.33%）、3 個術語（融資、融券、整戶維持率）、`holdingsInput` 新增 `side: 'short'`（欄名改融券股數／融券賣出價；向下相容）、卡通提示 `margin-01`→`out/margin-comic.png`、`margin-02`→`out/margin-step1.png`；任務書 `collab/to-codex.md`（⑤ v1，頁面＋生圖一份）待 Codex 面板做。tests 87、smoke 12 全過。
+  - 簡化（頁面註明）：不算券商把融資金額／保證金取整數、融券價款不扣費用與借券費、不算假除權息。
+- **再下一步**：⑤ Codex 回報後驗收（重跑 PROOF_CMD、smoke、逐字核對兩張圖、轉 `img/margin/*.webp`、卡片改 ready）→ ⑲ 退休提領。（原文：⑤ 融資融券（core 由 Opus 寫：研究 R2-06 RSI20 融資融券試算＋R2-01 證交所指南；併融券、整戶維持率；任務書照 ⑦ 格式「頁面＋生圖一份」）→ ⑲ 退休提領（使用者 2026-11-09 定：todo2 財務計算機只納入退休提領，⑦ 之後加「停扣後再滾」選項；詳見 [research/候選清單.md](research/候選清單.md) 末節）。）
 
 **下次開工順序（Opus）**：
 1. 先跟使用者確認上面「目標樣子」，用 1–2 個畫面草圖（ASCII 或 artifact）對齊，**沒對齊不寫程式**。
@@ -74,7 +76,7 @@
 - 今天（2026-11-08）結束時：master＝origin/master，工作目錄乾淨；tests 51、smoke pages 9 全過；Codex 面板沒有進行中的任務（`collab/to-codex.md` 是已完成的 3a）。
 - **已部署**（2026-11-08，使用者同意公開）：https://tongxiaooppo-boop.github.io/zr-toolbox/ （GitHub `tongxiaooppo-boop/zr-toolbox`，public，Pages 來源 `master` 根目錄，MIT）。之後每個 Gate 驗收完 `git push` 就會更新（Pages 約 1 分鐘生效）。
 - **Codex 面板環境限制**（Gate 1 發現）：PowerShell 擋 `npm.ps1`，要用 `npm.cmd`；沙箱裡 `npm run smoke` 開不了無頭 Chrome 會卡住。任務書的 PROOF_CMD 改成：Codex 只跑 `npm.cmd test`，smoke 由 Opus 跑。
-- 驗收指令：`npm test && npm run smoke`（現行預期：tests 80 全過、smoke pages 12 全過）。
+- 驗收指令：`npm test && npm run smoke`（現行預期：tests 87 全過、smoke pages 12 全過；⑤ 上線後 smoke 13）。
 - 使用者 2026-11-08 補充：工具箱分四大類（正二教學／正二變種／正二槓桿／其他股票計算機，含融資等原 v2 項目），**每個工具都要圖文解說，圖由 sol 畫**（流程見 FRAMEWORK.md 第 5 節）。（「⑪ 擔任白話版、不另做」已被 Gate 7 推翻，見上方追加三件事。）
 
 ## 這是什麼

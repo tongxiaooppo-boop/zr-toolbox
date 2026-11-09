@@ -13,8 +13,9 @@
 //   withHelp(fieldEl, help)                 幫任何 .field 加「說明」：help＝{ text: string|string[], img?: { src, alt } }
 //     桌面：點進格子或按「說明」→ 說明出現在右欄；手機：按「說明」→ 在格子下方展開／收起
 //   numberInput({ id, label, plain, termId, value, suffix, help })   numberField 的精靈版：value 可以是數字（NaN 會留白）
-//   holdingsInput({ id, rows, max, label })  持股輸入：代號＋買入股數＋買入價＋現價（輸入代號自動抓 FinMind 收盤價），每格內建說明
+//   holdingsInput({ id, rows, max, label, side })  持股輸入：代號＋買入股數＋買入價＋現價（輸入代號自動抓 FinMind 收盤價），每格內建說明
 //     rows：[{ code, shares, buyPrice, nowPrice }]（數字可為 NaN／空），max 預設 5
+//     side：'long'（預設）｜'short'（⑤ 融券：欄名改「融券股數」「融券賣出價」，資料仍放 shares、buyPrice）
 //   readHoldings(id) → [{ code, shares, buyPrice, nowPrice }]   只讀畫面，檢查交給 core 的 holdingSummary
 //   tokenBox()                               FinMind token（選填）：存在這台裝置、清除、連到申請教學
 //   explain({ label, value, tone, how, means, todo })   結果的一項：大數字＋▸怎麼來的／▸代表什麼／▸要做什麼
@@ -150,13 +151,22 @@ const HOLDING_HELP = {
     text: ['平均每股花多少錢。分好幾次買的，填券商 App 庫存裡的「成本均價」（也叫平均成本）。', '例：100 元買 1 張、80 元買 1 張 → 填 90。'] },
   now: { text: ['最近一個交易日的收盤價，輸入代號後會自動帶入，也可以自己改。', '抓不到時（沒網路、查詢次數用完）就手動填券商 App 上的價格。'] }
 };
+// 欄名與說明：long＝一般持股／融資；short＝融券（借股票先賣）
+const SIDE = {
+  long: { shares: ['買入股數', '看券商 App 的「庫存」；1 張＝1000 股'], buy: ['買入價', '庫存裡的「成本均價」'], help: HOLDING_HELP },
+  short: { shares: ['融券股數', '看券商 App 的「信用庫存」；1 張＝1000 股'], buy: ['融券賣出價', '信用庫存裡的「成交均價」'],
+    help: { ...HOLDING_HELP,
+      shares: { text: ['你融券賣出了幾「股」，不是幾張：1 張＝1000 股。', '看券商 App 的「信用庫存」或「融券庫存」。'] },
+      buy: { text: ['融券是借股票先賣掉，這裡填當初賣出的價格。', '分好幾次賣的，填信用庫存裡的「成交均價」。'] } } }
+};
 
-function holdingRow(r = {}, onRemove) {
+function holdingRow(r = {}, onRemove, side = 'long') {
+  const t = SIDE[side] || SIDE.long;
   const status = h('small', { class: 'holding-status', 'aria-live': 'polite' });
   const name = h('span', { class: 'holding-name' }, STOCK_NAMES[r.code] || '');
   const code = h('input', { class: 'h-code', type: 'text', autocomplete: 'off', autocapitalize: 'characters', placeholder: '例：0050', value: show(r.code), 'aria-label': '股票代號' });
-  const shares = h('input', { class: 'h-shares', type: 'text', inputmode: 'numeric', autocomplete: 'off', placeholder: '例：3000', value: show(r.shares), 'aria-label': '買入股數' });
-  const buy = h('input', { class: 'h-buy', type: 'text', inputmode: 'decimal', autocomplete: 'off', placeholder: '例：165.2', value: show(r.buyPrice), 'aria-label': '買入價' });
+  const shares = h('input', { class: 'h-shares', type: 'text', inputmode: 'numeric', autocomplete: 'off', placeholder: '例：3000', value: show(r.shares), 'aria-label': t.shares[0] });
+  const buy = h('input', { class: 'h-buy', type: 'text', inputmode: 'decimal', autocomplete: 'off', placeholder: '例：165.2', value: show(r.buyPrice), 'aria-label': t.buy[0] });
   const now = h('input', { class: 'h-now', type: 'text', inputmode: 'decimal', autocomplete: 'off', placeholder: '輸入代號後自動帶入', value: show(r.nowPrice), 'aria-label': '現價' });
   let seq = 0;
   code.addEventListener('change', async () => {
@@ -175,15 +185,15 @@ function holdingRow(r = {}, onRemove) {
     } else status.textContent = r.message + (r.action === 'show-quota-guide' ? ' 申請方式見下方 token 說明。' : '');
   });
   return h('div', { class: 'holding' },
-    withHelp(h('div', { class: 'field' }, h('label', {}, '股票代號 ', name), code, status), HOLDING_HELP.code),
+    withHelp(h('div', { class: 'field' }, h('label', {}, '股票代號 ', name), code, status), t.help.code),
     h('div', { class: 'holding-grid' },
-      withHelp(h('div', { class: 'field' }, h('label', {}, '買入股數'), h('small', { class: 'plain-sub' }, '看券商 App 的「庫存」；1 張＝1000 股'), shares), HOLDING_HELP.shares),
-      withHelp(h('div', { class: 'field' }, h('label', {}, '買入價（元）'), h('small', { class: 'plain-sub' }, '庫存裡的「成本均價」'), buy), HOLDING_HELP.buy),
-      withHelp(h('div', { class: 'field' }, h('label', {}, '現價（元）'), h('small', { class: 'plain-sub' }, '自動抓最近收盤價'), now), HOLDING_HELP.now)),
+      withHelp(h('div', { class: 'field' }, h('label', {}, t.shares[0]), h('small', { class: 'plain-sub' }, t.shares[1]), shares), t.help.shares),
+      withHelp(h('div', { class: 'field' }, h('label', {}, `${t.buy[0]}（元）`), h('small', { class: 'plain-sub' }, t.buy[1]), buy), t.help.buy),
+      withHelp(h('div', { class: 'field' }, h('label', {}, '現價（元）'), h('small', { class: 'plain-sub' }, '自動抓最近收盤價'), now), t.help.now)),
     onRemove ? h('button', { type: 'button', class: 'link-button', onclick: onRemove }, '刪掉這檔') : null);
 }
 
-export function holdingsInput({ id, rows = [{}], max = 5, label = '你的持股' }) {
+export function holdingsInput({ id, rows = [{}], max = 5, label = '你的持股', side = 'long' }) {
   const list = h('div', { class: 'holding-list' });
   const add = h('button', { type: 'button', class: 'secondary' }, '＋ 再加一檔');
   const box = h('div', { id, class: 'holdings' }, h('h3', {}, label), list, add);
@@ -192,7 +202,7 @@ export function holdingsInput({ id, rows = [{}], max = 5, label = '你的持股'
     items.forEach(el => el.querySelector('.link-button')?.toggleAttribute('hidden', items.length === 1));
     add.hidden = items.length >= max;
   };
-  const append = r => { const row = holdingRow(r, () => { row.remove(); refresh(); }); list.append(row); refresh(); };
+  const append = r => { const row = holdingRow(r, () => { row.remove(); refresh(); }, side); list.append(row); refresh(); };
   (rows.length ? rows : [{}]).forEach(append);
   add.addEventListener('click', () => { append({}); list.lastElementChild.querySelector('.h-code').focus(); });
   return box;
