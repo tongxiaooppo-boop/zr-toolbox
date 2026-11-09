@@ -12,7 +12,7 @@ export const TOOLS = Object.freeze([
   { id: 'decay', no: '⑥', group: 'learn', title: '正二不是兩倍？', oneLine: '每日 2 倍的複利偏離與波動耗損', href: 'tools/decay.html', gate: 2, status: 'ready', terms: ['daily-2x', 'volatility-decay', 'tracking-error'] },
   { id: 'glossary', no: '⑫', group: 'learn', title: '術語辭典', oneLine: 'Beta、維持率、口徑、再平衡……一句白話', href: 'tools/glossary.html', gate: 1, status: 'ready', terms: [] },
   { id: 'trigger5050', no: '②', group: 'variants', title: '50/50 觸發提醒', oneLine: '正二漲跌一半時，配回正二、現金各半', href: 'tools/trigger5050.html', gate: 0, status: 'ready', terms: ['daily-2x', 'rebalance', 'base-price'] },
-  { id: 'rebalance', no: '③', group: 'variants', title: '定期配比再平衡', oneLine: '60/40、532、442、433，股版與債版', href: 'tools/rebalance.html', gate: 1, status: 'ready', terms: ['rebalance', 'beta', 'exposure'] },
+  { id: 'rebalance', no: '③', group: 'variants', title: '定期配比再平衡', oneLine: '多檔照比例配回，算出每檔要買賣幾股', href: 'tools/rebalance.html', gate: 1, status: 'ready', terms: ['rebalance', 'beta', 'exposure'] },
   { id: 'calc-guide', no: '①', group: 'leverage', title: '朋友那格計算機怎麼用', oneLine: '原「正二平衡計算器」逐欄白話教學', href: 'tools/calc-guide.html', gate: 3, status: 'ready', terms: ['beta', 'exposure', 'basis', 'net-assets', 'leverage-ratio', 'daily-2x', 'closing-price', 'finmind-token'] },
   { id: 'exposure', no: '⑪', group: 'leverage', title: '正二要買多少', oneLine: '想要整體等於幾倍大盤？算出正二要買賣多少、錢夠不夠', href: 'tools/exposure.html', gate: 7, status: 'ready', terms: ['exposure', 'beta', 'net-assets', 'basis', 'leverage-ratio', 'daily-2x'] },
   { id: 'pledge', no: '④', group: 'leverage', title: '質押壓力測試', oneLine: '大盤跌多少會被追繳？還款與補擔保分開算', href: 'tools/pledge.html', gate: 2, status: 'ready', terms: ['pledge', 'maintenance-ratio', 'margin-call'] },

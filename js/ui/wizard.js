@@ -22,6 +22,7 @@
 //     rows：[{ shares, price }]；max 預設 10；first：第 1 筆的編號（預設 1，⑮ 第 1 筆在持股格裡時傳 2）
 //   readLots(id) → [{ shares, price }]       只讀畫面，檢查交給 core
 //   betaHoldingsInput({ id, rows, max, label, kind })  ⑪ 持股（v5.5）：每列「代號／名稱＋股數＋現價＋Beta」，沒有買入價
+//     kind：'mix'（③ 混合持股：max 預設 10，至少留 1 列；Beta 留白看代號猜）
 //     kind：'stock'（其他持股：max 預設 10，可以全部刪光，刪光時顯示「沒有其他持股」一行）｜'lever'（正二：max 預設 3，至少留 1 列）
 //     rows：[{ code, shares, price, beta }]（數字可為 NaN／空；beta 空白＝core 預設 stock 1、lever 2）
 //     代號是台股代號（normalizeCode 通過）→ 跟 holdingsInput 一樣自動抓收盤價並顯示名稱；不是 → 不抓價，提示「現價自己填」
@@ -231,14 +232,14 @@ export function readHoldings(id) {
 }
 
 // ---------- Beta 持股（v5.5） ----------
-export function betaHoldingsInput({ id, rows = [{}], kind = 'stock', max = kind === 'lever' ? 3 : 10, label = kind === 'lever' ? '你的正二' : '其他持股（不含正二）' }) {
-  const lever = kind === 'lever';
+export function betaHoldingsInput({ id, rows = [{}], kind = 'stock', max = kind === 'lever' ? 3 : 10, label = kind === 'mix' ? '這個策略裡的持股' : kind === 'lever' ? '你的正二' : '其他持股（不含正二）' }) {
+  const lever = kind === 'lever', mix = kind === 'mix';
   const list = h('div', { class: 'holding-list' });
   const add = h('button', { type: 'button', class: 'secondary' }, '＋ 再加一檔');
   const box = h('div', { id, class: 'holdings' }, h('h3', {}, label), list, add);
   const refresh = () => {
     const items = [...list.querySelectorAll('.beta-holding')];
-    items.forEach(el => el.querySelector('.link-button').toggleAttribute('hidden', lever && items.length === 1));
+    items.forEach(el => el.querySelector('.link-button').toggleAttribute('hidden', (lever || mix) && items.length === 1));
     list.querySelector('.beta-empty')?.remove();
     if (!items.length) list.append(h('p', { class: 'muted beta-empty' }, '沒有其他持股：直接按「下一步」。'));
     add.hidden = items.length >= max;
@@ -250,7 +251,7 @@ export function betaHoldingsInput({ id, rows = [{}], kind = 'stock', max = kind 
     const input = (key, placeholder, aria) => h('input', { class: `b-${key}`, type: 'text', inputmode: 'decimal', autocomplete: 'off', placeholder, value: show(r[key]), 'aria-label': aria });
     const shares = input('shares', '例：3000', '股數');
     const price = input('price', '輸入代號後自動帶入', '現價（元）');
-    const beta = input('beta', lever ? '2' : '1', 'Beta');
+    const beta = input('beta', mix ? '' : lever ? '2' : '1', 'Beta');
     let seq = 0;
     code.addEventListener('change', async () => {
       const my = ++seq, c = normalizeCode(code.value);
@@ -272,13 +273,13 @@ export function betaHoldingsInput({ id, rows = [{}], kind = 'stock', max = kind 
         ? ['正二的代號，例：00631L、00685L。最多 3 檔。', '填好會自動抓最近收盤價。']
         : ['填台股代號會自動抓最近收盤價，例：0050、2330。', '海外股票、基金這類不是台股的資產，填名稱就好，股數填 1、現價填總金額。'] }),
       h('div', { class: 'holding-grid' },
-        field('股數', lever ? '還沒買就填 0' : '1 張＝1000 股', shares, lever ? ['手上有幾股：1 張＝1000 股。', '還沒買就填 0，工具會算出要買多少。'] : ['手上有幾「股」：1 張＝1000 股，零股照實際股數填。', '已經賣光的就按「刪掉這檔」。']),
+        field('股數', (lever || mix) ? '還沒買就填 0' : '1 張＝1000 股', shares, mix ? ['手上有幾「股」：1 張＝1000 股，零股照實際股數填。', '還沒買的就填 0，工具會算出要買多少。'] : lever ? ['手上有幾股：1 張＝1000 股。', '還沒買就填 0，工具會算出要買多少。'] : ['手上有幾「股」：1 張＝1000 股，零股照實際股數填。', '已經賣光的就按「刪掉這檔」。']),
         field('現價（元）', '填好代號自動抓', price, ['最近一個交易日的收盤價，填好代號會自動帶入，可以自己改。', '抓不到時（沒網路、查詢次數用完）就手動填券商 App 上的價格。']),
-        field('Beta', lever ? '留白＝2' : '不確定就留白＝1', beta, lever ? ['正二每天約等於 2 倍大盤，留白就當 2。', '注意是「每天」2 倍，放久了會偏離。'] : ['這檔跟大盤一起漲跌的程度：0050 這類大盤 ETF 約 1，不確定就留白（當 1）。', '個股的 Beta 是估計值，會隨時間改變。'], lever ? 'daily-2x' : 'beta')),
+        field('Beta', mix ? '留白＝看代號猜' : lever ? '留白＝2' : '不確定就留白＝1', beta, mix ? ['這檔跟大盤一起漲跌的程度。留白會看代號猜：結尾 L（正二）當 2、R（反向）當 −1、B（債券 ETF）當 0，其他當 1。', '正二是「每天」約 2 倍，放久了會偏離。'] : lever ? ['正二每天約等於 2 倍大盤，留白就當 2。', '注意是「每天」2 倍，放久了會偏離。'] : ['這檔跟大盤一起漲跌的程度：0050 這類大盤 ETF 約 1，不確定就留白（當 1）。', '個股的 Beta 是估計值，會隨時間改變。'], lever ? 'daily-2x' : 'beta')),
       h('button', { type: 'button', class: 'link-button', onclick: () => { ++seq; row.remove(); refresh(); } }, '刪掉這檔'));
     list.append(row); refresh();
   };
-  (lever && !rows.length ? [{}] : rows).forEach(append);
+  ((lever || mix) && !rows.length ? [{}] : rows).forEach(append);
   refresh();
   add.addEventListener('click', () => { append({}); list.lastElementChild.querySelector('.b-code').focus(); });
   return box;

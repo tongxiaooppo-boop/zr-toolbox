@@ -1,85 +1,142 @@
-import { h, toolHeader, numberField, selectField, exampleButton, readNumbers, metric, showResult, showError, disclaimer, figure } from '../ui/components.js';
-import { TEMPLATES, rebalance } from '../core/rebalance.js';
-import { fmtMoney, fmtX } from '../core/format.js';
+﻿// 工具③ 定期配比再平衡：公式與股數取整只呼叫 core/rebalance.js。
+import { h, toolHeader, selectField, disclaimer, figure } from '../ui/components.js';
+import { wizard, betaHoldingsInput, readBetaHoldings, tokenBox, numberInput, explain, withHelp } from '../ui/wizard.js';
+import { WIZARD_TEMPLATES, guessBeta, rebalancePlan } from '../core/rebalance.js';
+import { parseNum, fmtMoney, fmtPct, fmtX } from '../core/format.js';
+import { STOCK_NAMES } from '../data/stocks.js';
 import { TOOLS } from '../data/tools.js';
 
 const tool = TOOLS.find(t => t.id === 'rebalance');
-const FIELDS = ['h0', 'h1', 'h2', 'contribution', 'fee'];
-const result = h('div', { class: 'result', 'aria-live': 'polite' });
-const today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-const templates = [
-  { value: '5050', label: '股版｜50／50（正二 50、現金 50）' },
-  { value: '6040', label: '股版｜60／40（正二 60、現金 40）' },
-  { value: '532-stock', label: '股版｜532（原型 50、正二 30、現金 20）' },
-  { value: '442-stock', label: '股版｜442（原型 40、正二 40、現金 20）' },
-  { value: '433-stock', label: '股版｜433（原型 40、正二 30、現金 30）' },
-  { value: '532-bond', label: '債版｜532（正二 50、美債 30、現金 20）' },
-  { value: '442-bond', label: '債版｜442（正二 40、美債 40、現金 20）' }
+const num = id => parseNum(document.getElementById(id)?.value);
+const named = c => STOCK_NAMES[c] ? `${c} ${STOCK_NAMES[c]}` : c;
+const price = n => `${+n.toFixed(2)} 元`;
+const link = (href, text) => h('a', { href }, text);
+const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+const periods = { 1: '每月', 3: '每季', 6: '每半年', 12: '每年' };
+
+function params(s, withDate) {
+  return { rows: s.rows.map(r => ({ ...r, weight: (s.weights[r.code] || 0) / 100 })),
+    cash: s.cash, cashWeight: (s.cashPct || 0) / 100, contribution: s.contribution || 0,
+    unit: s.unit || 1, months: s.months || 6, last: withDate ? s.last || undefined : undefined, asOf: today };
+}
+
+const steps = [
+  {
+    title: '選配置',
+    hint: '選一個常見的比例當起點，下一步可以改代號、加減檔數。',
+    about: '定期配比只看時間：選好比例和週期，時間到了就用當時的總額照比例配回，中間漲跌都不動。這和 ② 的 50/50 觸發不同，那個看的是漲跌幅。',
+    figure: { src: '../img/rebalance/step1.webp', alt: '名字一樣叫 532，內容不一樣。小安問：網路上說的 532，到底是哪一種？股版：原型 50%、正二 30%、現金 20%，約 1.1 倍大盤。債版：正二 50%、美債 30%、現金 20%，約 1 倍大盤。兩者不相等。老師說：別人說 532 先問是哪一種。自訂也可以，但每一份加起來要剛好 100%。' },
+    body: s => [withHelp(selectField({ id: 'template', label: '配置', options: Object.entries(WIZARD_TEMPLATES).map(([value, t]) => ({ value, label: t.name })), value: s.template || '532-stock' }),
+      { text: ['股版＝原型／正二／現金；債版＝正二／美債／現金。名字一樣、風險不同。', '模板裡的代號只是例子（0050、00631L、00679B），下一步可以換成你實際買的。'] })],
+    read: s => {
+      s.template = document.getElementById('template').value;
+      if (s.rowsFrom !== s.template) {
+        const t = WIZARD_TEMPLATES[s.template];
+        s.rows = t.rows.map(r => ({ code: r.code, shares: NaN, price: NaN, beta: r.beta }));
+        s.weights = Object.fromEntries(t.rows.map(r => [r.code, r.weight * 100]));
+        s.cashPct = s.template === 'custom' ? NaN : t.cash * 100;
+        s.rowsFrom = s.template;
+      }
+    }
+  },
+  {
+    title: '你的持股',
+    hint: '只填這個策略裡的持股。股數看券商 App 的庫存；還沒買的那檔股數填 0。',
+    about: '每一檔記下現在有幾股、現價多少，工具才算得出要買賣幾股。',
+    figure: { src: '../img/common/step-holdings.svg', alt: '券商 App 庫存畫面示意：代號 0050 元大台灣50、股數 10,000、成本均價 80.00、現價 100.00。股票代號填 0050，買入股數填 10000（1 張＝1000 股），買入價填 80；現價會自動抓，不用填。' },
+    body: s => {
+      const holdings = betaHoldingsInput({ id: 'rows', rows: s.rows || [], kind: 'mix' });
+      const token = tokenBox();
+      holdings.querySelectorAll('.beta-holding').forEach(row => {
+        const code = row.querySelector('.b-code');
+        if (code.value.trim() && !row.querySelector('.b-price').value.trim()) code.dispatchEvent(new Event('change'));
+      });
+      return [holdings, token];
+    },
+    read: s => {
+      s.rows = readBetaHoldings('rows').map(r => ({ ...r, shares: Number.isNaN(r.shares) ? 0 : r.shares }));
+      rebalancePlan({ rows: s.rows.map(r => ({ ...r, weight: 1 / s.rows.length })), cash: 1, cashWeight: 0 });
+    }
+  },
+  {
+    title: '現金與目標比例',
+    hint: '現金只算這個策略留的錢，不是全部存款。比例照你自己的規則填，加起來要 100%。',
+    about: '每一份要占總額幾 %。總額＝持股市值＋現金＋這次新投入。',
+    body: s => {
+      const body = h('div', {},
+        numberInput({ id: 'cash', label: '策略現金', plain: '這個策略留著的現金', suffix: '元', value: s.cash, help: { text: ['只填這個策略的現金部位（例：放在交割戶、準備配回用的錢）。', '沒有就填 0。'] } }),
+        numberInput({ id: 'contribution', label: '這次新投入', plain: '沒有就留白', suffix: '元', value: s.contribution, help: { text: ['這次要另外加進來的錢（例：這半年存下來的）。', '會一起算進總額，照比例分下去。'] } }),
+        s.rows.map(({ code }, i) => numberInput({ id: 'w-' + i, label: named(code) + ' 的比例', suffix: '%', value: s.weights?.[code] })),
+        numberInput({ id: 'cashPct', label: '現金的比例', suffix: '%', value: s.cashPct }),
+        h('p', { class: 'muted', id: 'w-sum' }),
+        withHelp(selectField({ id: 'unit', label: '下單方式', options: [{ value: '1', label: '可以買賣零股（算到 1 股）' }, { value: '1000', label: '只用整張（1 張＝1000 股）' }], value: String(s.unit || 1) }),
+          { text: ['零股：算到 1 股，最貼近目標比例。', '只用整張：不到 1 張的差額就不動，配完會跟目標差多一點。'] }));
+      const updateSum = () => {
+        const sum = [...s.rows.map((_, i) => 'w-' + i), 'cashPct'].reduce((a, id) => a + (parseNum(body.querySelector(`#${id}`).value) || 0), 0);
+        body.querySelector('#w-sum').textContent = `目前加起來 ${+sum.toFixed(2)}%`;
+      };
+      updateSum();
+      body.addEventListener('input', updateSum);
+      return [body];
+    },
+    read: s => {
+      s.cash = num('cash');
+      if (Number.isNaN(s.cash)) throw new Error('請填策略現金，沒有就填 0。');
+      s.contribution = num('contribution') || 0;
+      s.weights = Object.fromEntries(s.rows.map(({ code }, i) => [code, num('w-' + i) || 0]));
+      s.cashPct = num('cashPct') || 0;
+      s.unit = Number(document.getElementById('unit').value);
+      rebalancePlan(params(s, false));
+    }
+  },
+  {
+    title: '多久配回一次',
+    hint: '不知道上次是哪天就留白，工具照樣算今天配回的股數。',
+    about: '週期到了才配回；還沒到就不用動。',
+    body: s => [
+      selectField({ id: 'months', label: '再平衡週期', termId: 'rebalance', options: Object.entries(periods).map(([value, label]) => ({ value, label })), value: String(s.months || 6) }),
+      withHelp(h('div', { class: 'field' }, h('label', { for: 'last' }, '上次配回日（選填）'),
+        h('input', { id: 'last', type: 'date', value: s.last || '', max: today })), { text: ['上次照比例配好的那天。', '留白就不算到期日。'] })],
+    read: s => { s.months = Number(document.getElementById('months').value); s.last = document.getElementById('last').value || ''; }
+  }
 ];
 
-function dateField({ id, label, plain, value = '' }) {
-  return h('div', { class: 'field' },
-    h('label', { for: id }, label),
-    h('small', { class: 'plain-sub' }, plain),
-    h('div', { class: 'input-row' }, h('input', { id, type: 'date', value })));
+function result(s) {
+  const r = rebalancePlan(params(s, true));
+  const out = [];
+  if (r.due) out.push(explain({ label: '到期了嗎？', value: r.ready ? '到期了，可以配回' : '還沒到期', tone: r.ready ? 'warn' : 'ok',
+    how: `上次配回 ${s.last} ＋ ${periods[s.months || 6]} ＝ ${r.due}。`,
+    means: r.ready ? '照規則今天可以配回。' : '照規則先不用動；下面是「如果今天配回」的股數。',
+    todo: r.ready ? '照下面的股數下單，做完把今天的日期記下來，下次第 4 步填這個日期。' : null }));
+  out.push(explain({ label: '總額', value: fmtMoney(r.pool), tone: 'info',
+    how: `持股市值 ${fmtMoney(r.total - s.cash)} ＋ 現金 ${fmtMoney(s.cash)}` + (s.contribution > 0 ? ` ＋ 新投入 ${fmtMoney(s.contribution)}` : '') + ` ＝ ${fmtMoney(r.pool)}。`, means: '每一份的目標＝總額 × 比例。' }),
+    h('table', { class: 'trade-table' },
+      h('thead', {}, h('tr', {}, ['部位', '現在占', '目標占', '要做的事', '配完股數'].map(label => h('th', { scope: 'col' }, label)))),
+      h('tbody', {}, r.rows.map(row => h('tr', {}, h('td', {}, named(row.code)), h('td', {}, fmtPct(row.nowWeight)), h('td', {}, fmtPct(row.weight)),
+        h('td', {}, row.tradeShares === 0 ? '不動' : `${row.tradeShares > 0 ? '買進' : '賣出'} ${Math.abs(row.tradeShares).toLocaleString('en-US')} 股`), h('td', {}, row.sharesAfter.toLocaleString('en-US')))),
+      h('tr', {}, h('td', {}, '現金'), h('td', {}, fmtPct(r.cashWeightNow)), h('td', {}, fmtPct(s.cashPct / 100)), h('td', {}, `配完 ${fmtMoney(r.cashAfter)}`), h('td', {}, '—')))));
+  r.rows.filter(row => row.tradeShares !== 0).forEach(row => out.push(explain({ label: `${named(row.code)}：${row.tradeShares > 0 ? '買進' : '賣出'}`, value: `${Math.abs(row.tradeShares).toLocaleString('en-US')} 股`, tone: 'warn',
+    how: `目標 ${fmtMoney(row.target)}（${fmtMoney(r.pool)} × ${+(row.weight * 100).toFixed(2)}%）− 現在 ${fmtMoney(row.value)}，÷ 現價 ${price(row.price)} ＝ ${((row.target - row.value) / row.price).toFixed(1)} 股 → ${row.tradeShares > 0 ? '買進無條件捨去' : '賣出四捨五入'}` + (s.unit === 1000 ? '，以 1,000 股為單位' : '') + '。',
+    means: `約 ${fmtMoney(Math.abs(row.tradeAmount))}。配完 ${row.sharesAfter.toLocaleString('en-US')} 股、約 ${fmtMoney(row.valueAfter)}，占 ${fmtPct(row.weightAfter)}。` })));
+  out.push(explain({ label: '配完的現金', value: fmtMoney(r.cashAfter), tone: 'ok',
+    how: `現金 ${fmtMoney(s.cash)} ＋ 新投入 ${fmtMoney(s.contribution || 0)} − 買進 ${fmtMoney(r.buyAmount)} ＋ 賣出 ${fmtMoney(r.sellAmount)} ＝ ${fmtMoney(r.cashAfter)}。`,
+    means: `目標是 ${fmtMoney(r.cashTarget)}；差一點是因為股數要取整。`, todo: ['下單前用 ', link('cost.html', '⑨ 買賣成本與損益'), ' 算手續費和稅；這裡沒算。'] }),
+    explain({ label: '曝險倍數', value: `${fmtX(r.exposureNow)} → ${fmtX(r.exposureAfter)}`, tone: 'info',
+      how: '每檔市值 × Beta 加起來 ÷ 總額。用到的 Beta：' + s.rows.map(row => `${row.code} ${Number.isNaN(row.beta) ? guessBeta(row.code) + '（看代號猜）' : row.beta}`).join('、') + '。',
+      means: `約等於「總額的幾倍跟著大盤漲跌」；目標比例算出來是 ${fmtX(r.exposureTarget)}。現金當 0，債券 ETF 當 0 是簡化。` }),
+    h('p', { class: 'note' }, '沒算手續費、證交稅；到期那天休市就順延到下一個交易日。'));
+  return out;
 }
 
-function update() {
-  const template = document.getElementById('template').value;
-  const assets = TEMPLATES[template].assets;
-  assets.forEach((name, i) => {
-    document.querySelector(`label[for=h${i}]`).firstChild.textContent = name + '市值';
-  });
-  const v = readNumbers(FIELDS);
-  const last = document.getElementById('last').value;
-  const asOf = document.getElementById('asOf').value;
-  const missing = ['h0', 'h1', 'h2'].filter(id => Number.isNaN(v[id])).length + Number(!last) + Number(!asOf);
-  if (missing) { showResult(result, h('p', { class: 'muted' }, `填完 ${missing} 格就會算。`)); return; }
-  try {
-    const r = rebalance({ template, holdings: [v.h0, v.h1, v.h2],
-      contribution: Number.isNaN(v.contribution) ? 0 : v.contribution,
-      fee: Number.isNaN(v.fee) ? 0 : v.fee,
-      months: Number(document.getElementById('months').value), last, asOf });
-    showResult(result,
-      h('div', { class: 'metrics' },
-        metric('到期日', r.due),
-        metric('到期了嗎？', r.ready ? '到期了，可以配回' : '還沒到期', r.ready ? 'warn' : 'ok')),
-      h('div', { class: 'metrics' },
-        metric('策略總額', fmtMoney(r.total)),
-        metric('近似曝險', '約 ' + fmtX(r.exposure) + '大盤')),
-      h('table', { class: 'trade-table' },
-        h('thead', {}, h('tr', {}, ['部位', '目標金額', '要做的事'].map(label => h('th', { scope: 'col' }, label)))),
-        h('tbody', {}, assets.map((name, i) => {
-          const trade = r.trades[i];
-          const action = Math.abs(trade) < 0.5 ? '不動' :
-            (name === '現金' ? (trade > 0 ? '增加 ' : '用掉 ') : (trade > 0 ? '買進 ' : '賣出 ')) + fmtMoney(Math.abs(trade));
-          return h('tr', {}, h('td', {}, name), h('td', {}, fmtMoney(r.targets[i])), h('td', {}, action));
-        }))),
-      !r.ready ? h('p', { class: 'note' }, '還沒到期，照規則先不用動；上面是「如果今天配回」的金額。') : [],
-      h('p', { class: 'note' }, '近似曝險＝原型權重×1＋正二權重×2，美債與現金算 0，是簡化，不是預期報酬。'));
-  } catch (e) { showError(result, e.message); }
-}
+const example = { template: '532-stock', rowsFrom: '532-stock',
+  rows: [{ code: '0050', shares: 2000, price: 195.5, beta: 1 }, { code: '00631L', shares: 9000, price: 26.3, beta: 2 }],
+  weights: { '0050': 50, '00631L': 30 }, cashPct: 20, cash: 172300, contribution: 50000, unit: 1, months: 6, last: '2026-05-08' };
 
-const app = document.getElementById('app');
-app.append(
-  toolHeader(tool),
-  h('section', { class: 'card' },
-    selectField({ id: 'template', label: '配置模板', plain: '股版和債版名字一樣、內容不同，選之前看清楚', options: templates, value: '532-stock' }),
-    selectField({ id: 'months', label: '再平衡週期', plain: '多久配回一次，不看漲跌', termId: 'rebalance',
-      options: [{ value: '1', label: '每月' }, { value: '3', label: '每季' }, { value: '6', label: '每半年' }, { value: '12', label: '每年' }], value: '6' }),
-    dateField({ id: 'last', label: '上次配回日', plain: '上次照比例配好的日期' }),
-    dateField({ id: 'asOf', label: '檢視日', plain: '預設今天', value: today }),
-    TEMPLATES['532-stock'].assets.map((name, i) => numberField({ id: `h${i}`, label: name + '市值', plain: '這個策略裡的這一部分現在值多少', suffix: '元' })),
-    numberField({ id: 'contribution', label: '這次新投入', plain: '沒有就留白', suffix: '元' }),
-    numberField({ id: 'fee', label: '費用預算', plain: '先扣掉手續費、稅的預留金額，沒有就留白', suffix: '元' }),
-    exampleButton({ template: '532-stock', months: '6', last: '2026-05-08', asOf: '2026-11-08', h0: 450000, h1: 210000, h2: 200000, contribution: '', fee: '' }, update)),
-  h('section', { class: 'card' }, h('h2', {}, '結果'), result),
+document.getElementById('app').append(
+  toolHeader(tool), wizard({ steps, result, example }),
   h('section', { class: 'card' }, h('h2', {}, '怎麼讀'),
-    figure({ src: '../img/rebalance/532-stock.svg', alt: '532 股版範例：到期日原型 45 萬、正二 21 萬、現金 20 萬，合計 86 萬；配回後原型 43 萬、正二 25.8 萬、現金 17.2 萬，原型賣 2 萬、正二買 4.8 萬、現金用掉 2.8 萬。', caption: '不看漲跌，到期就用當時的總額配回原比例。' }),
+    figure({ src: '../img/rebalance/comic.webp', alt: '四格漫畫：一、先定好比例：原型 50%｜正二 30%｜現金 20%，每半年看一次。老師說：這叫 532。中間漲跌都不用管。二、半年到了，先算總額：原型 391,000、正二 236,700、現金 172,300，合計 800,000，＋ 這次新投入 50,000，＝ 850,000。小安問：新存的錢也一起算進去？三、照比例算目標：850,000 × 50%＝425,000；850,000 × 30%＝255,000；850,000 × 20%＝170,000。老師說：每一份要變成多少，先算金額。四、換成股數：原型：(425,000 − 391,000) ÷ 195.5 ＝ 173.9 → 買 173 股；正二：(255,000 − 236,700) ÷ 26.3 ＝ 695.8 → 買 695 股；剩下現金 170,200。小安說：小數點直接捨掉，錢一定夠！買進股數無條件捨去；沒算手續費和稅。' }),
     h('p', {}, '定期配比只看時間：選好比例和週期，到期那天用當時的總額照比例配回，中間漲跌都不動。這和 ② 的 50/50 觸發不同，那個看的是正二漲跌一半。'),
     h('p', {}, '網路上的 532、442 有兩種：股版是原型／正二／現金，債版是正二／美債／現金。名字一樣、風險不同，別人說 442 時先問是哪一種。'),
-    h('p', {}, '算出來的是各部位的目標金額，不是下單股數；實際下單還要看股價、零股、手續費和稅。到期那天休市就順延到下一個交易日。')),
+    h('p', {}, '算出來的是取整後的股數：買進無條件捨去、賣出四捨五入，所以現金一定夠，配完會跟目標差一點點。')),
   disclaimer('general'));
-app.addEventListener('input', update);
-app.addEventListener('change', update);
-update();
