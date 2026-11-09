@@ -38,7 +38,7 @@
   - 發現：Codex 面板可以生圖，之後「頁面＋卡通圖」併成一份任務書、使用者只打一句。
 - **⑦ 進度（2026-11-09）**：Opus 寫好 `js/core/dca.js`（`dcaPlan`、`cagr`、`monthlyRate`）＋`tests/dca.test.js`（7 項，預期值用年金公式獨立算：每月 5,000、20 年、6%、月初 → 2,278,229；手續費 1,680；硬算年化 3.26%）、3 個術語（定期定額、複利、年化報酬）、卡通提示 `dca-01`→`out/dca-comic.png`、`dca-02`→`out/dca-step3.png`；任務書 `collab/to-codex.md`（⑦ v1，頁面＋生圖一份）待 Codex 面板做。
   - 收尾：讀回報、看 diff、重跑 PROOF_CMD；核對兩張圖、轉 `img/dca/*.webp`；tools.js 的 dca 改 ready；`npm test && npm run smoke`（tests 80、smoke 12）；push。
-- **再下一步**：⑤ 融資融券。
+- **再下一步**：⑤ 融資融券 → ⑲ 退休提領（使用者 2026-11-09 定：todo2 財務計算機只納入退休提領，⑦ 之後加「停扣後再滾」選項；詳見 [research/候選清單.md](research/候選清單.md) 末節）。
 
 **下次開工順序（Opus）**：
 1. 先跟使用者確認上面「目標樣子」，用 1–2 個畫面草圖（ASCII 或 artifact）對齊，**沒對齊不寫程式**。
