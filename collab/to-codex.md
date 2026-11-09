@@ -1,6 +1,6 @@
 # 任務 ⑩：股息與除權息精靈頁（照 ⑨ 樣板）
 
-- 版本：2026-11-09 v1。上一份（研究任務 R v4）已完成，以本檔為準。
+- 版本：2026-11-09 v2（v2：加 2b 生卡通圖）。上一份（研究任務 R v4）已完成，以本檔為準。
 - 執行者：訂閱 Codex sol，直接在本 repo（`D:\ok\zr-toolbox`）工作。**不要上網。不要 commit**。做完寫 `collab/from-codex.md`（覆蓋舊的）就停。
 - 指令一律用 `npm.cmd`／`node`（PowerShell 擋 `npm.ps1`）；**不要跑 `npm.cmd run smoke`**（沙箱開不了 Chrome，Opus 會跑）。
 - 暫存檔、一次性腳本只准放本 repo 內，結束前刪掉。
@@ -13,7 +13,7 @@
 - `js/ui/wizard.js` 第 53–80 行（`withHelp`、`numberInput`、`explain` 簽名）
 - `js/core/cost.js` 第 15–20 行（`guessKind`）
 
-## 1. 要新增的檔案（只准新增這兩個＋回報檔，其他檔一律不改）
+## 1. 要新增的檔案（只准新增這兩個＋第 2b 節兩張 PNG＋回報檔，其他檔一律不改）
 
 - `tools/dividend.html`：照抄 `tools/cost.html`，title 改「股息與除權息｜正二工具箱」，script 改 `../js/pages/dividend.js`。
 - `js/pages/dividend.js`：照下面規格。
@@ -100,7 +100,20 @@ const example = { holdings: [{ code: '2412', shares: 10000, buyPrice: 40, nowPri
 
 最後 `disclaimer('general')`。
 
-註：`img/dividend/` 的兩張 webp 由 Opus 放（可能比你晚到）；圖不存在不影響你交付，不要自己做圖。
+註：`img/dividend/` 的兩張 webp 由 Opus 從你生的 PNG 轉檔放入（第 2b 節），你不要自己放進 `img/`、不要轉檔。
+
+## 2b. 生兩張卡通圖（用你的生圖功能）
+
+依序讀 `docs/figures/cartoon/00-風格與角色.md`，再讀下面每張的提示檔，**把風格檔全文＋該張提示全文合在一起當生圖提示**，生成直式 1024×1536 PNG：
+
+| 提示檔 | 存成 |
+|---|---|
+| `docs/figures/cartoon/dividend-01-領股利四格.md` | `docs/figures/cartoon/out/dividend-comic.png` |
+| `docs/figures/cartoon/dividend-02-股利公告怎麼看.md` | `docs/figures/cartoon/out/dividend-step2.png` |
+
+- 生完自己看一遍：圖上中文與數字要和提示一字不差；有錯字或數字錯，重生該張，**每張最多重生 2 次**，仍有錯就留最後一張並在回報寫出哪裡錯。
+- 不能生圖（沒有這個功能）就跳過本節，回報寫「無法生圖」，頁面照常交付。
+- 這兩個 PNG 是本任務唯一允許寫進 `docs/` 的檔案。
 
 ## 3. PROOF_CMD（必跑，貼結果）
 
@@ -122,6 +135,9 @@ node --check js/pages/dividend.js
 - npm.cmd test：tests __ pass __ fail __
 - 範例數字：__
 - node --check：__
+## 卡通圖
+- dividend-comic.png：已生成／重生 _ 次／自查有無錯字（列出）
+- dividend-step2.png：同上
 ## 偏離規格或自行決定的小事
 - （沒有寫「無」）
 ## 需要 Opus 決定的事
