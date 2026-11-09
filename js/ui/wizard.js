@@ -230,6 +230,67 @@ export function readHoldings(id) {
   }));
 }
 
+// ---------- Beta 持股（v5.5） ----------
+export function betaHoldingsInput({ id, rows = [{}], kind = 'stock', max = kind === 'lever' ? 3 : 10, label = kind === 'lever' ? '你的正二' : '其他持股（不含正二）' }) {
+  const lever = kind === 'lever';
+  const list = h('div', { class: 'holding-list' });
+  const add = h('button', { type: 'button', class: 'secondary' }, '＋ 再加一檔');
+  const box = h('div', { id, class: 'holdings' }, h('h3', {}, label), list, add);
+  const refresh = () => {
+    const items = [...list.querySelectorAll('.beta-holding')];
+    items.forEach(el => el.querySelector('.link-button').toggleAttribute('hidden', lever && items.length === 1));
+    list.querySelector('.beta-empty')?.remove();
+    if (!items.length) list.append(h('p', { class: 'muted beta-empty' }, '沒有其他持股：直接按「下一步」。'));
+    add.hidden = items.length >= max;
+  };
+  const append = (r = {}) => {
+    const status = h('small', { class: 'holding-status', 'aria-live': 'polite' });
+    const name = h('span', { class: 'holding-name' }, STOCK_NAMES[r.code] || '');
+    const code = h('input', { class: 'b-code', type: 'text', autocomplete: 'off', autocapitalize: 'characters', placeholder: lever ? '例：00631L' : '例：0050', value: show(r.code), 'aria-label': '代號／名稱' });
+    const input = (key, placeholder, aria) => h('input', { class: `b-${key}`, type: 'text', inputmode: 'decimal', autocomplete: 'off', placeholder, value: show(r[key]), 'aria-label': aria });
+    const shares = input('shares', '例：3000', '股數');
+    const price = input('price', '輸入代號後自動帶入', '現價（元）');
+    const beta = input('beta', lever ? '2' : '1', 'Beta');
+    let seq = 0;
+    code.addEventListener('change', async () => {
+      const my = ++seq, c = normalizeCode(code.value);
+      name.textContent = STOCK_NAMES[c] || '';
+      if (!c) { status.textContent = code.value.trim() ? '不是台股代號：不會自動抓價，現價請自己填（海外股票、基金：股數填 1、現價填總金額）。' : ''; return; }
+      code.value = c;
+      status.textContent = `查詢 ${c} 最近收盤價…`;
+      const result = await fetchClose(c, { token: getToken() });
+      if (my !== seq) return;
+      if (result.ok) {
+        price.value = String(result.close);
+        status.textContent = `現價 ${result.close}：FinMind ${result.date} 收盤價，可以手動改。`;
+        if (result.clearToken) { setToken(''); status.textContent += '（存的 token 已失效，已清除）'; }
+      } else status.textContent = result.message + (result.action === 'show-quota-guide' ? ' 申請方式見下方 token 說明。' : '');
+    });
+    const field = (title, plain, el, text, chip) => withHelp(h('div', { class: 'field' }, h('label', {}, title, chip ? infoChip(chip) : null), h('small', { class: 'plain-sub' }, plain), el), { text });
+    const row = h('div', { class: 'holding beta-holding' },
+      withHelp(h('div', { class: 'field' }, h('label', {}, '代號／名稱 ', name), code, status), { text: lever
+        ? ['正二的代號，例：00631L、00685L。最多 3 檔。', '填好會自動抓最近收盤價。']
+        : ['填台股代號會自動抓最近收盤價，例：0050、2330。', '海外股票、基金這類不是台股的資產，填名稱就好，股數填 1、現價填總金額。'] }),
+      h('div', { class: 'holding-grid' },
+        field('股數', lever ? '還沒買就填 0' : '1 張＝1000 股', shares, lever ? ['手上有幾股：1 張＝1000 股。', '還沒買就填 0，工具會算出要買多少。'] : ['手上有幾「股」：1 張＝1000 股，零股照實際股數填。', '已經賣光的就按「刪掉這檔」。']),
+        field('現價（元）', '填好代號自動抓', price, ['最近一個交易日的收盤價，填好代號會自動帶入，可以自己改。', '抓不到時（沒網路、查詢次數用完）就手動填券商 App 上的價格。']),
+        field('Beta', lever ? '留白＝2' : '不確定就留白＝1', beta, lever ? ['正二每天約等於 2 倍大盤，留白就當 2。', '注意是「每天」2 倍，放久了會偏離。'] : ['這檔跟大盤一起漲跌的程度：0050 這類大盤 ETF 約 1，不確定就留白（當 1）。', '個股的 Beta 是估計值，會隨時間改變。'], lever ? 'daily-2x' : 'beta')),
+      h('button', { type: 'button', class: 'link-button', onclick: () => { ++seq; row.remove(); refresh(); } }, '刪掉這檔'));
+    list.append(row); refresh();
+  };
+  (lever && !rows.length ? [{}] : rows).forEach(append);
+  refresh();
+  add.addEventListener('click', () => { append({}); list.lastElementChild.querySelector('.b-code').focus(); });
+  return box;
+}
+
+export function readBetaHoldings(id) {
+  return [...document.querySelectorAll(`#${id} .beta-holding`)].map(el => {
+    const v = el.querySelector('.b-code').value;
+    return { code: normalizeCode(v) || v.trim(), shares: parseNum(el.querySelector('.b-shares').value), price: parseNum(el.querySelector('.b-price').value), beta: parseNum(el.querySelector('.b-beta').value) };
+  });
+}
+
 export function tokenBox() {
   const input = h('input', { type: 'password', autocomplete: 'off', placeholder: '貼上 FinMind token', value: getToken(), 'aria-label': 'FinMind token' });
   const msg = h('small', { class: 'plain-sub', 'aria-live': 'polite' });

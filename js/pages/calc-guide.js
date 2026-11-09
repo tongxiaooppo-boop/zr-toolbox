@@ -8,7 +8,7 @@ const app = document.getElementById('app');
 app.append(
   toolHeader(tool),
   h('section', { class: 'card' },
-    h('p', {}, '這頁一格一格說明朋友在用的「正二平衡計算器」。看完可以到原頁操作，也可以用工具箱的 ⑪ 算同一件事。'),
+    h('p', {}, '這頁一格一格說明朋友在用的「正二平衡計算器」。看完可以到原頁操作，也可以用工具箱的 ⑪「正二要買多少」一步一步算（算法跟原頁一樣）。'),
     h('a', { class: 'button-link', href: ONLINE_URL, target: '_blank', rel: 'noopener' }, '打開原計算器 ↗'),
     figure({ src: '../img/calc-guide/map.svg', alt: '原計算器四個區塊對應 ⑪：持股對股票市值（各檔加總）、正二 ETF 對正二市值、現金與負債對現金與借款、目標對目標倍數與倍數怎麼算。兩邊都按範例：股票 1,000 萬、現金 200 萬、負債 300 萬、目標 1.4，淨資產 900 萬，需買進正二 NT$ 1,300,000。', caption: '原計算器的每一區，都能在 ⑪ 找到對應的格子。' }),
     h('nav', { class: 'guide-toc' },
@@ -26,7 +26,7 @@ app.append(
   h('section', { class: 'card', id: 'differences' },
     h('h2', {}, '和 ⑪ 不一樣的地方'),
     h('ul', {}, DIFFERENCES.map(d => h('li', {}, d))),
-    h('p', {}, h('a', { href: 'exposure.html' }, '打開 ⑪ 我現在等於幾倍大盤'))),
+    h('p', {}, h('a', { href: 'exposure.html' }, '打開 ⑪ 正二要買多少'))),
   h('section', { class: 'card', id: 'token' },
     h('div', { class: 'field' },
       h('h2', {}, 'FinMind token 怎麼申請', infoChip('finmind-token'))),
