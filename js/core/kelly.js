@@ -78,7 +78,7 @@ export function kellyPlan({ cagr1x, vol, borrowRate, cashRate = 0, current }) {
     row('two', '2 倍（例：全部買正二）', 2),
     row('quarter', '四分之一凱利', full / 4),
     row('half', '半凱利', full / 2),
-    row('full', '全凱利（長期成長最大）', full)
+    row('full', '全凱利', full)
   ];
   if (current !== undefined && !Number.isNaN(current)) {
     if (!(Number.isFinite(current) && current >= 0 && current <= MAX_L)) throw new Error(`你現在的倍數要在 0 到 ${MAX_L} 之間。`);

@@ -37,6 +37,7 @@
 //   tokenBox()                               FinMind token（選填）：存在這台裝置、清除、連到申請教學
 //   explain({ label, value, tone, how, means, todo })   結果的一項：大數字＋▸怎麼來的／▸代表什麼／▸要做什麼
 import { h, infoChip, metric, figure } from './components.js';
+import { DEBT_KINDS } from '../core/lifelev.js';
 import { parseNum } from '../core/format.js';
 import { normalizeCode } from '../core/holdings.js';
 import { STOCK_NAMES } from '../data/stocks.js';
@@ -239,8 +240,8 @@ export function readHoldings(id) {
 }
 
 // ---------- Beta 持股（v5.5） ----------
-export function betaHoldingsInput({ id, rows = [{}], kind = 'stock', max = kind === 'lever' ? 3 : 10, label = kind === 'mix' ? '這個策略裡的持股' : kind === 'lever' ? '你的正二' : '其他持股（不含正二）' }) {
-  const lever = kind === 'lever', mix = kind === 'mix';
+export function betaHoldingsInput({ id, rows = [{}], kind = 'stock', max = kind === 'lever' ? 3 : 10, label = kind === 'life' ? '你所有的股票和 ETF' : kind === 'mix' ? '這個策略裡的持股' : kind === 'lever' ? '你的正二' : '其他持股（不含正二）' }) {
+  const lever = kind === 'lever', mix = kind === 'mix', guessed = mix || kind === 'life';
   const list = h('div', { class: 'holding-list' });
   const add = h('button', { type: 'button', class: 'secondary' }, '＋ 再加一檔');
   const box = h('div', { id, class: 'holdings' }, h('h3', {}, label), list, add);
@@ -258,7 +259,7 @@ export function betaHoldingsInput({ id, rows = [{}], kind = 'stock', max = kind 
     const input = (key, placeholder, aria) => h('input', { class: `b-${key}`, type: 'text', inputmode: 'decimal', autocomplete: 'off', placeholder, value: show(r[key]), 'aria-label': aria });
     const shares = input('shares', '例：3000', '股數');
     const price = input('price', '輸入代號後自動帶入', '現價（元）');
-    const beta = input('beta', mix ? '' : lever ? '2' : '1', 'Beta');
+    const beta = input('beta', guessed ? '' : lever ? '2' : '1', 'Beta');
     let seq = 0;
     code.addEventListener('change', async () => {
       const my = ++seq, c = normalizeCode(code.value);
@@ -282,7 +283,7 @@ export function betaHoldingsInput({ id, rows = [{}], kind = 'stock', max = kind 
       h('div', { class: 'holding-grid' },
         field('股數', (lever || mix) ? '還沒買就填 0' : '1 張＝1000 股', shares, mix ? ['手上有幾「股」：1 張＝1000 股，零股照實際股數填。', '還沒買的就填 0，工具會算出要買多少。'] : lever ? ['手上有幾股：1 張＝1000 股。', '還沒買就填 0，工具會算出要買多少。'] : ['手上有幾「股」：1 張＝1000 股，零股照實際股數填。', '已經賣光的就按「刪掉這檔」。']),
         field('現價（元）', '填好代號自動抓', price, ['最近一個交易日的收盤價，填好代號會自動帶入，可以自己改。', '抓不到時（沒網路、查詢次數用完）就手動填券商 App 上的價格。']),
-        field('Beta', mix ? '留白＝看代號猜' : lever ? '留白＝2' : '不確定就留白＝1', beta, mix ? ['這檔跟大盤一起漲跌的程度。留白會看代號猜：結尾 L（正二）當 2、R（反向）當 −1、B（債券 ETF）當 0，其他當 1。', '正二是「每天」約 2 倍，放久了會偏離。'] : lever ? ['正二每天約等於 2 倍大盤，留白就當 2。', '注意是「每天」2 倍，放久了會偏離。'] : ['這檔跟大盤一起漲跌的程度：0050 這類大盤 ETF 約 1，不確定就留白（當 1）。', '個股的 Beta 是估計值，會隨時間改變。'], lever ? 'daily-2x' : 'beta')),
+        field('Beta', guessed ? '留白＝看代號猜' : lever ? '留白＝2' : '不確定就留白＝1', beta, guessed ? ['這檔跟大盤一起漲跌的程度。留白會看代號猜：結尾 L（正二）當 2、R（反向）當 −1、B（債券 ETF）當 0，其他當 1。', '正二是「每天」約 2 倍，放久了會偏離。'] : lever ? ['正二每天約等於 2 倍大盤，留白就當 2。', '注意是「每天」2 倍，放久了會偏離。'] : ['這檔跟大盤一起漲跌的程度：0050 這類大盤 ETF 約 1，不確定就留白（當 1）。', '個股的 Beta 是估計值，會隨時間改變。'], lever ? 'daily-2x' : 'beta')),
       h('button', { type: 'button', class: 'link-button', onclick: () => { ++seq; row.remove(); refresh(); } }, '刪掉這檔'));
     list.append(row); refresh();
   };
@@ -345,5 +346,55 @@ export function readLots(id) {
   return [...document.querySelectorAll(`#${id} .lot`)].map(el => ({
     shares: parseNum(el.querySelector('.l-shares').value),
     price: parseNum(el.querySelector('.l-price').value)
+  }));
+}
+
+// ---------- 借款清單（v5.10） ----------
+export function debtsInput({ id, rows = [], max = 8, label = '你的借款' }) {
+  const list = h('div', { class: 'holding-list' });
+  const add = h('button', { type: 'button', class: 'secondary' }, '＋ 再加一筆借款');
+  const box = h('div', { id, class: 'holdings debts' }, h('h3', {}, label), list, add);
+  const refresh = () => {
+    const items = [...list.querySelectorAll('.debt')];
+    items.forEach((el, i) => { el.querySelector('strong').textContent = `第 ${i + 1} 筆`; });
+    list.querySelector('.debt-empty')?.remove();
+    if (!items.length) list.append(h('p', { class: 'muted debt-empty' }, '沒有借款：直接按「下一步」。'));
+    add.hidden = items.length >= max;
+  };
+  const append = (r = {}) => {
+    const kind = h('select', { class: 'd-kind', 'aria-label': '種類' }, DEBT_KINDS.map(k => h('option', { value: k.value }, k.label)));
+    kind.value = r.kind || 'mortgage';
+    const input = (key, cls, aria, placeholder = '') => h('input', { class: `d-${cls}`, type: 'text', inputmode: 'decimal', autocomplete: 'off', value: show(r[key]), placeholder, 'aria-label': aria });
+    const balance = input('balance', 'balance', '還欠多少（元）');
+    const invest = input('invest', 'invest', '拿去投資多少（元）');
+    const updateInvest = () => { invest.placeholder = DEBT_KINDS.find(k => k.value === kind.value)?.investAll ? '留白＝全部' : '留白＝0'; };
+    kind.addEventListener('change', updateInvest);
+    updateInvest();
+    const field = (label, plain, el, text) => withHelp(h('div', { class: 'field' }, h('label', {}, label), plain ? h('small', { class: 'plain-sub' }, plain) : null, el), { text });
+    const row = h('div', { class: 'holding debt' }, h('strong', {}),
+      h('div', { class: 'holding-grid' },
+        field('種類', '借來做什麼不影響這格', kind, ['房貸、信貸、股票質押、融資、其他（車貸、保單借款、親友借款…）。', '融資、質押這類用股票擔保的，追繳風險請用 ④、⑤ 另外算。']),
+        field('還欠多少（元）', '看銀行 App 的剩餘本金', balance, '現在還沒還的本金，不是當初借的金額。'),
+        field('每月繳多少（元）', '知道就填，不知道留白', input('monthly', 'monthly', '每月繳多少（元）'), ['看扣款紀錄或繳款通知。', '留白就用下面的利率（和剩幾年）幫你算。']),
+        field('年利率（%）', '例：2.2', input('ratePct', 'rate', '年利率（%）', '例：2.2'), ['借款合約或 App 上的年利率。', '只填利率、不填剩幾年，就當作只繳利息（質押、融資常見）。']),
+        field('還剩幾年', '例：25', input('years', 'years', '還剩幾年', '例：25'), '還要繳幾年；填了會用本息平均攤還算每月繳款。'),
+        field('拿去投資多少（元）', '', invest, ['這筆借款有多少拿去買股票、ETF。', '房貸買房子就留白；房貸增貸拿去買股票，填那一部分。'])),
+      h('button', { type: 'button', class: 'link-button', onclick: () => { row.remove(); refresh(); } }, '刪掉這筆'));
+    list.append(row); refresh();
+  };
+  rows.forEach(append);
+  refresh();
+  add.addEventListener('click', () => { append({ kind: 'mortgage' }); list.lastElementChild.querySelector('.d-balance').focus(); });
+  return box;
+}
+
+export function readDebts(id) {
+  return [...document.querySelectorAll(`#${id} .debt`)].map(el => ({
+    kind: el.querySelector('.d-kind').value,
+    balance: parseNum(el.querySelector('.d-balance').value),
+    monthly: parseNum(el.querySelector('.d-monthly').value),
+    ratePct: parseNum(el.querySelector('.d-rate').value),
+    years: parseNum(el.querySelector('.d-years').value),
+    invest: parseNum(el.querySelector('.d-invest').value)
   }));
 }
