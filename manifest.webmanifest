@@ -1,7 +1,7 @@
 {
-  "name": "正二工具箱",
-  "short_name": "正二工具箱",
-  "description": "正二與股市計算機工具箱：每個工具都有圖文解說",
+  "name": "正2工具箱",
+  "short_name": "正2工具箱",
+  "description": "正2工具箱：正二與股市計算機，每個工具都有圖文解說",
   "lang": "zh-Hant",
   "start_url": "./",
   "scope": "./",

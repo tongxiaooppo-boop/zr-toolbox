@@ -8,7 +8,7 @@ const card = t => h('a', { class: 'tool-card' + (t.status === 'ready' ? '' : ' p
   h('p', {}, t.oneLine));
 
 document.getElementById('app').append(
-  h('h1', { class: 'site-title' }, '正二與股市計算機工具箱'),
+  h('h1', { class: 'site-title' }, '正2工具箱'),
   h('p', { class: 'site-sub' }, '點一張卡片就能算；看不懂的詞，點旁邊的 ⓘ。'),
   h('nav', { class: 'shortcuts', 'aria-label': '常見問題' },
     SHORTCUTS.filter(s => byId[s.toolId].status === 'ready').map(s => h('a', { href: byId[s.toolId].href }, s.label))),
