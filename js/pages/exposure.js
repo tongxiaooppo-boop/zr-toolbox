@@ -130,7 +130,7 @@ function result(s) {
     h('h3', {}, '每一檔明細'),
     table(['代號', '現在市值', '調整後', '買賣'], r.rows.map(x => [named(x.code), fmtMoney(x.value), fmtMoney(x.target), [`${x.trade >= 0 ? '買' : '賣'} ${fmtMoney(Math.abs(x.trade))}`, Number.isFinite(x.shares) ? [h('br'), h('small', {}, shareText(x.shares))] : null]])),
     h('div', { class: 'note' },
-      h('p', {}, '算法照朋友那格計算機（使用者以手機版 Claude 依計算模板製作，後續小改），同一組輸入算出同樣的數字；欄位對照看 ', link('calc-guide.html', '① 朋友那格計算機怎麼用'), '。'),
+      h('p', {}, '算法照朋友那格計算機（使用者以手機版 Claude 依計算模板製作，後續小改），同一組輸入算出同樣的數字。'),
       h('p', {}, '沒算手續費、稅和借款利息；股數是約略值。'),
       r.fullMode ? h('p', {}, '完整重配：全部持股（含正二）照比重重新分配，沒填比重的會建議全賣。') : null,
       r.bwDefaulted ? h('p', {}, '各檔 Beta 合起來不是正數，改用 2 計算（跟原頁一樣）。') : null)
@@ -153,8 +153,8 @@ document.getElementById('app').append(
         ['大仁 50/50：正二、現金各半，漲跌一半就配回', link('trigger5050.html', '② 50/50 觸發提醒')],
         ['532／442／433 百分比配置（HAMR 指數爆擊流）', link('rebalance.html', '③ 定期配比再平衡')],
         ['質押借錢買正二', link('pledge.html', '④ 質押壓力測試')],
-        ['人生槓桿（HAMR）', '⑬ 人生槓桿體檢（製作中）'],
-        ['凱利公式：幾倍槓桿最划算', '⑭ 幾倍槓桿最划算（製作中）'],
+        ['人生槓桿（HAMR）', link('lifelev.html', '⑬ 人生槓桿體檢')],
+        ['凱利公式：幾倍槓桿最划算', link('kelly.html', '⑭ 幾倍槓桿最划算')],
         ['計算Pro 的 Beta 看板', '不連結：它的補現金公式算錯（研究時的例子：建議補 144 萬，補完只到 0.98 倍；要到目標其實要 360 萬）']
       ].map(([a, b]) => h('tr', {}, h('td', {}, a), h('td', {}, b))))),
     h('p', {}, '同類工具只找到 HAMR 指數爆擊流的曝險計算機，但它是輸入三類百分比，不是從目標倍數反推正二要買多少。')),

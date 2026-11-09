@@ -80,6 +80,7 @@
 - **科普分兩份任務書（使用者 2026-11-09 拍板）**：股票基本術語＝**獨立一頁**；分兩份派 Codex，**都要卡通圖**。
   - **科普一**（⑳ ETF 入門 `etf101`、㉑ 借錢投資的管道 `loans`、㉒ 商品與賺錢方式 `products`）：Opus 已在 `tools.js` 加 `science` 分組＋三張卡（`planned`），寫好驗收 `scripts/check-kepu.mjs`（資料檔筆數、百分比與網址必須出自 R3／R4／R5、頁面元件、PNG）、六張卡通提示 `etf101-01/02`、`loans-01/02`、`products-01/02`（→ `out/<id>-comic.png`、`<id>-map.png`），任務書 `collab/to-codex.md`（科普一 v1）待 Codex 面板做。內容放 `js/data/etf101.js`／`loans.js`／`products.js`，頁面只排版。Codex 回報後 Opus：核對圖、轉 `img/<id>/comic.webp`、`map.webp`、改 ready、跑 smoke、抽查數字與白話。
   - **科普二**（㉓ 股票基本術語〔R5 術語 48 列〕、㉔ 正二教學〔含大仁 50/50 原文結果與限制〕）：科普一驗收後再寫任務書。
+- **① 移除（使用者 2026-11-09：「工具箱本身就有，就連到那裡；舊版那個不同專案留著」）**：首頁拿掉 ① 卡片與捷徑；⑪ 副標加「朋友那格『正二平衡計算器』的新版」；`tools/calc-guide.html` 改成轉址（`#token` → `token.html`，其他 → `exposure.html`）；FinMind token 教學搬到 `tools/token.html`＋`js/data/token.js`（文案改成工具箱用法，不是首頁卡片），各計算機 token 欄連到這裡；刪 `js/pages/calc-guide.js`、`js/data/calcGuide.js`、`img/calc-guide/`。舊專案 `zr-calc` 不動。同時修 ⑪ 對照表 ⑬⑭ 還寫「製作中」→ 改成連結。smoke 19 頁（少了 ①）。
 - **引用規則（使用者 2026-11-09）**：外部網站內容預設**完全 AI 重寫**（原文最多引一句加引號，做法出處寫「做法出自 某某」＋連結）；要照抄文字或圖必須網站同意並標「引用自」，目前無同意 → 不照抄。UI 美化時每頁底部加「參考資料」（名稱＋連結），科普頁照此格式。
 - **科普範圍再追加（使用者 2026-11-09）**：④ **股票基本術語**（補辭典沒有的最基本詞：上市櫃、集保、交割、委託單、漲跌停、T+2…）；⑤ **個人（非專業投資人）可交易的股票相關商品與獲利方式圖文詳解**（股票、零股、興櫃、ETF、ETN、權證、期貨、選擇權、可轉債、債券、基金、複委託、TDR、REITs、借券出借、當沖；價差、股利、利息等）。研究 **R5** 任務書 `collab/to-codex-r5.md`（R4 做完才做，回報 `collab/from-codex-r5.md`），驗收 `node scripts/check-r5.mjs`。科普頁共五頁：ETF 入門（R3）、借錢管道（R4）、商品與獲利方式（R5）、股票基本術語（R5，併入辭典或獨立頁待定）、正二教學。
 - （舊）⑥ ⑧ 改精靈（無持股，輸入少，步驟可以短）。全部 A 類做完 → ⑬⑭ → ⑯⑰⑱ → UI 統一美化（Neo-brutalism）。
@@ -120,7 +121,7 @@
 - 今天（2026-11-08）結束時：master＝origin/master，工作目錄乾淨；tests 51、smoke pages 9 全過；Codex 面板沒有進行中的任務（`collab/to-codex.md` 是已完成的 3a）。
 - **已部署**（2026-11-08，使用者同意公開）：https://tongxiaooppo-boop.github.io/zr-toolbox/ （GitHub `tongxiaooppo-boop/zr-toolbox`，public，Pages 來源 `master` 根目錄，MIT）。之後每個 Gate 驗收完 `git push` 就會更新（Pages 約 1 分鐘生效）。
 - **Codex 面板環境限制**（Gate 1 發現）：PowerShell 擋 `npm.ps1`，要用 `npm.cmd`；沙箱裡 `npm run smoke` 開不了無頭 Chrome 會卡住。任務書的 PROOF_CMD 改成：Codex 只跑 `npm.cmd test`，smoke 由 Opus 跑。
-- 驗收指令：`npm test && npm run smoke`（現行預期：tests 155 全過、smoke pages 20 全過）。
+- 驗收指令：`npm test && npm run smoke`（現行預期：tests 155 全過、smoke pages 19 全過；科普三頁 ready 後 22）。
 - 使用者 2026-11-08 補充：工具箱分四大類（正二教學／正二變種／正二槓桿／其他股票計算機，含融資等原 v2 項目），**每個工具都要圖文解說，圖由 sol 畫**（流程見 FRAMEWORK.md 第 5 節）。（「⑪ 擔任白話版、不另做」已被 Gate 7 推翻，見上方追加三件事。）
 
 ## 這是什麼

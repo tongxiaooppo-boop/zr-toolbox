@@ -14,8 +14,7 @@ export const TOOLS = Object.freeze([
   { id: 'glossary', no: '⑫', group: 'learn', title: '術語辭典', oneLine: 'Beta、維持率、口徑、再平衡……一句白話', href: 'tools/glossary.html', gate: 1, status: 'ready', terms: [] },
   { id: 'trigger5050', no: '②', group: 'variants', title: '50/50 觸發提醒', oneLine: '正二漲跌一半時，配回正二、現金各半', href: 'tools/trigger5050.html', gate: 0, status: 'ready', terms: ['daily-2x', 'rebalance', 'base-price'] },
   { id: 'rebalance', no: '③', group: 'variants', title: '定期配比再平衡', oneLine: '多檔照比例配回，算出每檔要買賣幾股', href: 'tools/rebalance.html', gate: 1, status: 'ready', terms: ['rebalance', 'beta', 'exposure'] },
-  { id: 'calc-guide', no: '①', group: 'leverage', title: '朋友那格計算機怎麼用', oneLine: '原「正二平衡計算器」逐欄白話教學', href: 'tools/calc-guide.html', gate: 3, status: 'ready', terms: ['beta', 'exposure', 'basis', 'net-assets', 'leverage-ratio', 'daily-2x', 'closing-price', 'finmind-token'] },
-  { id: 'exposure', no: '⑪', group: 'leverage', title: '正二要買多少', oneLine: '想要整體等於幾倍大盤？算出正二要買賣多少、錢夠不夠', href: 'tools/exposure.html', gate: 7, status: 'ready', terms: ['exposure', 'beta', 'net-assets', 'basis', 'leverage-ratio', 'daily-2x'] },
+  { id: 'exposure', no: '⑪', group: 'leverage', title: '正二要買多少', oneLine: '朋友那格「正二平衡計算器」的新版：想要整體等於幾倍大盤？算出正二要買賣多少、錢夠不夠', href: 'tools/exposure.html', gate: 7, status: 'ready', terms: ['exposure', 'beta', 'net-assets', 'basis', 'leverage-ratio', 'daily-2x'] },
   { id: 'pledge', no: '④', group: 'leverage', title: '質押壓力測試', oneLine: '大盤跌多少會被追繳？還款與補擔保分開算', href: 'tools/pledge.html', gate: 2, status: 'ready', terms: ['pledge', 'maintenance-ratio', 'margin-call'] },
   { id: 'lifelev', no: '⑬', group: 'leverage', title: '人生槓桿體檢', oneLine: '房貸、信貸、質押一起算：你其實開了幾倍槓桿？', href: 'tools/lifelev.html', gate: 5, status: 'ready', terms: ['financial-net', 'life-multiple', 'exposure', 'leverage-ratio'] },
   { id: 'kelly', no: '⑭', group: 'leverage', title: '幾倍槓桿最划算', oneLine: '凱利倍數：倍數對長期報酬，過頭反而賺更少', href: 'tools/kelly.html', gate: 5, status: 'ready', terms: ['kelly', 'volatility', 'leverage-ratio', 'daily-2x'] },
@@ -36,7 +35,6 @@ export const TOOLS = Object.freeze([
 
 export const SHORTCUTS = Object.freeze([
   { label: '我的正二要買多少？', toolId: 'exposure' },
-  { label: '朋友那格計算機怎麼用？', toolId: 'calc-guide' },
   { label: '我的正二要不要再平衡？', toolId: 'trigger5050' },
   { label: '質押買正二，跌多少會被追繳？', toolId: 'pledge' }
 ]);

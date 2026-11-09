@@ -5,7 +5,7 @@ import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { TOOLS, SHORTCUTS, GROUPS } from '../js/data/tools.js';
 import { GLOSSARY, TERM_BY_ID } from '../js/data/glossary.js';
-import { GUIDE_SECTIONS, DIFFERENCES, TOKEN_GUIDE, ONLINE_URL } from '../js/data/calcGuide.js';
+import { TOKEN_GUIDE } from '../js/data/token.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 
@@ -41,12 +41,8 @@ test('glossary: required terms for v1 are present', () => {
   for (const id of REQUIRED) assert.ok(TERM_BY_ID[id], id);
 });
 
-test('calc guide ①: every online field documented, terms exist, token guide complete', () => {
-  const names = GUIDE_SECTIONS.flatMap(s => s.fields.map(f => f.name));
-  for (const n of ['代號／名稱', '股數', '現價', 'Beta', '目標比重 %（選填）', '現金合計', '負債合計', '目標組合 Beta（B）',
-    '最低保留現金', 'Beta 口徑', '允許新增借款（現金不足時）', '填入範例', '清空', '更新股價', 'FinMind Token（選填）']) assert.ok(names.includes(n), n);
-  for (const s of GUIDE_SECTIONS) { assert.ok(s.id && s.title && s.intro, s.id); for (const f of s.fields) { assert.ok(f.what, f.name); if (f.termId) assert.ok(TERM_BY_ID[f.termId], f.termId); } }
-  assert.equal(DIFFERENCES.length, 4);
+test('token guide: steps, errors and privacy complete', () => {
   assert.equal(TOKEN_GUIDE.steps.length, 4); assert.equal(TOKEN_GUIDE.errors.length, 3);
-  assert.ok(ONLINE_URL.startsWith('https://'));
+  for (const k of ['why', 'limit', 'privacy']) assert.ok(TOKEN_GUIDE[k], k);
+  assert.ok(!/原計算器|原頁/.test(JSON.stringify(TOKEN_GUIDE)), 'token 教學不再提原計算器');
 });

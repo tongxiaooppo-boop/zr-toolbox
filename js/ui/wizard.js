@@ -311,7 +311,7 @@ export function tokenBox() {
       h('button', { type: 'button', class: 'secondary', onclick: () => { msg.textContent = setToken(input.value.trim()) ? (input.value.trim() ? '已存在這台裝置。' : '已清除。') : '這個瀏覽器不允許儲存（例如私密模式），每次要重貼。'; } }, '存起來'),
       h('button', { type: 'button', class: 'secondary', onclick: () => { input.value = ''; setToken(''); msg.textContent = '已清除。'; } }, '清除')),
     msg,
-    h('p', {}, h('a', { href: up + 'calc-guide.html#token' }, 'token 怎麼申請？')));
+    h('p', {}, h('a', { href: up + 'token.html' }, 'token 怎麼申請？')));
 }
 
 // ---------- 分次買進（v5.4） ----------

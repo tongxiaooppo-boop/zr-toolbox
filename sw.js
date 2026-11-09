@@ -1,7 +1,7 @@
 // Service worker：安裝時把整站存進手機（全部離線可用、不靠 GitHub）；平常先連網、連不上才用快取（network-first）。
 // VERSION 與 PRECACHE 由 scripts/gen-precache.mjs 產生，改了網站任何檔案後要重跑（tests/pwa.test.js 會檢查）。
 // 網站一改 VERSION 就變 → 手機下次連網時裝新版 service worker、重新下載整份；連不上就繼續用手機裡那份。
-const VERSION = 'b6383e6a0a80';
+const VERSION = 'b8a2d2d4514e';
 const CACHE = 'zr-toolbox-' + VERSION;
 const PRECACHE = ["./",
   "css/app.css",
@@ -9,7 +9,6 @@ const PRECACHE = ["./",
   "icon-512.png",
   "img/avgcost/comic.webp",
   "img/avgcost/step1.webp",
-  "img/calc-guide/map.svg",
   "img/common/help-avg-cost.svg",
   "img/common/step-holdings.svg",
   "img/cost/comic.webp",
@@ -80,13 +79,12 @@ const PRECACHE = ["./",
   "js/core/trigger.js",
   "js/core/validate.js",
   "js/core/valuation.js",
-  "js/data/calcGuide.js",
   "js/data/glossary.js",
   "js/data/stocks.js",
+  "js/data/token.js",
   "js/data/tools.js",
   "js/net/price.js",
   "js/pages/avgcost.js",
-  "js/pages/calc-guide.js",
   "js/pages/cost.js",
   "js/pages/dca.js",
   "js/pages/decay.js",
@@ -103,6 +101,7 @@ const PRECACHE = ["./",
   "js/pages/pledge.js",
   "js/pages/rebalance.js",
   "js/pages/retire.js",
+  "js/pages/token.js",
   "js/pages/trigger5050.js",
   "js/pages/valuation.js",
   "js/pwa.js",
@@ -126,6 +125,7 @@ const PRECACHE = ["./",
   "tools/pledge.html",
   "tools/rebalance.html",
   "tools/retire.html",
+  "tools/token.html",
   "tools/trigger5050.html",
   "tools/valuation.html"];
 
