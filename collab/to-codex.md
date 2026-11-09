@@ -1,124 +1,137 @@
-# 任務 ③ v1：定期配比再平衡改精靈（任意多檔＋股數取整）＋兩張卡通圖
+# 任務 ⑥⑧ v1：「正二不是兩倍？」「跌多少要漲多少才回本」改精靈＋四張卡通圖
 
-- 版本：2026-11-09 v1（框架 v5.8）。上一份（② v2）已完成上線，以本檔為準。
+- 版本：2026-11-09 v1（框架 v5.9）。上一份（③ v1）已完成上線，以本檔為準。
 - 執行者：訂閱 Codex sol，直接在本 repo（`D:\ok\zr-toolbox`）工作。**不要上網。不要 commit**。做完寫 `collab/from-codex.md`（覆蓋舊的）就停。
 - 指令一律用 `npm.cmd`／`node`；**不要跑 `npm.cmd run smoke`**（Opus 會跑）。暫存檔只准放本 repo 內，結束前刪掉。
 
 ## 0. 要讀的檔案（只准讀這些）
 
 - `js/pages/trigger5050.js`（全檔，**照抄它的寫法**：import、`steps`、`explain`、`example`、頁尾「怎麼讀」）
-- `js/pages/rebalance.js`（舊頁，整檔要重寫；只看它的「怎麼讀」文字可以沿用哪些）
-- `js/core/rebalance.js` 第 60 行以後（`WIZARD_TEMPLATES`、`guessBeta`、`rebalancePlan` 與 JSDoc，**只准呼叫**）
-- `js/ui/wizard.js` 第 1–40 行（介面註解）、第 233–295 行（`betaHoldingsInput`／`readBetaHoldings`）
-- `docs/figures/cartoon/00-風格與角色.md`、`rebalance-01-時間到了就配回四格.md`、`rebalance-02-532有兩種.md`（第 3 節生圖用）
+- `js/pages/decay.js`、`js/pages/drawdown.js`（舊頁，整檔要重寫；`lineChart` 用法、textarea 解析、「怎麼讀」文字照這兩檔）
+- `js/core/decay.js` 第 35 行以後（`decayPlan`）、`js/core/drawdown.js` 第 25 行以後（`drawdownPlan`），**只准呼叫**，JSDoc 是規格
+- `js/ui/wizard.js` 第 1–40 行（介面註解）
+- `docs/figures/cartoon/00-風格與角色.md` 和第 3 節表裡的四個提示檔
 
 ## 1. 只准改／新增這些檔
 
-- `js/ui/wizard.js`：`betaHoldingsInput` **只新增** `kind: 'mix'`（第 2.1 節）；`'stock'`／`'lever'` 行為、欄名、class 不准變。檔頭註解在 `betaHoldingsInput` 那行後面補一行說明 `'mix'`。
-- `js/pages/rebalance.js`：整檔改寫成精靈（第 2.2 節）。
-- `js/data/tools.js`：只改 ③ 的 `oneLine` 為「多檔照比例配回，算出每檔要買賣幾股」。
-- `docs/figures/cartoon/out/rebalance-comic.png`、`rebalance-step1.png`（第 3 節）。
+- `js/pages/decay.js`、`js/pages/drawdown.js`：整檔改寫成精靈。
+- `docs/figures/cartoon/out/` 底下四張 PNG（第 3 節）。
 - `collab/from-codex.md`。
 
-**不准改**：`js/core/`、`tests/`、`css/`、`img/`、其他頁面、`docs/`（`docs/figures/cartoon/out/` 除外）。覺得要改就停下寫進回報。
+**不准改**：`js/core/`、`js/ui/`、`js/data/`、`tests/`、`css/`、`img/`、`tools/`、其他頁面、`docs/`（`docs/figures/cartoon/out/` 除外）。覺得要改就停下寫進回報。
 
-## 2.1 元件：`betaHoldingsInput` 新增 `kind: 'mix'`
+共用輔助（兩頁各自寫在檔內）：`signed(x, digits = 1)` 照舊 ⑥ 頁；`pct = id => num(id) / 100`；`num`、`named`、`price`、`link` 照抄 ② 頁。
 
-給 ③ 用：正二、原型、債券 ETF 混在同一張表。
-- label 預設「這個策略裡的持股」，max 預設 10，**至少留 1 列**（跟 `lever` 一樣：只剩 1 列時隱藏「刪掉這檔」；`rows` 空陣列時先放 1 列空白）。
-- 代號 placeholder「例：0050」；代號說明照 `stock`。
-- 股數：plain「還沒買就填 0」，說明 `['手上有幾「股」：1 張＝1000 股，零股照實際股數填。', '還沒買的就填 0，工具會算出要買多少。']`。
-- Beta：placeholder 空字串，plain「留白＝看代號猜」，chip `'beta'`，說明 `['這檔跟大盤一起漲跌的程度。留白會看代號猜：結尾 L（正二）當 2、R（反向）當 −1、B（債券 ETF）當 0，其他當 1。', '正二是「每天」約 2 倍，放久了會偏離。']`。
-- `readBetaHoldings` 不用改。
+## 2.1 ⑥ `js/pages/decay.js`
 
-## 2.2 頁面 `js/pages/rebalance.js`
+import：`h, toolHeader, selectField, disclaimer, figure, lineChart`（components）、`wizard, numberInput, explain, withHelp`（wizard）、`decayPlan`（core/decay）、`parseNum, fmtMoney, fmtPct`（format）、`TOOLS`。
 
-import：`h, toolHeader, selectField, disclaimer, figure`（components）、`wizard, betaHoldingsInput, readBetaHoldings, tokenBox, numberInput, explain, withHelp`（wizard）、`WIZARD_TEMPLATES, guessBeta, rebalancePlan`（core/rebalance）、`parseNum, fmtMoney, fmtPct, fmtX`（format）、`STOCK_NAMES`、`TOOLS`。輔助函式 `num`、`named`、`price`、`link` 照抄 ② 頁。
-今天＝`new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())`。
+state：`kind`、`days`、`size`（百分比數字，例 5）、`amount`、`annualCost`（百分比數字）。
 
-state 欄位：`template`、`rowsFrom`、`rows`（`[{code, shares, price, beta}]`）、`weights`（物件，代號 → 百分比數字）、`cashPct`、`cash`、`contribution`、`unit`（1 或 1000）、`months`、`last`。
+### 步驟 1「選行情」
+- hint：「先選一種行情，下一步再填天數和幅度。」
+- about：「正二是『每天』大約 2 倍，不是一整段 2 倍。行情來回震盪或一路同方向，結果差很多。」
+- figure：`../img/decay/step1.webp`，alt 照第 3 節圖 2 的文字完整寫出。
+- body：`withHelp(selectField({ id: 'kind', label: '行情', termId: 'volatility-decay', options: [{ value: 'chop', label: '來回震盪（一天漲、一天跌）' }, { value: 'trend', label: '一路同方向（每天漲跌一樣多）' }], value: s.kind || 'chop' }), { text: ['來回震盪：大盤一天漲、隔天跌同樣的 %，最後幾乎回到原點。', '一路同方向：把整段漲跌平均分到每一天。'] })`
+- read：`s.kind = 值`。
 
-### 步驟 1「選配置」
-- hint：「選一個常見的比例當起點，下一步可以改代號、加減檔數。」
-- about：「定期配比只看時間：選好比例和週期，時間到了就用當時的總額照比例配回，中間漲跌都不動。這和 ② 的 50/50 觸發不同，那個看的是漲跌幅。」
-- figure：`../img/rebalance/step1.webp`，alt 照第 3 節圖 2 的文字完整寫出。
-- body：`selectField({ id: 'template', label: '配置', options: Object.entries(WIZARD_TEMPLATES).map(([value, t]) => ({ value, label: t.name })), value: s.template || '532-stock' })`，用 `withHelp` 掛說明：`['股版＝原型／正二／現金；債版＝正二／美債／現金。名字一樣、風險不同。', '模板裡的代號只是例子（0050、00631L、00679B），下一步可以換成你實際買的。']`。
-- read：`s.template = 選的值`；**當 `s.rowsFrom !== s.template`**：`const t = WIZARD_TEMPLATES[s.template]; s.rows = t.rows.map(r => ({ code: r.code, shares: NaN, price: NaN, beta: r.beta })); s.weights = Object.fromEntries(t.rows.map(r => [r.code, r.weight * 100])); s.cashPct = t.cash * 100; s.rowsFrom = s.template;`（自訂：`rows` 空陣列、`weights` 空物件、`cashPct` NaN）。同模板回來不重設。
+### 步驟 2「大盤怎麼走」
+- hint：`s.kind === 'chop'` ?「例：20 天、每天漲跌 5%。」:「例：10 天、整段大盤漲 10%；跌就填負數，例 −30。」
+- about：「一年大約 250 個交易日。」
+- body：`numberInput({ id: 'days', label: '天數', plain: '模擬幾個交易日（1–2520）', suffix: '天', value: s.days })`；`numberInput({ id: 'size', label: chop ? '每天漲跌幅' : '整段大盤漲跌', termId: 'daily-2x', plain: chop ? '大盤一天漲這麼多、隔天跌這麼多' : '整段期間大盤總共漲跌幾 %', suffix: '%', value: s.size })`。
+- read：兩格空白 → 錯誤「請填天數和幅度。」；`s.days = num('days'); s.size = num('size')`；然後 `decayPlan({ kind: s.kind, days: s.days, size: s.size / 100 })` 檢查（錯誤丟出去）。
 
-### 步驟 2「你的持股」
-- hint：「只填這個策略裡的持股。股數看券商 App 的庫存；還沒買的那檔股數填 0。」
-- about：「每一檔記下現在有幾股、現價多少，工具才算得出要買賣幾股。」
-- figure：`../img/common/step-holdings.svg`，alt 照抄 ② 頁步驟 1。
-- body：`[betaHoldingsInput({ id: 'rows', rows: s.rows || [], kind: 'mix' }), tokenBox()]`。畫完之後，**代號有值、現價空白**的列，對它的 `.b-code` 觸發一次 `change` 事件（讓模板帶入的代號自動抓價）。
-- read：`s.rows = readBetaHoldings('rows').map(r => ({ ...r, shares: Number.isNaN(r.shares) ? 0 : r.shares }))`；然後只為了檢查呼叫一次 `rebalancePlan({ rows: s.rows.map(r => ({ ...r, weight: 1 / s.rows.length })), cash: 1, cashWeight: 0 })`（錯誤訊息直接丟出去）。
+### 步驟 3「你的錢（選填）」
+- hint：「兩格都可以留白。填了金額，結果會換算成錢。」
+- body：`numberInput({ id: 'amount', label: '投入金額', plain: '留白就只看 %', suffix: '元', value: s.amount })`；`numberInput({ id: 'annualCost', label: '每年內扣費用', plain: '留白當 0；正二大約 1% 上下', suffix: '%', value: s.annualCost, help: { text: ['正二每天從淨值扣的經理費、保管費等，一年合計大約 1% 上下，詳細看投信網站的公開說明書。', '這裡平均攤到每天（÷ 250）。'] } })`。
+- read：空白當 NaN 存；`decayPlan(params(s))` 檢查。
 
-### 步驟 3「現金與目標比例」
-- hint：「現金只算這個策略留的錢，不是全部存款。比例照你自己的規則填，加起來要 100%。」
-- about：「每一份要占總額幾 %。總額＝持股市值＋現金＋這次新投入。」
-- body：
-  - `numberInput({ id: 'cash', label: '策略現金', plain: '這個策略留著的現金', suffix: '元', value: s.cash, help: { text: ['只填這個策略的現金部位（例：放在交割戶、準備配回用的錢）。', '沒有就填 0。'] } })`
-  - `numberInput({ id: 'contribution', label: '這次新投入', plain: '沒有就留白', suffix: '元', value: s.contribution, help: { text: ['這次要另外加進來的錢（例：這半年存下來的）。', '會一起算進總額，照比例分下去。'] } })`
-  - 每一列持股一格：`numberInput({ id: 'w-' + i, label: named(code) + ' 的比例', suffix: '%', value: s.weights?.[code] })`
-  - `numberInput({ id: 'cashPct', label: '現金的比例', suffix: '%', value: s.cashPct })`
-  - 一行 `h('p', { class: 'muted', id: 'w-sum' })`：「目前加起來 X%」，畫好時算一次，之後在 body 根節點聽 `input` 事件即時更新（空白當 0；`+x.toFixed(2)`）。
-  - `selectField({ id: 'unit', label: '下單方式', options: [{ value: '1', label: '可以買賣零股（算到 1 股）' }, { value: '1000', label: '只用整張（1 張＝1000 股）' }], value: String(s.unit || 1) })`，`withHelp`：`['零股：算到 1 股，最貼近目標比例。', '只用整張：不到 1 張的差額就不動，配完會跟目標差多一點。']`。
-- read：`cash` 空白 → 錯誤「請填策略現金，沒有就填 0。」；`contribution` 空白當 0；比例空白當 0，存回 `s.weights[code]`、`s.cashPct`；`s.unit = Number(...)`。然後呼叫一次 `rebalancePlan`（用第 2.2 節最後的「組參數」方式，不帶 `last`）檢查，錯誤丟出去（比例不是 100% 的訊息就是從這裡出來）。
+### `params(s)`
+`{ kind: s.kind, days: s.days, size: s.size / 100, amount: Number.isNaN(s.amount) || s.amount == null ? 0 : s.amount, annualCost: Number.isNaN(s.annualCost) || s.annualCost == null ? 0 : s.annualCost / 100 }`
 
-### 步驟 4「多久配回一次」（選填）
-- hint：「不知道上次是哪天就留白，工具照樣算今天配回的股數。」
-- about：「週期到了才配回；還沒到就不用動。」
-- body：`selectField({ id: 'months', label: '再平衡週期', termId: 'rebalance', options: 每月 1／每季 3／每半年 6／每年 12, value: String(s.months || 6) })`；日期欄 `last`（照 ② 頁的日期欄寫法：`type: 'date'`、`max` 今天、`withHelp` 說明 `['上次照比例配好的那天。', '留白就不算到期日。']`）。
-- read：`s.months = Number(...)`；`s.last = 值或 ''`。
-
-### 組參數（結果與步驟 3 共用，寫成檔內函式 `params(s, withDate)`）
-`{ rows: s.rows.map(r => ({ ...r, weight: (s.weights[r.code] || 0) / 100 })), cash: s.cash, cashWeight: (s.cashPct || 0) / 100, contribution: s.contribution || 0, unit: s.unit || 1, months: s.months || 6, last: withDate ? s.last || undefined : undefined, asOf: 今天 }`
-
-### 結果（`result(s)`，`const r = rebalancePlan(params(s, true))`）
-依序：
-1. `r.due` 有值時：`explain({ label: '到期了嗎？', value: r.ready ? '到期了，可以配回' : '還沒到期', tone: r.ready ? 'warn' : 'ok', how: '上次配回 {s.last} ＋ {週期中文} ＝ {r.due}。', means: r.ready ? '照規則今天可以配回。' : '照規則先不用動；下面是「如果今天配回」的股數。', todo: r.ready ? '照下面的股數下單，做完把今天的日期記下來，下次第 4 步填這個日期。' : null })`。
-2. `explain({ label: '總額', value: fmtMoney(r.pool), tone: 'info', how: '持股市值 {fmtMoney(r.total − s.cash)} ＋ 現金 {fmtMoney(s.cash)}' + (新投入 > 0 ? ' ＋ 新投入 {…}' : '') + ' ＝ {fmtMoney(r.pool)}。', means: '每一份的目標＝總額 × 比例。' })`。
-3. 一張表 `h('table', { class: 'trade-table' })`：欄「部位｜現在占｜目標占｜要做的事｜配完股數」。每檔一列：`named(code)`、`fmtPct(nowWeight)`、`fmtPct(weight)`、`tradeShares > 0 ? '買進 N 股' : tradeShares < 0 ? '賣出 N 股' : '不動'`（N 加千分位 `toLocaleString('en-US')`）、`sharesAfter` 加千分位；最後一列現金：`fmtPct(r.cashWeightNow)`、`fmtPct(cashPct/100)`、`配完 fmtMoney(r.cashAfter)`、`—`。
-4. 每檔 `tradeShares !== 0` 的列各一項 `explain`：label `{named(code)}：買進／賣出`，value `N 股`，tone `'warn'`；how「目標 {fmtMoney(target)}（{fmtMoney(r.pool)} × {weight×100}%）− 現在 {fmtMoney(value)}，÷ 現價 {price(price)} ＝ {((target − value)/price).toFixed(1)} 股 → {買進無條件捨去／賣出四捨五入}」，整張時後面接「，以 1,000 股為單位」；means「約 {fmtMoney(|tradeAmount|)}。配完 {sharesAfter} 股、約 {fmtMoney(valueAfter)}，占 {fmtPct(weightAfter)}。」。
-5. `explain({ label: '配完的現金', value: fmtMoney(r.cashAfter), tone: 'ok', how: '現金 {…} ＋ 新投入 {…} − 買進 {fmtMoney(r.buyAmount)} ＋ 賣出 {fmtMoney(r.sellAmount)} ＝ {…}。', means: '目標是 {fmtMoney(r.cashTarget)}；差一點是因為股數要取整。', todo: ['下單前用 ', link('cost.html', '⑨ 買賣成本與損益'), ' 算手續費和稅；這裡沒算。'] })`。
-6. `explain({ label: '曝險倍數', value: '{fmtX(r.exposureNow)} → {fmtX(r.exposureAfter)}', tone: 'info', how: '每檔市值 × Beta 加起來 ÷ 總額。用到的 Beta：{逐檔 code Beta，beta 是用猜的（原本留白）在後面加「（看代號猜）」}。', means: '約等於「總額的幾倍跟著大盤漲跌」；目標比例算出來是 {fmtX(r.exposureTarget)}。現金當 0，債券 ETF 當 0 是簡化。', termId 不用 })`。判斷「用猜的」：步驟 2 讀到的 `beta` 是 NaN。
-7. `h('p', { class: 'note' }, '沒算手續費、證交稅；到期那天休市就順延到下一個交易日。')`。
+### 結果
+`const r = decayPlan(params(s)); const m = r.amount > 0;` 依序：
+1. `explain({ label: '大盤整段', value: signed(r.indexTotal) + (m ? '（' + fmtMoney(r.moneyIndex) + '）' : ''), tone: 'info', how: chop ? '每天 ×(1 + {size}%)、隔天 ×(1 − {size}%)，共 {days} 天。' : '整段 {signed(size/100)} 平均攤成每天一樣的漲跌，共 {days} 天。' })`
+2. `explain({ label: '以為的「整段 × 2」', value: signed(r.naive) + (m ? '（…moneyNaive）' : ''), how: '大盤整段 {signed(r.indexTotal)} × 2。', means: '很多人以為正二就是這樣，但正二不是這樣算的。' })`
+3. `explain({ label: '正二實際', value: signed(r.leveredTotal) + (m ? '（…moneyLevered）' : ''), tone: r.gap < 0 ? 'bad' : 'ok', how: '每天都用前一天的淨值 ×(1 + 2 × 大盤當天漲跌' + (r.dailyCost > 0 ? ' − 每天費用 ' + (r.dailyCost * 100).toFixed(4) + '%' : '') + ')，一天一天乘上去。' })`
+4. `explain({ label: '差距', value: signed(r.gap) + (m ? '（' + (r.moneyGap < 0 ? '少 ' : '多 ') + fmtMoney(Math.abs(r.moneyGap)) + '）' : ''), tone: r.gap < 0 ? 'bad' : 'ok', how: '正二實際 − 以為的整段 × 2。', means: r.gap < 0 ? '來回震盪越多、天數越長，差距通常越大。這就是常聽到的波動耗損。' : '一路同方向時，每天重新變 2 倍反而會放大結果。', todo: ['想知道正二要買多少，看 ', link('exposure.html', '⑪ 正二要買多少'), '。'] })`
+5. `lineChart(...)`：照舊 ⑥ 頁（series 正二／大盤、label、yFormat、baseline 1）。
+6. `h('p', { class: 'note' }, '理想化計算：' + (r.dailyCost > 0 ? '' : '沒扣內扣費用、') + '沒算追蹤誤差和折溢價，實際結果會再差一些。')`
 
 ### example
-```
-{ template: '532-stock', rowsFrom: '532-stock',
-  rows: [{ code: '0050', shares: 2000, price: 195.5, beta: 1 }, { code: '00631L', shares: 9000, price: 26.3, beta: 2 }],
-  weights: { '0050': 50, '00631L': 30 }, cashPct: 20, cash: 172300, contribution: 50000, unit: 1, months: 6, last: '2026-05-08' }
-```
-範例結果必須是：總額 850,000；0050 買進 173 股（配完 2,173）；00631L 買進 695 股（配完 9,695）；配完現金 170,200；曝險 1.08 倍 → 1.10 倍；到期日 2026-11-08、到期了。
+`{ kind: 'chop', days: 20, size: 5, amount: 1000000, annualCost: NaN }`；範例結果必須有：大盤 −2.5%（975,279）、以為 −4.9%（950,559）、正二 −9.6%（904,382）、差距少 46,177。
 
-### 頁面組裝（照 ② 頁）
-`toolHeader(tool)`、`wizard({ steps, result, example })`、「怎麼讀」卡片：
-- `figure({ src: '../img/rebalance/comic.webp', alt: 第 3 節圖 1 四格文字完整寫出 })`
-- 三段文字：沿用舊頁第 1、2 段（定期配比只看時間…；532、442 有兩種…），第 3 段改「算出來的是取整後的股數：買進無條件捨去、賣出四捨五入，所以現金一定夠，配完會跟目標差一點點。」
-- `disclaimer('general')`。
+### 怎麼讀
+`figure({ src: '../img/decay/comic.webp', alt: 第 3 節圖 1 四格文字完整寫出 })`，接舊頁三段文字（不改），`disclaimer('general')`。舊的 `two-days.svg` 不再放進頁面。
 
-## 3. 生兩張卡通圖（用你的生圖功能）
+## 2.2 ⑧ `js/pages/drawdown.js`
+
+import：`h, toolHeader, selectField, infoChip, disclaimer, figure`（components）、`wizard, holdingsInput, readHoldings, tokenBox, numberInput, explain, withHelp`（wizard）、`holdingSummary`（core/holdings）、`drawdownPlan`（core/drawdown）、`parseNum, fmtMoney, fmtPct`（format）、`STOCK_NAMES`、`TOOLS`。
+
+state：`mode`、`h`（holdingsInput 的 rows）、`peak`、`now`、`drop`（百分比數字）、`seriesText`、`annual`（百分比數字）。
+
+### 步驟 1「怎麼算跌幅」
+- hint：「選你手上有的數字。」
+- about：「同一個現價，跟買入價比和跟最高點比，答案不一樣。」
+- figure：`../img/drawdown/step1.webp`，alt 照第 3 節圖 4 的文字完整寫出。
+- body：`withHelp(selectField({ id: 'mode', label: '跟什麼比', termId: 'drawdown', options: [{ value: 'holding', label: '跟我的買入價比（填持股）' }, { value: 'peak', label: '跟最高點比（填最高和現在）' }, { value: 'pct', label: '直接填跌幅 %' }, { value: 'series', label: '貼一串淨值或股價紀錄' }], value: s.mode || 'holding' }), { text: ['跟買入價比：算「還要漲多少才不虧」。', '跟最高點比：算「還要漲多少才回到最高」，淨值、股價、指數都可以。', '貼一串紀錄：找出中間跌最深的那一次（最大回撤）。'] })`
+- read：`s.mode = 值`。
+
+### 步驟 2（標題依 mode：holding「你的持股」／peak「最高點和現在」／pct「跌了幾 %」／series「貼上紀錄」）
+- holding：hint「只填一檔。股數和成本均價看券商 App 的庫存。」；figure `../img/common/step-holdings.svg`，alt 照抄 ② 頁步驟 1；body `[holdingsInput({ id: 'h', rows: s.h || [{}], max: 1, label: '你的持股' }), tokenBox()]`；read `s.h = readHoldings('h'); holdingSummary(s.h);`
+- peak：hint「淨值、股價、指數都可以，兩格單位要一樣。」；body `numberInput({ id: 'peak', label: '最高點', plain: '之前最高的那個數字', value: s.peak })`、`numberInput({ id: 'now', label: '現在', plain: '現在的數字', value: s.now })`；read 存 `num`。
+- pct：body `numberInput({ id: 'drop', label: '跌幅', termId: 'recovery-gain', plain: '從高點跌了幾 %，例：30', suffix: '%', value: s.drop })`；read 存 `num`。
+- series：body 照舊頁 `seriesField()`（textarea id `series`，值帶 `s.seriesText`）；read：`s.seriesText = 值`，解析照舊頁（`split(/[\s,，、]+/)`、`parseNum`），有非數字 → 錯誤「紀錄裡有不是數字的內容，請只填數字，用逗號或空白隔開。」
+- 每種 read 最後都呼叫 `drawdownPlan(params(s))` 檢查（錯誤丟出去）。
+
+### 步驟 3「之後每年賺多少（選填）」
+- hint：「留白就不估要幾年。」
+- body：`numberInput({ id: 'annual', label: '之後每年賺多少', plain: '例：大盤長期平均約 8%，這只是假設', suffix: '%', value: s.annual, help: { text: ['用固定的年報酬估要幾年回本，真實行情不會這麼平順。', '留白就不估。'] } })`
+- read：`s.annual = num('annual')`（空白＝NaN），`drawdownPlan(params(s))` 檢查。
+
+### `params(s)`
+`{ mode: s.mode, annual: s.annual / 100 }` 再依 mode 加：holding `{ shares: s.h[0].shares, buyPrice: s.h[0].buyPrice, nowPrice: s.h[0].nowPrice }`；peak `{ peak: s.peak, now: s.now }`；pct `{ drop: s.drop / 100 }`；series `{ series: 解析後的數字陣列 }`。（`s.annual` 是 NaN 時 `annual` 就是 NaN，core 會當作沒填。）
+
+### 結果
+`const r = drawdownPlan(params(s))`；`what = { holding: '買入價', peak: '最高點', series: '前高' }[s.mode]`。依序：
+1. `r.drop === 0 && r.up > 0`：`explain({ label: '沒有虧', value: '現在比' + what + '高 ' + fmtPct(r.up), tone: 'ok', means: '不用回本。可以把買入價換成最高點再算一次，看離最高點多遠。' })`，**後面只放第 6、7 項**。`r.drop === 0 && r.up === 0`：同樣格式，value「剛好回到" + what + "」」。
+2. `explain({ label: '跌了', value: fmtPct(r.drop), tone: 'bad', how: base 有值 ? '(' + what + ' {base} − {current}) ÷ {base}＝' + fmtPct(r.drop) + '。' : '你填的跌幅。' })`；series 時 how 改「從第 {peakIndex+1} 筆（{base}）跌到第 {troughIndex+1} 筆（{current}），是這串紀錄裡最深的一次。」
+3. `explain({ label: '要漲多少才回本', value: fmtPct(r.recovery), tone: 'warn', how: '1 ÷ (1 − ' + fmtPct(r.drop) + ') − 1＝' + fmtPct(r.recovery) + '。', means: '跌是用原本的錢算，漲是用剩下的錢算，所以要漲的比跌的多。' + (base 有值 ? '要從 {current} 漲回 {base}。' : '') })`（數字用 `+x.toFixed(2)` 顯示，不加「元」，因為 peak／series 可能是淨值）。
+4. holding 才有：`explain({ label: '現在虧', value: fmtMoney(r.loss), tone: 'bad', how: '{shares 千分位} 股 ×（{buyPrice} − {nowPrice}）。', means: '還沒賣就只是帳面上的虧損；沒算手續費、稅和股利。' })`
+5. `r.years !== null`：`explain({ label: '每年賺 ' + s.annual + '% 要', value: '約 ' + r.years.toFixed(1) + ' 年', how: 'ln(1 + ' + fmtPct(r.recovery) + ') ÷ ln(1 + ' + s.annual + '%)。', means: '假設每年都穩穩賺一樣多；真實行情會有起伏。' })`
+6. series 才有：`explain({ label: '現在離最高點', value: r.curDrop === 0 ? '在最高點' : '還差 ' + fmtPct(r.curDrop), tone: 'info', how: '最後一筆 ÷ 全部最高的一筆。' })`
+7. 對照表 `h('table', { class: 'trade-table' })`：欄「跌了｜要漲」，`r.table` 每列 `fmtPct(drop, 0)`、`fmtPct(gain)`。表下一行 `h('p', { class: 'note' }, ['正二的漲跌約是大盤的 2 倍，回撤也比較深，而且來回震盪會再多虧一點，見 ', link('decay.html', '⑥ 正二不是兩倍？'), '。'])`。
+
+### example
+`{ mode: 'holding', h: [{ code: '0050', shares: 1000, buyPrice: 200, nowPrice: 150 }], annual: 8 }`；範例結果必須有：跌了 25.0%、要漲 33.3%、現在虧 50,000、約 3.7 年。
+
+### 怎麼讀
+`figure({ src: '../img/drawdown/comic.webp', alt: 第 3 節圖 3 四格文字完整寫出 })`，接舊頁三段文字（不改），`disclaimer('general')`。舊的 `recovery.svg` 不再放進頁面。
+
+## 3. 生四張卡通圖（用你的生圖功能）
 
 每張把 `00-風格與角色.md` 全文＋該張提示全文合在一起當生圖提示，生成直式 1024×1536 PNG：
 
-| 提示檔 | 存成 |
-|---|---|
-| `docs/figures/cartoon/rebalance-01-時間到了就配回四格.md` | `docs/figures/cartoon/out/rebalance-comic.png` |
-| `docs/figures/cartoon/rebalance-02-532有兩種.md` | `docs/figures/cartoon/out/rebalance-step1.png` |
+| # | 提示檔 | 存成 |
+|---|---|---|
+| 1 | `docs/figures/cartoon/decay-01-正二不是整段兩倍四格.md` | `docs/figures/cartoon/out/decay-comic.png` |
+| 2 | `docs/figures/cartoon/decay-02-兩種行情.md` | `docs/figures/cartoon/out/decay-step1.png` |
+| 3 | `docs/figures/cartoon/drawdown-01-跌25要漲33四格.md` | `docs/figures/cartoon/out/drawdown-comic.png` |
+| 4 | `docs/figures/cartoon/drawdown-02-跌幅四種算法.md` | `docs/figures/cartoon/out/drawdown-step1.png` |
 
 - 生完自己看一遍：中文與數字要和提示一字不差；錯了重生該張，**每張最多重生 2 次**，仍有錯就留最後一張並在回報寫出哪裡錯。
-- 頁面引用的是 `img/rebalance/comic.webp`、`step1.webp`（Opus 轉檔搬過去，你不用做）。
+- 頁面引用的是 `img/decay/comic.webp`、`step1.webp`、`img/drawdown/comic.webp`、`step1.webp`（Opus 轉檔搬過去，你不用做）。
 - 不能生圖就跳過本節，回報寫「無法生圖」，頁面照常交付。
 
 ## 4. PROOF_CMD（必跑，貼結果）
 
 ```
 npm.cmd test
-node -e "import('./js/core/rebalance.js').then(m=>{const r=m.rebalancePlan({rows:[{code:'0050',shares:2000,price:195.5,beta:1,weight:.5},{code:'00631L',shares:9000,price:26.3,beta:2,weight:.3}],cash:172300,cashWeight:.2,contribution:50000,months:6,last:'2026-05-08',asOf:'2026-11-09'});console.log(r.pool,r.rows.map(x=>x.tradeShares).join(','),r.cashAfter,r.exposureNow.toFixed(2),r.exposureAfter.toFixed(2),r.due,r.ready)})"
-node --check js/pages/rebalance.js
-node --check js/ui/wizard.js
+node -e "Promise.all([import('./js/core/decay.js'),import('./js/core/drawdown.js')]).then(([a,b])=>{const r=a.decayPlan({kind:'chop',days:20,size:.05,amount:1e6});const d=b.drawdownPlan({mode:'holding',shares:1000,buyPrice:200,nowPrice:150,annual:.08});console.log(Math.round(r.moneyIndex),Math.round(r.moneyNaive),Math.round(r.moneyLevered),Math.round(r.moneyGap),d.drop,d.recovery.toFixed(4),d.loss,d.years.toFixed(1))})"
+node --check js/pages/decay.js
+node --check js/pages/drawdown.js
 ```
-預期：`ℹ tests 131`、`ℹ pass 131`、`ℹ fail 0`；第二行 `850000 173,695 170200 1.08 1.10 2026-11-08 true`；後兩行無輸出。
+預期：`ℹ tests 138`、`ℹ pass 138`、`ℹ fail 0`；第二行 `975279 950559 904382 -46177 0.25 0.3333 50000 3.7`；後兩行無輸出。
 
 ## 5. 回報 `collab/from-codex.md`（欄位寫死，不貼程式碼）
 

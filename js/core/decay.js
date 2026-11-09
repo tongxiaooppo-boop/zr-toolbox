@@ -30,3 +30,22 @@ export function makeScenario(kind, days, size) {
   }
   throw new Error('未知的情境。');
 }
+
+/**
+ * ⑥ 精靈（v5.9，Opus 定，外包不得改簽名）：情境＋天數＋幅度（＋金額、每年內扣費用）→ 大盤、「整段 × 2」、正二實際、差距。
+ * @param {{kind:'chop'|'trend', days:number, size:number, amount?:number, annualCost?:number}} p
+ *   size：chop＝每日漲跌幅（0.05＝5%）；trend＝整段大盤總報酬（0.1＝+10%、−0.3＝−30%）
+ *   amount：投入金額（選填，0＝不換算金額）；annualCost：每年內扣費用率（0.01＝1%，選填，預設 0），
+ *   每日費用＝annualCost ÷ 250（一年約 250 個交易日），從正二每天的報酬扣掉。
+ * @returns simulateDaily 的全部欄位＋{ dailyCost, amount, moneyIndex, moneyNaive, moneyLevered, moneyGap }
+ *   money* ＝ amount × (1＋報酬)（moneyGap＝amount × gap）；amount 為 0 時 money* 都是 null。
+ */
+export function decayPlan({ kind, days, size, amount = 0, annualCost = 0 }) {
+  if (!(Number.isFinite(amount) && amount >= 0)) throw new Error('投入金額要是 0 或正數。');
+  if (!(Number.isFinite(annualCost) && annualCost >= 0 && annualCost < 0.1)) throw new Error('每年內扣費用要在 0–10% 之間。');
+  const dailyCost = annualCost / 250;
+  const r = simulateDaily(makeScenario(kind, days, size), { dailyCost });
+  const m = x => (amount > 0 ? amount * (1 + x) : null);
+  return { ...r, dailyCost, amount, moneyIndex: m(r.indexTotal), moneyNaive: m(r.naive), moneyLevered: m(r.leveredTotal),
+    moneyGap: amount > 0 ? amount * r.gap : null };
+}
