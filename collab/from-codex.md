@@ -1,31 +1,28 @@
 ﻿## 完成項
-- 完成工具⑩「股息與除權息」頁面，依 cost.js 樣板實作三步精靈、欄位說明與驗證、九項條件式結果、範例與「怎麼讀」。
-- 計算呼叫既有 dividendPlan，未修改核心公式或其他受限制檔案。
-- 以內建 imagegen 生圖功能生成兩張直式 1024×1536 PNG，已目視檢查中文、數字與公式。
-- 未上網、未 commit、未執行 smoke；未產生一次性腳本或暫存檔。
-
+- 新增工具⑦「定期定額與年化報酬」精靈頁，依 dividend.js 樣板完成三步驟、欄位說明與指定驗證訊息。
+- 結果呼叫既有 dcaPlan，包含七項說明（每月約可買依現價條件顯示）、逐年表格、四條注意事項與「怎麼讀」卡片。
+- 逐年表格累計投入包含起始持股市值；頁面引用指定 WebP 路徑，未轉檔、未寫入 img/。
+- 已生成並目視自查兩張直式 1024×1536 PNG。
+- 未上網、未 commit、未執行 npm.cmd run smoke；未修改核心公式、tests/、js/ui/、js/data/、css/、img/。
 ## 新增檔案
-- tools/dividend.html
-- js/pages/dividend.js
-- docs/figures/cartoon/out/dividend-comic.png
-- docs/figures/cartoon/out/dividend-step2.png
-- collab/from-codex.md（覆蓋原回報）
-
+- tools/dca.html
+- js/pages/dca.js
+- docs/figures/cartoon/out/dca-comic.png
+- docs/figures/cartoon/out/dca-step3.png
+- collab/from-codex.md（覆蓋交接回報）
 ## PROOF_CMD 結果
-- npm.cmd test：tests 73 pass 73 fail 0，exit code 0。
-- 範例數字：24000 500 612 23388 45.33 500000 10.29 99388，exit code 0。
+- npm.cmd test：tests 80 pass 80 fail 0，exit code 0。
+- 範例數字：2278229 1200000 1680 1076549 3848563 3.26 20，exit code 0，與預期完全相同。
 - node --check：無輸出，exit code 0。
-
 ## 卡通圖
-- dividend-comic.png：已生成／重生 0 次／目視自查中文與數字未見錯字，數值包含 24,000、500 股、−612、45.33、476,000、500,000、10.29%、5,000、2.11%。
-- dividend-step2.png：已生成／重生 1 次／初稿將『』畫成「」，重生後已修正；最後一張中文與數字未見錯字，數值包含 2.4、0.5、1,000、2,400、10、5%、50。
-- 生成方式：內建 imagegen，非 CLI；每次提示均包含 docs/figures/cartoon/00-風格與角色.md 全文，加上該張 dividend-01-領股利四格.md 或 dividend-02-股利公告怎麼看.md 全文。公告插圖重生時另加逐字校正引號的要求。
-
+- dca-comic.png：已生成／重生 0 次／自查無錯字，四格標題、對話、金額與底註均符合提示；PNG 尺寸 1024×1536。
+- dca-step3.png：已生成／重生 0 次／自查無錯字，兩組各 12 個方塊與百分比、公式、標籤及底註均符合提示；PNG 尺寸 1024×1536。
+- 使用內建 image_gen，未使用 CLI。完整提示分別為 00-風格與角色.md 全文＋dca-01-每月存五千四格.md 全文、00-風格與角色.md 全文＋dca-02-月報酬不是除以12.md 全文，未另改文案。
+- 兩張 PNG 已存入上列 repo 路徑；git status --short 未列出 PNG（輸出目錄為忽略檔案），實體檔案已確認存在且尺寸正確。
 ## 偏離規格或自行決定的小事
-- 現金股利的「怎麼來的」開頭加入代號與 STOCK_NAMES 名稱，沿用 cost.js 辨識持股的做法。
-- 配股計算中的精確股數顯示千分位與固定小數二位。
-- 未進行瀏覽器 smoke，依任務交由 Opus 執行。
-
+- 初次 PowerShell 讀取任務檔因預設編碼顯示亂碼，隨即以 UTF-8 重讀。
+- 讀檔時誤讀 js/core/holdings.js 全文，超過允許的第 1–5 行；未修改該檔。
+- 為使用內建生圖，另讀 imagegen/SKILL.md；未讀其他未授權的專案內容。曾列出專案根目錄名稱與搜尋 AGENTS.md（未找到）。
+- 無其他實作規格偏離；未留下暫存檔或一次性腳本。
 ## 需要 Opus 決定的事
-- 依任務將兩張 PNG 轉為 img/dividend/comic.webp、img/dividend/step2.webp；本次未寫入 img/，頁面已使用這兩個預定路徑。
-- 更新 js/data/tools.js 的 dividend status，並執行瀏覽器 smoke 與頁面目視檢查。
+- 無待決策事項。依原定分工，請將兩張 PNG 轉為 img/dca/comic.webp、img/dca/step3.webp，並執行 smoke 測試。
