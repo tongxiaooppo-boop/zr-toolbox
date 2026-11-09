@@ -64,6 +64,40 @@ export async function fetchCloseOn(code, date, { token = '', fetchFn = globalThi
   return r;
 }
 
+const EVENT_SETS = { split: 'TaiwanStockSplitPrice', dividend: 'TaiwanStockDividendResult', reduction: 'TaiwanStockCapitalReductionReferencePrice' };
+
+/**
+ * 股票事件（v5.7）：since 之後（含）的分割／反分割、除權息、減資原始列，交給 core/events.js 的 normalizeEvents。
+ * 三個資料集各查一次；任一個失敗就整個回失敗（事件缺一筆，換算就會錯）。token 壞掉照 fetchClose 的規則改匿名重試。
+ * @returns {Promise<{ok:true, raw:{split:object[], dividend:object[], reduction:object[]}, clearToken:boolean} | {ok:false, action:string, message:string}>}
+ */
+export async function fetchEvents(code, since, { token = '', fetchFn = globalThis.fetch } = {}) {
+  const raw = {}; let clearToken = false;
+  const get = async (dataset, t) => {
+    const u = new URL(API);
+    u.searchParams.set('dataset', dataset); u.searchParams.set('data_id', code); u.searchParams.set('start_date', since);
+    if (t) u.searchParams.set('token', t);
+    try {
+      const res = await fetchFn(u.toString());
+      let j = null; try { j = await res.json(); } catch { /* 非 JSON 回應 */ }
+      return { status: j?.status ?? res.status, data: j?.data };
+    } catch { return { status: 0, data: null }; }
+  };
+  for (const [key, dataset] of Object.entries(EVENT_SETS)) {
+    const t = clearToken ? '' : token;
+    let r = await get(dataset, t);
+    let a = finmindAction({ status: r.status, usedToken: !!t, retried: false });
+    if (a.action === 'retry-without-token') {
+      r = await get(dataset, '');
+      a = finmindAction({ status: r.status, usedToken: false, retried: true });
+      if (a.action === 'ok') clearToken = true;
+    }
+    if (a.action !== 'ok') return { ok: false, action: a.action, message: a.message };
+    raw[key] = Array.isArray(r.data) ? r.data : [];
+  }
+  return { ok: true, raw, clearToken };
+}
+
 // localStorage 在私密模式或被封鎖時會丟例外，一律包起來；讀不到就當沒有 token。
 export function getToken() { try { return localStorage.getItem(TOKEN_KEY) || ''; } catch { return ''; } }
 export function setToken(t) { try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY); return true; } catch { return false; } }
