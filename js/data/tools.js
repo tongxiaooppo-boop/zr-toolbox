@@ -28,9 +28,9 @@ export const TOOLS = Object.freeze([
   { id: 'divtax', no: '⑰', group: 'stock', title: '股利要怎麼報稅', oneLine: '股利合併計稅還是分開計稅，哪一種繳比較少', href: 'tools/divtax.html', gate: 4, status: 'ready', terms: ['dividend-tax', 'dividend-yield', 'nhi-premium'] },
   { id: 'fx', no: '⑱', group: 'stock', title: '換匯成本與海外損益', oneLine: '換外幣的價差、匯率變動，換回台幣到底賺多少', href: 'tools/fx.html', gate: 4, status: 'ready', terms: ['fx-spread'] },
   { id: 'retire', no: '⑲', group: 'stock', title: '退休提領', oneLine: '退休存的錢每月能領多少、要存多少才夠', href: 'tools/retire.html', gate: 4, status: 'ready', terms: ['four-percent-rule', 'inflation', 'real-value', 'compound-interest'] },
-  { id: 'etf101', no: '⑳', group: 'science', title: 'ETF 入門', oneLine: 'ETF 是什麼、費用怎麼算、配息與正二要注意什麼', href: 'tools/etf101.html', gate: 6, status: 'planned', terms: [] },
-  { id: 'loans', no: '㉑', group: 'science', title: '借錢投資的管道', oneLine: '質借、融資、信貸、房貸、保單……利息、追繳、最壞情況一次比', href: 'tools/loans.html', gate: 6, status: 'planned', terms: [] },
-  { id: 'products', no: '㉒', group: 'science', title: '商品與賺錢方式', oneLine: '股票、ETF、債券、權證、期貨……怎麼賺、怎麼虧、適不適合新手', href: 'tools/products.html', gate: 6, status: 'planned', terms: [] }
+  { id: 'etf101', no: '⑳', group: 'science', title: 'ETF 入門', oneLine: 'ETF 是什麼、費用怎麼算、配息與正二要注意什麼', href: 'tools/etf101.html', gate: 6, status: 'ready', terms: [] },
+  { id: 'loans', no: '㉑', group: 'science', title: '借錢投資的管道', oneLine: '質借、融資、信貸、房貸、保單……利息、追繳、最壞情況一次比', href: 'tools/loans.html', gate: 6, status: 'ready', terms: [] },
+  { id: 'products', no: '㉒', group: 'science', title: '商品與賺錢方式', oneLine: '股票、ETF、債券、權證、期貨……怎麼賺、怎麼虧、適不適合新手', href: 'tools/products.html', gate: 6, status: 'ready', terms: [] }
 ]);
 
 export const SHORTCUTS = Object.freeze([

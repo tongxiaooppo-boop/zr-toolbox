@@ -181,3 +181,17 @@ main:has(.wizard-layout){max-width:1120px}
 .refs ol{font-size:14px;padding-left:1.2em}
 .refs small{color:var(--muted)}
 @media (prefers-reduced-motion:reduce){.primary:active,.secondary:active,.button-link:active,.tool-card:hover,.tool-card:focus-visible{transform:none}}
+
+/* 科普長文：只作用在文章中的誤解、展開卡與借款表。 */
+.article .myth{padding:10px 12px;background:var(--soft);border-left:4px solid var(--accent)}
+.article :is(.loan-more,.product){margin:12px 0;padding:12px;border:var(--bw) solid var(--line);border-radius:var(--r-in);background:var(--card);color:var(--text)}
+.article :is(.loan-more,.product) summary{cursor:pointer;line-height:1.75;overflow-wrap:anywhere}
+.article dl{margin:16px 0;line-height:1.75;overflow-wrap:anywhere}
+.article dt{font-weight:900;margin-top:12px}
+.article dd{margin:4px 0 12px}
+.article .loan-table{min-width:2200px}
+.article .loan-table :is(th,td){min-width:12em;max-width:20em;white-space:normal;overflow-wrap:anywhere}
+.article .loan-table th[scope="row"]{position:sticky;left:0;background:var(--card);color:var(--text);z-index:1}
+.article .loan-table small{display:block;color:var(--muted);font-weight:400;margin-top:6px}
+.article .loan-table caption{text-align:left;padding:12px;color:var(--text)}
+.article .compare-wrap:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
