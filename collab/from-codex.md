@@ -1,23 +1,49 @@
-﻿## 完成項
-- 完成平均成本與攤平三步驟精靈，包含分次買進、費率設定、再買與目標均價試算、逐項結果解說及明細表。
-- 兩張卡通 PNG 已生成並逐張目視自查，皆為 1024×1536。
-- 未上網瀏覽、未 commit、未跑 smoke，未修改核心、共用元件、資料、樣式或 img。
-## 新增檔案
-- tools/avgcost.html
-- js/pages/avgcost.js
-- docs/figures/cartoon/out/avgcost-comic.png
-- docs/figures/cartoon/out/avgcost-step1.png
-- collab/from-codex.md（覆蓋舊回報）
+﻿## 結論（三行內）
+未找到朋友版方法的公開承襲證據，不能宣稱源自 HAMR、CLEC 或其他流派；公開倉庫沒有 README，根提交與後三筆提交未交代方法來源。
+最接近同類為 T06，但它輸入目標配比並重配全部資產；A/B 外部換算配比可對上，不能稱原生功能等同。
+已以現行原函式重現 T01 外部補現金疑點；C 能達總資產 Beta 1.4，並不符合 DIFFERENCES 第 4 條的 bw≤B 條件。
+
 ## PROOF_CMD 結果
-- npm.cmd test：tests 101 pass 101 fail 0；結束碼 0。
-- 範例數字：95.14 -30978 95.6 87.62 88.1 -31914 350498 1810 145006；結束碼 0，與預期完全一致。
-- node --check：無輸出；結束碼 0。
-## 卡通圖
-- avgcost-comic.png：已生成／重生 0 次／目視自查未見錯字，數字與指定提示相符。
-- avgcost-step1.png：已生成／重生 0 次／目視自查未見錯字，數字與指定提示相符。
-- 使用內建 imagegen。最終提示：00-風格與角色.md 全文，分別接上 avgcost-01-越跌越買四格.md 全文、avgcost-02-均價要照股數算.md 全文，未另加提示。
-- 最終圖片路徑：D:/ok/zr-toolbox/docs/figures/cartoon/out/avgcost-comic.png、D:/ok/zr-toolbox/docs/figures/cartoon/out/avgcost-step1.png。
-## 偏離規格或自行決定的小事
-- 無。
+`miss 0 refs 18 lost 0`（符合 N≥3）。另抽查八項函式輸出通過：朋友 A 目標、B 目標、B 買入、C 目標、D 截斷提醒、T01 補款後 0.98、T03 金融淨資產、T06 B 轉換結果。
+首次用 PowerShell 管線送中文驗收程式時遭預設編碼轉成問號；明設 UTF-8 後已完整重跑通過。不是把失敗當通過。
+一次性 `collab/o-run.cjs` 已刪，Test-Path=False。原文目錄以 git check-ignore 確認被忽略。未 commit。
+
+## 新增檔案
+- `docs/research/O-朋友計算機出處.md`
+- `docs/research/來源/O-01_朋友計算機：線上版.md`
+- `docs/research/來源/O-02_HAMR：指數爆擊流曝險.md`
+- `docs/research/來源/O-03_計算Pro：Beta看板.md`
+- `docs/research/來源/O-04_HAMR：人生槓桿.md`
+- `docs/research/來源/O-05_GitHub：公開歷史.md`
+- `docs/research/來源/O-06_HAMR：鼠叔與指數爆擊流.md`
+- `docs/research/來源/O-07_驗算：四組輸入與重現.md`
+- `docs/research/來源/原文/O-01_朋友計算機線上版.html`（內含全部計算 JS）
+- `docs/research/來源/原文/O-02_HAMR指數爆擊流.html`
+- `docs/research/來源/原文/O-03_計算Pro.html`、`O-03_app.js`
+- `docs/research/來源/原文/O-04_HAMR人生槓桿.html`
+- `docs/research/來源/原文/O-05_GitHub.html`、`O-05_GitHub提交.json`、`O-05_GitHub檔案.json`、`O-05_最初提交.json`
+- `docs/research/來源/原文/O-06_鼠叔.html`
+- `docs/research/來源/原文/O-07_函式驗算.json`、`O-07_原文雜湊.json`
+- `docs/research/來源/原文/O-08_搜尋批次1.json`、`O-08_搜尋批次2.json`、`O-08_搜尋批次3.json`
+- 本檔 `collab/from-codex.md` 為覆蓋舊回報。
+原文、搜尋回傳、函式輸出與雜湊僅留本機。沒有改工具程式、avgcost 檔案與圖片，也沒有改本機或 GitHub 的 zr-calc。
+
+## 朋友那格 A、B 兩組有沒有對上 Opus 檢查值（130 萬／192 萬）
+有。A 正二目標1,300,000、買1,300,000、現金剩700,000，平衡後淨Beta1.40／總資產Beta1.05。
+B 正二目標1,920,000、買1,720,000、現金剩280,000，平衡後兩種Beta均1.20。
+C 正二目標6,666,666.67、買同額，需新增借款4,666,666.67，淨Beta2.592593／總資產Beta1.40。
+D 正二目標0、買0，原函式顯示可執行但兩種Beta均1.00，未達0.8；有原型曝險過高提醒。
+
+## 沒做到的事
+- 未找到原作者公開明示的算法參考來源；不登入開啟協作 session，也未聯絡作者。無 README 可讀，不推測私人討論。
+- 未做瀏覽器 UI 操作或截圖，採下載原始碼、Node vm 原函式及 DOM 替身驗算；完整輸出在 O-07 JSON，重現細節在 O-07 筆記。未把函式驗算寫成網頁實操成功。
+- T01 A/C 缺負債欄，完整同組不適用。B/D 取得 ETF 合計目標及調整額，但沒有單一正二交易計畫或平衡後 Beta 可抄；獨立推算已標明。
+- T06 沒有目標 Beta 反解；A/B 需研究者外部換算百分比，C/D 補充方案改動原型。T03 只測 A/C 現況分母，沒有目標買入量。
+- 未定位符合條件的額外工具，不湊一般回測工具。搜尋回傳按批次合併，報告保留每個關鍵字但未冒稱知道各詞獨立排名。
+- 未改 `calcGuide.js` 的 DIFFERENCES；本次結果僅提供後續判斷。
+
 ## 需要 Opus 決定的事
-- 無。依原定分工，請 Opus 將兩張 PNG 轉成 img/avgcost/comic.webp、img/avgcost/step1.webp，並執行 smoke；本次未做瀏覽器視覺驗證。
+1. Gate 7 方法標示採「依朋友版程式驗算，原始出處未確認」；HAMR 僅列同類。是否需要後續另查真正方法來源，由 Opus 決定。
+2. 更正測試標記：C 的1.4低於正二Beta2，沒有觸發 DIFFERENCES 第4條。若要驗該條，另授權增加目標B≥2且資金不足的案例；本次未把固定C輸入偷偷改掉。
+3. D 的「可以」是資金可執行，不代表達標；C 的目標曝險行仍以借前總資產計，與借後曝險不同。建議 Gate 7 清楚區分這些文字，未直接修改產品。
+4. T01 補款公式不要移植：全正二600萬＋現金400萬、B1.2、大盤跌30%後，網站顯示額外投入144萬，Beta僅0.98；正確外部全買正二需360萬，內部轉買144萬才達1.2。
