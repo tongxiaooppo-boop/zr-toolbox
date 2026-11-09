@@ -1,95 +1,82 @@
-# Gate 3a 任務書：① 朋友那格計算機怎麼用（逐欄教程＋FinMind token 教學）
+# 研究任務 R：計算機清單＋正二／ETF 常識（不寫程式）
 
-- 版本：2026-11-08 v1（對應 FRAMEWORK.md 2026-11-08 v4）。Gate 2b 的任務書已完成，以本檔為準。
-- 執行者：訂閱 Codex sol。直接在本 repo（`D:\ok\zr-toolbox`）工作。
-- **不要 commit**，做完寫 `collab/from-codex.md`（覆蓋舊的）就停。
-- 指令一律用 `npm.cmd`。**不要跑 `npm run smoke`**，冒煙測試由 Opus 跑。
-- 這頁沒有輸入和計算，只把 `js/data/calcGuide.js` 的文案排成畫面。**文案一個字都不准改**，也不准另外加說明文字（下面寫明的除外）。
+- 版本：2026-11-09 v1。Gate 3a 的任務書已完成，以本檔為準。
+- 執行者：訂閱 Codex sol。直接在本 repo（`D:\ok\zr-toolbox`）工作。**需要上網搜尋**；若你的環境不能上網，做完 R1 就停，在回報寫「無法上網」。
+- **不要 commit**。做完寫 `collab/from-codex.md`（覆蓋舊的）就停。指令一律用 `npm.cmd`／`node`。
+- 只准新增 `docs/research/` 底下三個檔，加上覆蓋 `collab/from-codex.md`。其他檔案一律不改（含 `scripts/check-research.mjs`）。暫存檔結束前刪掉。
 
-## 0. 要讀的檔案（只准讀這些）
+## 背景（一段話）
 
-| 檔案 | 為什麼 |
-|---|---|
-| `js/data/calcGuide.js` | 全部文案與資料結構（檔頭註解有欄位說明） |
-| `js/pages/glossary.js` | 樣板：沒有輸入的頁面怎麼寫、`#id` 定位的寫法 |
-| `tools/pledge.html` | **頁殼樣板（含 manifest 與 `pwa.js`，一行都不能少）** |
-| `js/ui/components.js` | 元件簽名（檔頭註解） |
-| `js/data/tools.js` | 卡片清單 |
-| `css/app.css` | 只准在檔尾追加 |
+工具箱是給**投資新手**的手機計算機集合，主題是台股、0050、正二（00631L 等 2 倍槓桿 ETF）。改版後每個計算機都是**逐步精靈**：使用者輸入股票代號＋買入股數＋買入價（現價自動抓）→ 現金／借款金額 → 倍率與參數 → 輸出數字並逐項解說。這次研究要回答：該做哪些計算機、解說裡要放哪些常識。
 
-## 1. 規則（違反就退回）
+現有 core 函式（R1 的「對應 core」欄只能填這些名稱，沒有就寫「缺」並說缺什麼）：
+`simulateDaily`、`makeScenario`（每日 2 倍模擬）、`recoveryGain`、`maxDrawdown`、`yearsToRecover`（回撤）、`exposureNow`、`betaPlan`（曝險倍數、目標 Beta）、`pledgeStress`、`pledgeTable`（質押壓測）、`dueDate`、`rebalance`、`TEMPLATES`（定期配比 532／442／433 等）、`checkTrigger`、`split5050`（50/50 觸發）。
 
-- **不准改**：`js/core/**`、`js/ui/components.js`、`js/data/glossary.js`、`js/data/calcGuide.js`、`js/pwa.js`、`sw.js`、`manifest.webmanifest`、`scripts/**`、`img/**`、`tests/**`、`docs/**`、其他工具頁與 html。
-- 不用 `innerHTML`，一律用 `h()` 與元件。不用 localStorage、不連網路、不加套件。暫存檔結束前刪掉。
-- 不確定就停下，寫進回報「需要決定的事」（問題一句＋2–3 選項＋建議）。小疑問自行決定並註明。最多停 2 次。
+## 0. 要讀的檔案
 
-## 2. 步驟 1：頁面
+- `D:\ok\zr-calc\資料蒐集\2026-11-08_正二資料庫\來源筆記\` 底下 77 個 `.md`（檔名前三碼是 ID，例 `C01`）
+- 同資料夾的 `變種策略比較.md`、`計算機比較.md`、`研究判讀與疑點.md`
+- 不准讀其他專案檔案。
 
-新增 `tools/calc-guide.html`（照抄 `tools/pledge.html`，只改 title 為「朋友那格計算機怎麼用｜正二工具箱」與頁面 script 為 `../js/pages/calc-guide.js`）與 `js/pages/calc-guide.js`。
+## R1：`docs/research/R1-77筆分類.md`
 
-由上到下：
+一張表，77 列，每個 ID 一列，**欄位順序固定**：
 
-1. `toolHeader(tool)`（`TOOLS` 依 id `'calc-guide'` 取）
-2. 開頭卡 `section.card`：
-   - `h('p', {}, '這頁一格一格說明朋友在用的「正二平衡計算器」。看完可以到原頁操作，也可以用工具箱的 ⑪ 算同一件事。')`
-   - 按鈕連結：`h('a', { class: 'button-link', href: ONLINE_URL, target: '_blank', rel: 'noopener' }, '打開原計算器 ↗')`
-   - `figure({ src: '../img/calc-guide/map.svg', alt: '原計算器四個區塊對應 ⑪：持股對股票市值（各檔加總）、正二 ETF 對正二市值、現金與負債對現金與借款、目標對目標倍數與倍數怎麼算。兩邊都按範例：股票 1,000 萬、現金 200 萬、負債 300 萬、目標 1.4，淨資產 900 萬，需買進正二 NT$ 1,300,000。', caption: '原計算器的每一區，都能在 ⑪ 找到對應的格子。' })`
-   - 目錄 `h('nav', { class: 'guide-toc' }, …)`：每個 `GUIDE_SECTIONS` 一個 `<a href="#${s.id}">${s.title}</a>`，再加 `#differences`「和 ⑪ 不一樣的地方」、`#token`「FinMind token 怎麼申請」。
-3. 每個 `GUIDE_SECTIONS` 一張 `section.card`，`id: s.id`：
-   - `h('h2', {}, s.title)`、`h('p', {}, s.intro)`
-   - 每個 field 一個 `h('div', { class: 'field guide-field' }, …)`（`.field` 是為了讓 ⓘ 小卡展開在這格底下）：
-     - `h('h3', {}, f.name, f.termId ? infoChip(f.termId) : null)`
-     - `h('p', {}, f.what)`
-     - `f.tip` 有值：`h('p', { class: 'tip' }, f.tip)`
-     - `f.toolbox` 有值：`h('p', { class: 'map' }, '⑪ 對應：', f.toolbox)`
-4. `section.card`，`id: 'differences'`：`h2`「和 ⑪ 不一樣的地方」；`h('ul', {}, DIFFERENCES.map(d => h('li', {}, d)))`；`h('p', {}, h('a', { href: 'exposure.html' }, '打開 ⑪ 我現在等於幾倍大盤'))`
-5. `section.card`，`id: 'token'`：
-   - `h2`「FinMind token 怎麼申請」，再加 `infoChip('finmind-token')` 放在 h2 裡（h2 包在 `h('div', { class: 'field' }, …)` 裡，讓小卡有地方展開）
-   - `h('p', {}, TOKEN_GUIDE.why)`、`h('p', {}, TOKEN_GUIDE.limit)`
-   - `h('ol', {}, TOKEN_GUIDE.steps.map(s => h('li', {}, s)))`
-   - `h('h3', {}, '看到錯誤怎麼辦')`，每個 error 一個 `div.guide-field`：`h('p', {}, h('strong', {}, e.sign))`、`h('p', {}, e.meaning)`、`h('p', { class: 'tip' }, e.todo)`
-   - `h('h3', {}, '保密')`、`h('p', {}, TOKEN_GUIDE.privacy)`
-6. **`disclaimer('executable')`**（main 的最後一個元素）。
-7. `app.append(...)` 之後：`location.hash` 有值時 `document.getElementById(location.hash.slice(1))?.scrollIntoView()`（照 glossary 的寫法）。
+`| ID | 類別 | 名稱 | 計算方法（一句） | 需要的輸入 | 輸出 | 對應 core | 科普可用在 |`
 
-**css 檔尾追加**：
-- `.button-link`：inline-block、padding 10px 16px、圓角 8px、背景 `var(--accent)`、字色 `var(--card)`、無底線、粗體、上下 margin 8px
-- `.guide-toc a`：block、padding 4px 0
-- `.guide-field`：上邊框 `1px solid var(--line)`、上下 padding 10px；`.guide-field h3` 字級 16px、margin 0 0 4px
-- `.tip`：字級 14px、色 `var(--muted)`；`.map`：字級 14px、色 `var(--accent)`
+- 類別只能填 `計算`、`科普`、`兩者`。`計算`＝裡面有可照做的算法、規則、配置比例、壓測公式，或本身是網路計算機；`科普`＝風險說明、論文、基金資料、公告，沒有可照做的算法。
+- 「計算方法」「輸入」「輸出」：科普類填 `—`。輸入要寫成新手能填的東西（例：股票代號、股數、買入價、借款金額、追繳線％），不要寫「市值」這種要先算的量。
+- 「科普可用在」：一句話，寫這筆資料適合放進哪個解說（例：「⑥ 正二不是兩倍：波動耗損」）；計算類沒有就填 `—`。
+- 表格後面加「## 歸併」：把 `計算`／`兩者` 類合併成「候選計算機」清單（同一算法的多筆來源合成一個），每個候選一行：`- 名稱｜來源 ID｜對應 core 或缺什麼`。
 
-## 3. 步驟 2：`js/data/tools.js`
+## R2：`docs/research/R2-常用計算機.md`
 
-- `calc-guide`：`status: 'ready'`，`terms: ['beta', 'exposure', 'basis', 'net-assets', 'leverage-ratio', 'daily-2x', 'closing-price', 'finmind-token']`
-- 不改其他卡片。
+上網調查**台灣投資新手和老手實際會用到的計算機**，不限正二。來源：台灣投資計算機網站與 App、券商工具頁、PTT Stock／Dcard 投資板常被問的計算問題。種子清單（要驗證、補齊、刪掉沒人用的）：
 
-## 4. 驗收指令（PROOF_CMD）
+- 交易基本：買賣損益與報酬率（手續費、證交稅、ETF 稅率較低、零股、券商折扣）、攤平後平均成本、損益兩平價、停損停利價
+- 股息：殖利率、除權息參考價、填息、股票股利配股、二代健保補充保費、股利所得合併／分開計稅
+- 長期：定期定額（扣款日、手續費下限）、單筆 vs 定期定額、複利與 CAGR、存股達標年數、退休 4% 提領
+- 信用交易：融資維持率與追繳價、融券、整戶維持率、當沖損益
+- 槓桿與借貸：質押、借錢投資的利息 vs 預期報酬、信貸／房貸增貸投資
+- 估價：本益比、本淨比、殖利率估價法（便宜／合理／昂貴價）
+- 其他：ETF 折溢價、換匯成本、任意比例再平衡
 
-Codex 跑：
+一張表，**至少 25 列**，欄位順序固定，**最後一欄必須是網址**：
 
-```
-npm.cmd test
-```
+`| 計算機 | 誰會用（新手／老手／都會） | 輸入（新手能填的） | 輸出 | 熱門程度（高／中／低＋一句證據） | 台灣規則要注意（稅率、費率、法規數字＋年份） | 來源網址 |`
 
-預期：`ℹ tests 51`、`ℹ pass 51`、`ℹ fail 0`、`ℹ todo 0`。
+- 稅率、費率、追繳線等數字要寫出來源與年份（例：證交稅股票 0.3%、ETF 0.1%、當沖減半的適用期限）。查不到可靠來源就寫「待查」，**不要憑印象填數字**。
+- 表格後面加「## 和 R1 重疊」：列出 R2 中哪些已被 R1 的候選計算機涵蓋。
 
-Opus 另外跑 `npm run smoke`，預期 `smoke pages 9 pass 9 fail 0`（home＋8 個 ready 工具頁）。
+## R3：`docs/research/R3-ETF常識.md`
 
-## 5. 回報（覆蓋 `collab/from-codex.md`，只填這些欄位，不貼程式碼）
+上網整理**圍繞正二與各類 ETF 的股票常識**，給計算機的解說和科普頁用。至少涵蓋：
+
+- ETF 基本：ETF 是什麼、市值型／高股息／主題型／債券 ETF／主動式 ETF 的差別、成分股與定期調整、內扣費用（經理費、保管費）、追蹤誤差與追蹤差距、折溢價、流動性與造市、配息與收益平準金、除息、ETF 分割、下市清算
+- 槓桿與反向：每日 2 倍的意思、波動耗損、期貨轉倉成本、為什麼長期不等於 2 倍、反向 ETF、槓反 ETF 風險預告書與開戶門檻、台股主要正二（00631L、00663L、00675L、00685L）的差別
+- 信用與借貸：融資、融券、質押、不限用途借貸的差別、維持率與追繳流程
+- 交易規則：交易時間、盤後零股與盤中零股、漲跌幅限制、T+2 交割、手續費與證交稅
+- 新手常見誤解（例：「正二長抱就是兩倍報酬」「高股息比較安全」）
+
+一張表，**至少 20 列**，欄位順序固定，**最後一欄必須是網址**：
+
+`| 主題 | 一句話說明（新手看得懂） | 常見誤解 | 放在哪個工具的解說 | 來源網址 |`
+
+- 來源優先順序：證交所、櫃買、投信投顧公會、金管會、發行投信官網 → 券商教學 → 其他。部落格只能當補充。
+- 數字（費率、門檻、日期）一律附來源；可以先查 `來源筆記/` 裡 A01–A10、B01–B10 的內容。
+
+## PROOF_CMD
 
 ```
-## 完成項
-- 步驟 1：…
-- 步驟 2：…
-## 異動檔案
-- （git status 的清單）
-## PROOF_CMD 輸出
-- tests / pass / fail / todo：
-## 畫面實測
-- 區塊數（GUIDE_SECTIONS 卡片數）／欄位說明總數／差異條數／token 步驟數／錯誤條數：
-- 有 ⓘ 的欄位數：
-## 自行決定的小事
-- …
-## 需要決定的事
-- （沒有就寫「無」）
+node scripts/check-research.mjs
 ```
+
+預期：最後一行 `OK`，第一行 `R1 77/77（計算 x、科普 y、兩者 z）；R2 ≥25 列；R3 ≥20 列`。若出現 `FAIL` 就修到 OK。
+
+## 回報欄位（`collab/from-codex.md`，不貼表格內容）
+
+- 完成項：R1／R2／R3 各一行
+- PROOF_CMD 輸出：原樣貼上兩行
+- 數字：R1 計算／科普／兩者筆數、候選計算機個數；R2 列數、「待查」數量；R3 列數
+- 無法查證或互相矛盾的資料：每條一行（主題＋兩個來源的說法）
+- 需要決定的事：沒有就寫「無」
