@@ -23,6 +23,7 @@ document.getElementById('app').append(
     s.topics.map(t => [h('h3', {}, t.title), h('p', {}, t.text),
       h('p', { class: 'myth' }, h('strong', {}, '常見誤解：'), t.myth, ' ', h('strong', {}, '其實：'), t.fact),
       t.tools.length ? links(t.tools) : null]),
+    s.id === 'leveraged' ? h('p', {}, h('a', { href: 'zr101.html' }, '㉔ 正二教學：從頭帶你走一遍 →')) : null,
     s.id === 'borrow' ? h('p', {}, h('a', { href: 'loans.html' }, '㉑ 借錢投資的管道：全部管道一次比 →')) : null)),
   h('section', { class: 'card article', id: 'limits' }, h('h2', {}, '這頁的限制'),
     ETF_LIMITS.map(t => h('p', {}, t)),

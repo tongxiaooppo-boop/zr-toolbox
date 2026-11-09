@@ -195,3 +195,10 @@ main:has(.wizard-layout){max-width:1120px}
 .article .loan-table small{display:block;color:var(--muted);font-weight:400;margin-top:6px}
 .article .loan-table caption{text-align:left;padding:12px;color:var(--text)}
 .article .compare-wrap:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+
+.article .basic-item{padding:12px 0;border-bottom:var(--bw) solid var(--line);scroll-margin-top:16px}
+.article .basic-item:last-child{border-bottom:0}
+.article h4{font-size:16px;margin:20px 0 8px}
+.article .compare-wrap caption{text-align:left;padding:12px;color:var(--text)}
+.article .compare-wrap th[scope=row]{background:var(--card);color:var(--text)}
+
