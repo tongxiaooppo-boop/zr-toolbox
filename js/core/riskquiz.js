@@ -12,11 +12,12 @@
 //       scoreKey：只看總分的型態；key：套用封頂後的最終型態；caps：真的把型態往下拉的規則（依 CAPS 順序）
 //       zr：正2（00631L，RR5）可能適合的四個條件，全過才 ok
 //     不合格 throw Error（中文，頁面直接顯示）
+//   BUCKETS、AGE_BANDS、ALLOC、allocationPlan：三桶配置，見檔尾
 
 export const QUESTIONS = Object.freeze([
   { id: 'age', no: 1, text: '你的年齡', hint: '年紀越輕，虧了之後越有時間賺回來。', options: [
-    { label: '65 歲以上', score: 1 }, { label: '55–64 歲', score: 2 }, { label: '45–54 歲', score: 3 },
-    { label: '35–44 歲', score: 4 }, { label: '未滿 35 歲', score: 5 }] },
+    { label: '60 歲以上', score: 1 }, { label: '50–59 歲', score: 2 }, { label: '40–49 歲', score: 3 },
+    { label: '30–39 歲', score: 4 }, { label: '未滿 30 歲', score: 5 }] },
   { id: 'income', no: 2, text: '你目前的工作與收入穩定嗎？', hint: '收入穩定，跌的時候才不用被迫賣股票過生活。', options: [
     { label: '沒有固定收入（學生、退休靠存款）', score: 1 }, { label: '收入不固定（接案、業績制）', score: 2 },
     { label: '有工作，但最近擔心失業或減薪', score: 3 }, { label: '穩定的薪水或固定收入', score: 4 },
@@ -57,7 +58,7 @@ export const PROFILES = Object.freeze([
 export const CAPS = Object.freeze([
   { key: 'noLoss', max: 'conservative', text: '第 8 題選「不能虧」，最高只到保守型。' },
   { key: 'lowCash', max: 'balanced', text: '第 3 題備用金不到 3 個月，最高只到穩健型。' },
-  { key: 'age65', max: 'growth', text: '第 1 題 65 歲以上，最高只到成長型。' }
+  { key: 'age60', max: 'growth', text: '第 1 題 60 歲以上，最高只到成長型。' }
 ]);
 
 const RANK = Object.fromEntries(PROFILES.map((p, i) => [p.key, i]));
@@ -79,4 +80,37 @@ export function scoreQuiz(answers) {
     { key: 'halve', ok: answers[7] === 5, text: '能承受腰斬（第 8 題選 -50%）' }
   ];
   return { total, scoreKey, key, profile, caps, zr: { ok: checks.every(c => c.ok), checks } };
+}
+
+// ---------- 三桶配置（v5.12，決策 docs/decision/決策-2026-11-25-投資屬性配置.md；比例照 R11 5.3） ----------
+//   BUCKETS：[{ key:'safe'|'growth'|'bold', label, examples[] }]（內容是使用者定義的類別與例子，不排序、不是推薦）
+//   ALLOC：四型 × 五個年齡段（依第 1 題分數 5→1：未滿 30、30–39、40–49、50–59、60 以上）的 [safe, growth, bold] 百分比
+//     成長型分兩列：growthHigh（第 8 題能接受 -30% 以上）、growthLow（-20% 以內）
+//     規則：主力桶守 50；積極桶隨年齡遞減，減掉的移到保守穩健桶。RR 只當參考、不限制各桶商品。
+//   allocationPlan({ key, age, loss }) key＝scoreQuiz 的最終型態；age＝第 1 題分數；loss＝第 8 題分數
+//     → { safe, growth, bold, band, row }（百分比整數，合計 100；band＝年齡段文字；row＝用到的列名）
+export const BUCKETS = Object.freeze([
+  { key: 'safe', label: '保守穩健', examples: ['債券、債券 ETF', '定存股（電信、官股銀行…）', '00713', 'VT 類全球股'] },
+  { key: 'growth', label: '成長', examples: ['0050', 'QQQ', 'SPY'] },
+  { key: 'bold', label: '積極', examples: ['主動式 ETF', '正2', '個股'] }
+]);
+
+export const AGE_BANDS = Object.freeze(['60 歲以上', '50–59 歲', '40–49 歲', '30–39 歲', '未滿 30 歲']); // 依第 1 題分數 1–5
+
+// 欄位順序：未滿 30、30–39、40–49、50–59、60 以上
+export const ALLOC = Object.freeze({
+  conservative: [[75, 25, 0], [80, 20, 0], [80, 20, 0], [85, 15, 0], [90, 10, 0]],
+  balanced: [[50, 30, 20], [50, 30, 20], [55, 30, 15], [65, 30, 5], [70, 30, 0]],
+  growthHigh: [[20, 50, 30], [25, 50, 25], [30, 50, 20], [40, 50, 10], [50, 50, 0]],
+  growthLow: [[30, 50, 20], [35, 50, 15], [40, 50, 10], [50, 50, 0], [50, 50, 0]],
+  aggressive: [[20, 30, 50], [25, 30, 45], [30, 30, 40], [40, 30, 30], [50, 30, 20]]
+});
+
+export function allocationPlan({ key, age, loss }) {
+  if (!RANK.hasOwnProperty(key)) throw new Error('型態不對，請重新作答。');
+  if (!Number.isInteger(age) || age < 1 || age > 5) throw new Error('第 1 題還沒選。');
+  if (!Number.isInteger(loss) || loss < 1 || loss > 5) throw new Error('第 8 題還沒選。');
+  const row = key === 'growth' ? (loss >= 4 ? 'growthHigh' : 'growthLow') : key;
+  const [safe, growth, bold] = ALLOC[row][5 - age];
+  return { safe, growth, bold, band: AGE_BANDS[age - 1], row };
 }
