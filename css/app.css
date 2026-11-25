@@ -262,3 +262,6 @@ ul.checks li { margin-block: 10px; overflow-wrap: anywhere; }
 @media (max-width: 480px) {
   .recover-table th, .recover-table td { padding: .5rem .25rem; font-size: .75rem; }
 }
+/* DCA tables: contain horizontal scrolling on narrow screens. */
+.dca-table-scroll { min-width: 0; max-width: 100%; overflow-x: auto; }
+.dca-table-scroll .trade-table { white-space: nowrap; }

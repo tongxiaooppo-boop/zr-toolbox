@@ -16,7 +16,7 @@ const steps = [
     hint: '把退休時預計有的錢加起來：存款、股票、ETF、勞退專戶……。',
     about: '這一步是你要拿來每月領的那筆錢。',
     body: s => [
-      h('p', { class: 'tip' }, fromDca > 0 ? `已從定期定額帶入 ${fmtMoney(fromDca)}，可以自己改。` : '還不知道退休時會有多少？先用「定期定額與年化報酬」算，結果頁可以一鍵帶過來。'),
+      h('p', { class: 'tip' }, fromDca > 0 ? `已從定期定額帶入 ${fmtMoney(fromDca)}，可以自己改。` : '還不知道退休時會有多少？先用「定期定額與持續投入」算，結果頁可以一鍵帶過來。'),
       numberInput({ id: 'pool', label: '退休時的資產', plain: '例：10000000（1,000 萬）', value: s.pool ?? (fromDca > 0 ? Math.round(fromDca) : ''), suffix: '元',
         help: { text: ['股票、ETF 用退休那時預計的市值。', '房子如果不打算賣，不要算進來。'] } })],
     read: s => {

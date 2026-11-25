@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 240" role="img" aria-labelledby="title desc">
+<title id="title">複利後段加速</title>
+<desc id="desc">第 1–10 年賺約 21.6 萬，第 11–20 年賺約 86.2 萬，第 21–30 年賺約 201.8 萬。每 10 年都投入 60 萬，每月 5,000 元、年報酬 6% 假設。橫條長度依賺到的金額成比例。</desc>
+<style>text{font-family:system-ui,sans-serif;fill:#243746;font-size:15px}.bar{fill:#227e69}.small{font-size:12px}@media(prefers-color-scheme:dark){text{fill:#e0e8ee}.bar{fill:#6cc9ad}}</style>
+<text x="12" y="25">第 1–10 年 賺約 21.6 萬</text><rect class="bar" x="12" y="35" width="36" height="22" rx="4"/>
+<text x="12" y="88">第 11–20 年 賺約 86.2 萬</text><rect class="bar" x="12" y="98" width="143.5" height="22" rx="4"/>
+<text x="12" y="151">第 21–30 年 賺約 201.8 萬</text><rect class="bar" x="12" y="161" width="336" height="22" rx="4"/>
+<text class="small" x="12" y="210">每 10 年都投入 60 萬</text>
+<text class="small" x="12" y="229">（每月 5,000 元、年報酬 6% 假設）</text>
+</svg>
