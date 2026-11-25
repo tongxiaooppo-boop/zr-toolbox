@@ -4,7 +4,7 @@ import { TOOLS, GROUPS, SHORTCUTS } from '../data/tools.js';
 
 const byId = Object.fromEntries(TOOLS.map(t => [t.id, t]));
 const card = t => h('a', { class: 'tool-card' + (t.status === 'ready' ? '' : ' planned'), href: t.href, 'aria-disabled': t.status === 'ready' ? null : 'true' },
-  h('strong', {}, h('span', { class: 'no' }, t.no), t.title),
+  h('strong', {}, t.title),
   h('p', {}, t.oneLine));
 
 document.getElementById('app').append(
