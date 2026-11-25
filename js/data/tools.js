@@ -13,6 +13,7 @@ export const GROUPS = Object.freeze([
 export const TOOLS = Object.freeze([
   { id: 'zr101', no: '㉔', group: 'learn', title: '正二教學', oneLine: '正二是什麼、為什麼不是整段 2 倍、常見做法與大仁 50/50 原文結果，照順序帶你用工具', href: 'tools/zr101.html', gate: 6, status: 'ready', terms: ['daily-2x', 'volatility-decay', 'rebalance', 'exposure'] },
   { id: 'yearcheck', no: '㉘', group: 'learn', title: '年初 100 萬，現在變多少', oneLine: '今年年初投入 100 萬，正2 四種做法和 0050、0056、00981A 長抱，到現在各變多少、中間怎麼起伏', href: 'tools/yearcheck.html', gate: 6, status: 'ready', terms: [] },
+  { id: 'recover', no: '㉕', group: 'learn', title: '正2 虧了，要漲多少才回本', oneLine: '正2 虧 X%，自己要漲多少、大盤要漲多少；不動、攤平、換 0050 三條路並排比較', href: 'tools/recover.html', gate: 6, status: 'planned', terms: ['daily-2x', 'volatility-decay', 'recovery-gain'] },
   { id: 'decay', no: '⑥', group: 'learn', title: '正二不是兩倍？', oneLine: '每日 2 倍的複利偏離與波動耗損', href: 'tools/decay.html', gate: 2, status: 'ready', terms: ['daily-2x', 'volatility-decay', 'tracking-error'] },
   { id: 'glossary', no: '⑫', group: 'learn', title: '術語辭典', oneLine: 'Beta、維持率、口徑、再平衡……一句白話', href: 'tools/glossary.html', gate: 1, status: 'ready', terms: [] },
   { id: 'trigger5050', no: '②', group: 'variants', title: '50/50 觸發提醒', oneLine: '正二漲跌一半時，配回正二、現金各半', href: 'tools/trigger5050.html', gate: 0, status: 'ready', terms: ['daily-2x', 'rebalance', 'base-price'] },
@@ -47,12 +48,12 @@ export const SHORTCUTS = Object.freeze([
 
 // 新手路線（使用者 2026-11-25 同意，決策 docs/decision/決策-2026-11-25-科普梳理.md）。
 // 首頁頂端照這個順序列出；每頁用 components.js 的 pathNav(id) 顯示「你在第幾步、下一步」。
-// ids 只放已存在 TOOLS 的 id；還沒做的頁（複利與持續投資、股災與心態、㉕ 回本）做好時再加進來。
+// ids 只放已存在 TOOLS 的 id；還沒做的頁（複利與持續投資、股災與心態）做好時再加進來；㉕ recover 已列入，planned 時 pathPlace 會跳過。
 export const PATH = Object.freeze([
   { step: 1, title: '認識自己', question: '我能承受多少漲跌？', ids: ['riskquiz', 'riskprofile'] },
   { step: 2, title: '認識市場', question: '股票怎麼買？有哪些商品？', ids: ['basics', 'products', 'etf101'] },
   { step: 3, title: '為什麼長期投資', question: '為什麼要持續投入？跌了怎麼辦？', ids: [] },
-  { step: 4, title: '正2 進階', question: '正2 是什麼、怎麼用？', ids: ['zr101', 'decay'] },
+  { step: 4, title: '正2 進階', question: '正2 是什麼、怎麼用？', ids: ['zr101', 'decay', 'recover'] },
   { step: 5, title: '借錢投資（最進階）', question: '要不要借錢買？', ids: ['loans'] }
 ]);
 
