@@ -18,7 +18,9 @@
 //       label：給螢幕閱讀器的一句話（必填）；yFormat：y 軸刻度格式函式（預設 String）
 //       baseline：一條虛線參考值（例 1＝起點），可省略；height：viewBox 高度，預設 200
 //       回傳 <figure class="chart">（內含 svg 與 HTML 圖例），可直接放進 showResult
+//   pathNav(id)                             新手路線：「你在第 N 步」＋下一步連結（v5.12，Opus 寫）；id 不在路線上回傳 null
 import { TERM_BY_ID } from '../data/glossary.js';
+import { pathPlace } from '../data/tools.js';
 import { parseNum } from '../core/format.js';
 
 export function h(tag, attrs = {}, ...children) {
@@ -165,3 +167,14 @@ function pageFoot() {
 
 // 首頁在根目錄、工具頁在 tools/，連結用相對路徑才能部署在任何子路徑（GitHub Pages 的 /repo/）。
 function rootPath() { return location.pathname.includes('/tools/') ? '../' : ''; }
+
+export function pathNav(id) {
+  const at = pathPlace(id);
+  if (!at) return null;
+  return h('nav', { class: 'card path-nav', 'aria-label': '新手路線' },
+    h('h2', {}, '新手路線'),
+    h('p', {}, `你在第 ${at.step} 步「${at.title}」：${at.question}`),
+    at.next ? h('p', {}, '下一步：', h('a', { href: at.next.href.replace(/^tools\//, '') }, `${at.next.no} ${at.next.title}`), ' →')
+      : h('p', {}, '這是目前路線的最後一頁。'),
+    h('p', { class: 'muted' }, h('a', { href: '../index.html#path' }, '看完整路線')));
+}

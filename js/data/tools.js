@@ -31,6 +31,7 @@ export const TOOLS = Object.freeze([
   { id: 'fx', no: '⑱', group: 'stock', title: '換匯成本與海外損益', oneLine: '換外幣的價差、匯率變動，換回台幣到底賺多少', href: 'tools/fx.html', gate: 4, status: 'ready', terms: ['fx-spread'] },
   { id: 'retire', no: '⑲', group: 'stock', title: '退休提領', oneLine: '退休存的錢每月能領多少、要存多少才夠', href: 'tools/retire.html', gate: 4, status: 'ready', terms: ['four-percent-rule', 'inflation', 'real-value', 'compound-interest'] },
   { id: 'riskquiz', no: '㉖', group: 'science', title: '投資屬性測驗', oneLine: '10 題測出你是保守、穩健、成長還是積極型，以及三桶資金怎麼分', href: 'tools/riskquiz.html', gate: 6, status: 'ready', terms: [] },
+  { id: 'riskprofile', no: '㉗', group: 'science', title: '投資屬性是什麼', oneLine: '保守、穩健、成長、積極差在哪？各自對應什麼商品、為什麼', href: 'tools/riskprofile.html', gate: 6, status: 'planned', terms: [] },
   { id: 'basics', no: '㉓', group: 'science', title: '股票基本術語', oneLine: '上市櫃、集保、交割、委託單、漲跌停、T+2……下單前要懂的 48 個詞', href: 'tools/basics.html', gate: 6, status: 'ready', terms: [] },
   { id: 'etf101', no: '⑳', group: 'science', title: 'ETF 入門', oneLine: 'ETF 是什麼、費用怎麼算、配息與正二要注意什麼', href: 'tools/etf101.html', gate: 6, status: 'ready', terms: [] },
   { id: 'products', no: '㉒', group: 'science', title: '商品與賺錢方式', oneLine: '股票、ETF、債券、權證、期貨……怎麼賺、怎麼虧、適不適合新手', href: 'tools/products.html', gate: 6, status: 'ready', terms: [] },
@@ -42,3 +43,24 @@ export const SHORTCUTS = Object.freeze([
   { label: '我的正二要不要再平衡？', toolId: 'trigger5050' },
   { label: '質押買正二，跌多少會被追繳？', toolId: 'pledge' }
 ]);
+
+// 新手路線（使用者 2026-11-25 同意，決策 docs/decision/決策-2026-11-25-科普梳理.md）。
+// 首頁頂端照這個順序列出；每頁用 components.js 的 pathNav(id) 顯示「你在第幾步、下一步」。
+// ids 只放已存在 TOOLS 的 id；還沒做的頁（複利與持續投資、股災與心態、㉕ 回本）做好時再加進來。
+export const PATH = Object.freeze([
+  { step: 1, title: '認識自己', question: '我能承受多少漲跌？', ids: ['riskquiz', 'riskprofile'] },
+  { step: 2, title: '認識市場', question: '股票怎麼買？有哪些商品？', ids: ['basics', 'products', 'etf101'] },
+  { step: 3, title: '為什麼長期投資', question: '為什麼要持續投入？跌了怎麼辦？', ids: [] },
+  { step: 4, title: '正2 進階', question: '正2 是什麼、怎麼用？', ids: ['zr101', 'decay'] },
+  { step: 5, title: '借錢投資（最進階）', question: '要不要借錢買？', ids: ['loans'] }
+]);
+
+// pathPlace(id) → { step, title, question, next } | null；next＝路線上下一個 ready 的工具（跳過還沒做好的），沒有就 null
+export function pathPlace(id) {
+  const order = PATH.flatMap(p => p.ids.map(i => ({ id: i, p })));
+  const at = order.findIndex(o => o.id === id);
+  if (at < 0) return null;
+  const { step, title, question } = order[at].p;
+  const next = order.slice(at + 1).map(o => TOOLS.find(t => t.id === o.id)).find(t => t && t.status === 'ready') || null;
+  return { step, title, question, next };
+}

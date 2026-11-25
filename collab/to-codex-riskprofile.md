@@ -15,8 +15,7 @@
 
 ## 1. 註冊與殼
 
-- `js/data/tools.js`：在 `riskquiz` 那筆**後面**加：
-  `{ id: 'riskprofile', no: '㉗', group: 'science', title: '投資屬性是什麼', oneLine: '保守、穩健、成長、積極差在哪？各自對應什麼商品、為什麼', href: 'tools/riskprofile.html', gate: 6, status: 'ready', terms: [] }`
+- `js/data/tools.js`：`riskprofile` 那筆 Opus 已加（status `'planned'`），**只把 status 改成 `'ready'`**，其他不動。
 - `tools/riskprofile.html`：照抄 `tools/products.html`，title `投資屬性是什麼｜正2工具箱與股市學堂`，script 改 `../js/pages/riskprofile.js`。
 
 ## 2. 頁面（`js/pages/riskprofile.js`，用 `h()`，不准 innerHTML）
@@ -41,7 +40,7 @@
 node scripts/gen-precache.mjs && npm.cmd test
 ```
 
-預期：`tests 170`、`pass 170`、`fail 0`。smoke 由 Opus 跑（預期 pages 26 全過）。
+（本檔併入 `collab/to-codex-path.md` 一起做，PROOF_CMD 以那份為準。）
 
 ## 5. 回報（欄位固定，不貼程式碼）
 
