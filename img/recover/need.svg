@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 300" role="img" aria-labelledby="title desc">
+  <title id="title">正2 虧 40%，回本所需漲幅</title>
+  <desc id="desc">正2 自己要漲 66.7%；直覺除以 2，大盤要漲 33.3%；每天穩穩上漲，大盤要漲 29.1%；震盪 25%、2 年、含費用，大盤要漲 38.9%。</desc>
+  <style>
+    text { fill: #243247; font: 14px system-ui, sans-serif; }
+    .warn { fill: #b45309; }
+    .index { fill: #2563eb; }
+    .track { fill: #e2e8f0; }
+    @media (prefers-color-scheme: dark) {
+      text { fill: #e2e8f0; }
+      .warn { fill: #fbbf24; }
+      .index { fill: #60a5fa; }
+      .track { fill: #283548; }
+    }
+  </style>
+  <text x="12" y="24">正2 自己要漲 66.7%</text>
+  <rect class="track" x="12" y="34" width="336" height="20" rx="4"/>
+  <rect class="warn" x="12" y="34" width="336" height="20" rx="4"/>
+  <text x="12" y="94">直覺：除以 2　33.3%</text>
+  <rect class="track" x="12" y="104" width="336" height="20" rx="4"/>
+  <rect class="index" x="12" y="104" width="168" height="20" rx="4"/>
+  <text x="12" y="164">每天穩穩上漲　29.1%</text>
+  <rect class="track" x="12" y="174" width="336" height="20" rx="4"/>
+  <rect class="index" x="12" y="174" width="147" height="20" rx="4"/>
+  <text x="12" y="234">震盪 25%、2 年、含費用　38.9%</text>
+  <rect class="track" x="12" y="244" width="336" height="20" rx="4"/>
+  <rect class="index" x="12" y="244" width="196" height="20" rx="4"/>
+</svg>

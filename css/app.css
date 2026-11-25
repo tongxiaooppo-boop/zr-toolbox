@@ -253,3 +253,12 @@ ul.checks li { margin-block: 10px; overflow-wrap: anywhere; }
 .yc-rules{margin:8px 0;padding-left:20px}
 .yc-details{margin:8px 0}
 .yc-details summary{cursor:pointer;font-weight:600}
+
+/* Recover: keep wide comparison tables inside the result card. */
+.recover-table-wrap { max-width: 100%; min-width: 0; overflow-x: auto; margin-block: 1rem; }
+.recover-table { width: 100%; table-layout: fixed; }
+.recover-table th, .recover-table td { white-space: normal; overflow-wrap: anywhere; vertical-align: top; }
+.recover-caption { text-align: left; font-weight: 600; margin-bottom: .5rem; }
+@media (max-width: 480px) {
+  .recover-table th, .recover-table td { padding: .5rem .25rem; font-size: .75rem; }
+}
