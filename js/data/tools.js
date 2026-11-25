@@ -24,7 +24,7 @@ export const TOOLS = Object.freeze([
   { id: 'kelly', no: '⑭', group: 'leverage', title: '幾倍槓桿最划算', oneLine: '凱利倍數：倍數對長期報酬，過頭反而賺更少', href: 'tools/kelly.html', gate: 5, status: 'ready', terms: ['kelly', 'volatility', 'leverage-ratio', 'daily-2x'] },
   { id: 'drawdown', no: '⑧', group: 'stock', title: '跌多少要漲多少才回本', oneLine: '最大回撤與回本所需漲幅', href: 'tools/drawdown.html', gate: 2, status: 'ready', terms: ['drawdown', 'recovery-gain'] },
   { id: 'margin', no: '⑤', group: 'stock', title: '融資融券維持率', oneLine: '融資、融券、整戶維持率：跌多少被追繳、要補多少', href: 'tools/margin.html', gate: 4, status: 'ready', terms: ['margin-trading', 'short-selling', 'account-ratio', 'margin-call'] },
-  { id: 'dca', no: '⑦', group: 'stock', title: '定期定額與年化報酬', oneLine: '每月扣款滾出多少、年化報酬怎麼算', href: 'tools/dca.html', gate: 4, status: 'ready', terms: ['dca', 'compound-interest', 'cagr'] },
+  { id: 'dca', no: '⑦', group: 'stock', title: '定期定額與持續投入', oneLine: '每月扣款滾出多少、為什麼要持續投入', href: 'tools/dca.html', gate: 4, status: 'ready', terms: ['dca', 'compound-interest', 'cagr'] },
   { id: 'cost', no: '⑨', group: 'stock', title: '買賣成本與損益', oneLine: '手續費、證交稅、零股、當沖，賣多少才不虧', href: 'tools/cost.html', gate: 4, status: 'ready', terms: ['broker-fee', 'transaction-tax', 'break-even-price', 'tick-size'] },
   { id: 'avgcost', no: '⑮', group: 'stock', title: '平均成本與攤平', oneLine: '分好幾次買，平均每股多少錢？再買多少能攤到目標價', href: 'tools/avgcost.html', gate: 4, status: 'ready', terms: ['average-cost', 'averaging-down', 'broker-fee', 'break-even-price'] },
   { id: 'dividend', no: '⑩', group: 'stock', title: '股息與除權息', oneLine: '領多少股利、扣多少健保費、除息後股價、填息', href: 'tools/dividend.html', gate: 4, status: 'ready', terms: ['ex-dividend', 'dividend-yield', 'fill-dividend', 'nhi-premium'] },
@@ -52,7 +52,7 @@ export const SHORTCUTS = Object.freeze([
 export const PATH = Object.freeze([
   { step: 1, title: '認識自己', question: '我能承受多少漲跌？', ids: ['riskquiz', 'riskprofile'] },
   { step: 2, title: '認識市場', question: '股票怎麼買？有哪些商品？', ids: ['basics', 'products', 'etf101'] },
-  { step: 3, title: '為什麼長期投資', question: '為什麼要持續投入？跌了怎麼辦？', ids: [] },
+  { step: 3, title: '為什麼長期投資', question: '為什麼要持續投入？跌了怎麼辦？', ids: ['dca'] },
   { step: 4, title: '正2 進階', question: '正2 是什麼、怎麼用？', ids: ['zr101', 'decay', 'recover'] },
   { step: 5, title: '借錢投資（最進階）', question: '要不要借錢買？', ids: ['loans'] }
 ]);
