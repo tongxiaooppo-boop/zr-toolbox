@@ -265,3 +265,12 @@ ul.checks li { margin-block: 10px; overflow-wrap: anywhere; }
 /* DCA tables: contain horizontal scrolling on narrow screens. */
 .dca-table-scroll { min-width: 0; max-width: 100%; overflow-x: auto; }
 .dca-table-scroll .trade-table { white-space: nowrap; }
+
+/* Crash: simple bar chart (width set inline from data). */
+.crash-group{margin:12px 0}
+.crash-bar{display:grid;grid-template-columns:3.5em 1fr 4.5em;gap:8px;align-items:center;margin:4px 0}
+.crash-bar-track{display:block;height:14px;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.crash-bar-fill{display:block;height:100%;border-radius:7px}
+.crash-bar-fill.tw{background:var(--accent)}
+.crash-bar-fill.zr{background:#dc2626}
+.crash-bar-val{font-variant-numeric:tabular-nums;font-size:14px}

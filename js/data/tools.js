@@ -37,7 +37,7 @@ export const TOOLS = Object.freeze([
   { id: 'basics', no: '㉓', group: 'science', title: '股票基本術語', oneLine: '上市櫃、集保、交割、委託單、漲跌停、T+2……下單前要懂的 48 個詞', href: 'tools/basics.html', gate: 6, status: 'ready', terms: [] },
   { id: 'etf101', no: '⑳', group: 'science', title: 'ETF 入門', oneLine: 'ETF 是什麼、費用怎麼算、配息與正二要注意什麼', href: 'tools/etf101.html', gate: 6, status: 'ready', terms: [] },
   { id: 'products', no: '㉒', group: 'science', title: '商品與賺錢方式', oneLine: '股票、ETF、債券、權證、期貨……怎麼賺、怎麼虧、適不適合新手', href: 'tools/products.html', gate: 6, status: 'ready', terms: [] },
-  { id: 'crash', no: '㉙', group: 'science', title: '股災與心態', oneLine: '台股跌過幾次大的、花多久回來、正2 當時跌多少，跌的時候先檢查什麼', href: 'tools/crash.html', gate: 6, status: 'planned', terms: [] },
+  { id: 'crash', no: '㉙', group: 'science', title: '股災與心態', oneLine: '台股跌過幾次大的、花多久回來、正2 當時跌多少，跌的時候先檢查什麼', href: 'tools/crash.html', gate: 6, status: 'ready', terms: [] },
   { id: 'loans', no: '㉑', group: 'science', title: '借錢投資的管道', oneLine: '質借、融資、信貸、房貸、保單……利息、追繳、最壞情況一次比', href: 'tools/loans.html', gate: 6, status: 'ready', terms: [] }
 ]);
 
