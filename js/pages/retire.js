@@ -115,6 +115,7 @@ const example = { pool: 10000000, years: 25, ret: 3.5, timing: 'end', inflation:
 
 document.getElementById('app').append(
   toolHeader(tool),
+  figure({ src: '../img/retire/joy.webp', alt: '頭髮花白的小安和老伴坐在陽台泡茶，望著夕陽下的遠山小鎮，旁邊放著旅行行李。', caption: '示意圖：投資有賺有賠。' }),
   wizard({ steps, result, example }),
   h('section', { class: 'card' }, h('h2', {}, '怎麼讀'),
     figure({ src: '../img/retire/comic.webp', alt: '四格漫畫：一、小安抱著 1,000 萬的錢袋，問退休後每個月能領多少。二、不管物價：年報酬 3.5%、領 25 年、最後剛好領完，每月約 49,768 元。三、物價每年漲 2%：第 1 年每月 39,875 元、第 25 年每月 65,312 元，每月跟著物價調高；老師說一開始領少一點，換來每年買得到的東西一樣多。四、4% 法則每月約 33,333 元；老師的白板寫報酬是假設不是保證、剛退休就大跌要領少一點；這是規劃情境，不是預測。' }),

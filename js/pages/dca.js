@@ -135,6 +135,7 @@ const example = { have: 'no', holdings: [{ code: '0050', nowPrice: 50 }], initia
 
 document.getElementById('app').append(
   toolHeader(tool),
+  figure({ src: '../img/dca/joy.webp', alt: '小安拿著顯示勾勾的手機比讚，一排存錢罐裡的硬幣逐漸增加，旁邊長出小盆栽。', caption: '示意圖：投資有賺有賠。' }),
   wizard({ steps, result, example }),
   h('section', { class: 'card' }, h('h2', {}, '怎麼讀'),
     figure({ src: '../img/dca/comic.webp', alt: '四格漫畫：一、小安在券商 App 設定某檔 ETF 每月 6 日扣款 5,000 元。二、20 年總共投入 5,000 元 × 12 個月 × 20 年＝1,200,000 元，手續費共 1,680 元。三、假設每年 6%，20 年後約 2,278,000 元，賺的錢約 1,077,000 元。四、老師說：6% 是假設不是保證；早投入的錢滾得比較久；真實市場有漲有跌，可能賠錢；這是用固定報酬算的情境，不是預測。' }),

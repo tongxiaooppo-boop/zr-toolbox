@@ -1,7 +1,7 @@
 // Service worker：安裝時把整站存進手機（全部離線可用、不靠 GitHub）；平常先連網、連不上才用快取（network-first）。
 // VERSION 與 PRECACHE 由 scripts/gen-precache.mjs 產生，改了網站任何檔案後要重跑（tests/pwa.test.js 會檢查）。
 // 網站一改 VERSION 就變 → 手機下次連網時裝新版 service worker、重新下載整份；連不上就繼續用手機裡那份。
-const VERSION = 'd2965f0a087e';
+const VERSION = 'e8a44a45a089';
 const CACHE = 'zr-toolbox-' + VERSION;
 const PRECACHE = ["./",
   "css/app.css",
@@ -17,6 +17,7 @@ const PRECACHE = ["./",
   "img/cost/step2.webp",
   "img/cost/step3-break-even.svg",
   "img/dca/comic.webp",
+  "img/dca/joy.webp",
   "img/dca/step3.webp",
   "img/decay/comic.webp",
   "img/decay/step1.webp",
@@ -37,6 +38,7 @@ const PRECACHE = ["./",
   "img/fx/comic.webp",
   "img/fx/step1.webp",
   "img/glossary/exposure-basis.svg",
+  "img/home/hero.webp",
   "img/kelly/comic.webp",
   "img/kelly/step1.webp",
   "img/lifelev/comic.webp",
@@ -57,6 +59,7 @@ const PRECACHE = ["./",
   "img/rebalance/comic.webp",
   "img/rebalance/step1.webp",
   "img/retire/comic.webp",
+  "img/retire/joy.webp",
   "img/retire/step3.webp",
   "img/trigger5050/comic.webp",
   "img/trigger5050/split-5050.svg",

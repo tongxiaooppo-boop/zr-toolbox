@@ -1,70 +1,36 @@
-﻿# UI v1 完成交接（2026-11-09）
+# UI 任務回報
 
-## 第 2 節完成項
+日期：2026-11-25。依 `collab/to-codex-ui.md` v2 執行，未 commit。
 
-1. 做了：卡片與輸入框採 3px 框、6px／4px 圓角，卡片 5px 硬陰影。
-2. 做了：主色改成指定橘紅，主要按鈕文字使用 --on-accent 黑色。
-3. 做了：每個 explain 是粗框硬陰影卡，以 :has(.metric.<tone>) 決定底色；數字 28px／900，內層 metric 無框無底，result 間距 16px。
-4. 做了：info 結果卡與獨立 metric 使用 --info-bg；獨立 metrics 保留網格、數字 20px。
-5. 做了：進度方塊高 12px、2px 框，完成／目前填橘紅，目前加小硬陰影。
-6. 做了：primary／secondary 有 3px 硬陰影，按下位移 3px 並移除陰影，減少動態模式取消位移。
-7. 做了：表格外框 3px，table-wrap 內的表格移除自身框；表頭橘紅黑字、列線 2px，一般表格固定欄寬並可斷行。
-8. 做了：首頁工具卡粗框硬陰影，hover／focus 位移 -2px、陰影 7px；planned 保留半透明；分組標題粗字、捷徑 2px 框。
-9. 做了：wizard-help／help-card／term-card／step-about 淺藍底、2px 框；help-btn 4px 圓角、2px 框。
-10. 做了：holding 使用 2px 框與卡片底；wizard-error 粗框粗字紅底，移除 min-height 並以 :empty 隱藏。
-11. 做了：figure 圖片 3px 框、4px 圓角；折線 s0／s1／s2 對應 accent／muted／warn。
-12. 做了：指定離線系統字型，標題 900、按鈕與標籤 700，數字 tabular-nums；無新增外部資源。
+## 完成項
 
-## 第 4 節完成項
-
-1. 做了：article 長文標題、段落、清單、引言與圖片樣式。
-2. 做了：compare-wrap 內部水平捲動、3px 框與硬陰影，表格至少 900px；第一欄 sticky，首格表頭維持橘紅底且提高 z-index。
-3. 做了：refs 頁底卡，16px 標題、14px 清單及 muted 備註。
-4. 做了：references(items) 以 h() 建立節點，支援選填 note、純文字名稱、安全新視窗連結；非 https:// 開頭拋出指定錯誤。其餘既有函式未改。
+- 配色：淺色與兩處深色 tokens 已改為指定的海軍藍、暖金與米白；保留 ok／warn／bad 及背景色，移除舊橘紅，陰影保留原尺寸。
+- 點綴：完成首頁標題金底線、群組左色條、工具卡上框、捷徑底色、工具標題、hero 樣式及每日固定輪換標語；首頁卡片維持不顯示編號。
+- 三張圖：以內建 imagegen 製作，PNG 均為 1536×1024，已存於 `docs/figures/cartoon/out/home-hero.png`、`docs/figures/cartoon/out/dca-joy.png`、`docs/figures/cartoon/out/retire-joy.png`；以 Python PIL 的 quality=80、method=6 轉存至 `img/home/hero.webp`、`img/dca/joy.webp`、`img/retire/joy.webp`。
+- 放圖：首頁主圖置於 site-sub 與 shortcuts 之間；dca、retire 圖置於 toolHeader 之後，附白話 alt 與指定風險 caption；已用指定產生器更新 sw.js，152 個預快取檔案，版本 e8a44a45a089。
 
 ## PROOF_CMD 輸出
 
-- check-ui 最後一行：OK
-- gen-precache：sw.js：124 個檔案，版本 94899d89a158
-- tests 155
-- pass 155
-- fail 0
+- check-ui 最後一行：`NG 1`（退出碼 1；前一行為 `FAIL 要有 .slogan 樣式`）。
+- test：`ℹ pass 155`
+- test：`ℹ fail 0`
 
-額外以記憶體 DOM 替身核對 references 結構、純文字、安全連結屬性、選填備註，以及 http／javascript／null 的拒絕行為，通過。無新增測試檔。
+check-ui 未達原訂 OK，原因是 `scripts/check-ui.mjs` 第 33 行的 .slogan 正規表示式結尾含實際退格字元 U+0008，並非反斜線加 b 的字界線。CSS 已有完整的 .slogan 規則。因任務禁止修改 scripts，原檔未改；僅在記憶體將該字元替換為預期字界線後，完整 check-ui 診斷輸出為 `OK`，不計為原始 PROOF_CMD 通過。
 
-## 自行計算對比值
+原始 check-ui 失敗後，另行執行 npm.cmd test，結果如上。三個頁面亦通過 node 語法檢查，git diff --check 無空白錯誤。未執行 smoke。
 
-依 WCAG sRGB 相對亮度公式計算，以下各行依序為淺色／深色；指定 token 數值未修改。
+## 圖片自查
 
-- 一般文字／頁面底色：17.12:1／16.46:1。
-- 一般文字／卡片底色：18.88:1／14.51:1。
-- muted／卡片底色：9.74:1／9.48:1。
-- muted／soft 或 info 底色：8.28:1／5.42:1。
-- muted／ok 底色：8.08:1／5.98:1。
-- muted／warn 底色：7.55:1／6.52:1。
-- muted／bad 底色：7.48:1／9.13:1。
-- ok 大數字／ok 底色：6.96:1／6.02:1；淺色依任務指定改用 #0a5a28，深色用 --ok。
-- ok 獨立數字／info 底色：7.13:1／5.46:1。
-- bad 大數字與錯誤文字／bad 底色：4.52:1／6.76:1。
-- bad 獨立數字／info 底色：5.01:1／4.01:1；獨立數字 20px、900，達大字 3:1。
-- warn 註記／卡片底色：5.76:1／9.84:1。
-- warn 註記／頁面底色：5.22:1／11.16:1。
-- 按鈕及表頭黑字／accent 底色：6.09:1／7.36:1。
-- info 卡一般文字／info 底色：16.06:1／8.30:1。
-- warn 卡一般文字及大數字／warn 底色：14.64:1／9.99:1。
-- 原 accent／卡片底色：3.10:1／6.24:1。淺色小字未達 4.5:1，因此連結、編號、map、info-chip 改用 --text；橘紅保留於連結底線、底色、焦點及線圖。
-- 圖例文字改為 --muted，色條仍維持 accent／muted／warn，避免淺色橘紅小字對比不足。
+提示使用讀檔後的純文字：每張先貼 `docs/figures/cartoon/00-風格與角色.md` 全文，再貼各張原始提示；各張配色與尺寸例外優先。使用內建工具，未使用 CLI/API fallback。
 
-## 版面與範圍
+| 圖片 | 最終提示來源 | 重生／修正次數 | 自查結果 |
+| --- | --- | --- | --- |
+| home-hero | `docs/figures/cartoon/home-01-持續投入到退休清閒.md` | 0 | 卡通；標題「持續投入，時間慢慢幫你」與小字「示意圖：投資有賺有賠，過去不代表未來」逐字相符；沒有額外文字、數字、真實品牌或節慶元素。 |
+| dca-joy | `docs/figures/cartoon/dca-03-每月一點點.md`，再要求只將 11 個罐子修正為精確 12 個，保留角色、構圖、配色及原文 | 1 | 最終為 12 個透明罐子；標題「持續投資，年富一年」與小字「示意圖：投資有賺有賠」逐字相符；手機只有勾勾；沒有額外文字、數字、真實品牌或節慶元素。 |
+| retire-joy | `docs/figures/cartoon/retire-03-退休清閒.md` | 0 | 卡通；標題「感謝過去的自己」與小字「示意圖：投資有賺有賠，提領要量力而為」逐字相符；沒有額外文字、數字、真實品牌或節慶元素。 |
 
-- app.css 行數：改前 150 → 改後 183。
-- 保留 ≥900px 左右兩欄與 sticky 說明欄，結果頁維持單欄；輸入字級 16px。
-- 一般互動元件至少高 44px；help-btn／link-button／info-chip 至少高 32px；焦點框使用指定 3px accent。
-- 手機以 minmax(0,...)、可收縮欄位、文字斷行及固定一般表格欄寬防止外溢；只有 compare-wrap 設定水平捲動。
-- 僅修改 css/app.css、js/ui/components.js，以及腳本產生的 sw.js；另新增本回報。
-- 未連網、未 commit、未跑 smoke；未執行瀏覽器視覺與 390px 實測，依任務由 Opus 跑 smoke 並截圖確認。
-- 無產生暫存檔。
+PNG 已留在指定 out 目錄；該目錄的 PNG 依現有 .gitignore 忽略。未變更 .gitignore，未建立需清理的 repo 暫存檔。
 
 ## 需要決定的事
 
-無。
+請維護者修正 `scripts/check-ui.mjs` 第 33 行的 U+0008 為正規表示式字界線，再重跑原始 PROOF_CMD。該檔在本任務禁止修改範圍內，因此未代改。
