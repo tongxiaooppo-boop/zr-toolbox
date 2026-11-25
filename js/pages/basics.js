@@ -1,4 +1,4 @@
-import { h, toolHeader, figure, references, disclaimer } from '../ui/components.js';
+import { h, toolHeader, figure, references, disclaimer, pathNav } from '../ui/components.js';
 import { TOOLS } from '../data/tools.js';
 import { BASIC_SECTIONS, BASIC_LIMITS, BASIC_REFS, FIGURE_TEXT } from '../data/basics.js';
 
@@ -56,7 +56,8 @@ document.getElementById('app').append(
   h('section', { class: 'card article' }, h('h2', {}, '先看這張圖'),
     figure({ src: '../img/basics/comic.webp', alt: FIGURE_TEXT.comic, caption: '送出委託、成交、交割、進集保，是四件不同的事。' }),
     h('p', {}, '這頁收的是下單前最基本的詞：上市櫃、集保、交割、委託單、漲跌停、T+2……每個詞先講白話，再舉例、講常見誤解。'),
-    h('p', {}, 'Beta、維持率、殖利率這類計算機會用到的詞，在 ', h('a', { href: 'glossary.html' }, '⑫ 術語辭典'), '。')),
+    h('p', {}, 'Beta、維持率、殖利率這類計算機會用到的詞，在 ', h('a', { href: 'glossary.html' }, '⑫ 術語辭典'), '。'),
+    h('p', {}, '這裡收下單、交割這類基本用詞；Beta、維持率、曝險這類正2 與槓桿用詞在 ', h('a', { href: 'glossary.html' }, '⑫ 術語辭典'), '。')),
   h('nav', { class: 'card article term-index', 'aria-label': '術語索引' }, h('h2', {}, '48 個詞，點了直接跳過去'),
     BASIC_SECTIONS.map(s => [h('h3', {}, h('a', { href: '#' + s.id }, s.title)),
       h('div', { class: 'shortcuts' }, s.terms.map(t => h('a', { href: '#' + t.id }, t.term)))]),
@@ -64,6 +65,7 @@ document.getElementById('app').append(
   h('section', { class: 'card article' }, h('h2', {}, '或輸入關鍵字找'), q, count),
   ...sections.map(s => s.el),
   h('section', { class: 'card article', id: 'limits' }, h('h2', {}, '這頁的限制'), BASIC_LIMITS.map(t => h('p', {}, t))),
+  pathNav('basics'),
   references(BASIC_REFS), disclaimer('general'));
 q.addEventListener('input', filter);
 window.addEventListener('hashchange', focusHash);

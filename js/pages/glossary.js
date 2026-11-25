@@ -41,7 +41,8 @@ document.getElementById('app').append(
   toolHeader(tool),
   h('section', { class: 'card' }, h('h2', {}, '先看這張圖'),
     figure({ src: '../img/glossary/exposure-basis.svg', alt: '同一個例子算出淨資產、曝險、兩種口徑與資產槓桿：持股 1,000 萬、現金 200 萬、借款 300 萬，淨資產 900 萬，淨資產口徑約 1.11 倍、總資產口徑約 0.83 倍、資產槓桿約 1.33 倍。', caption: '同一個人，換個分母，倍數就不一樣。' }),
-    h('p', {}, '下面每個詞都先給一句白話，再補一個數字例子。在其他工具按 ⓘ 也會看到同一張小卡。')),
+    h('p', {}, '下面每個詞都先給一句白話，再補一個數字例子。在其他工具按 ⓘ 也會看到同一張小卡。'),
+    h('p', {}, '這裡收正2、槓桿、質押這類進階用詞；下單、交割這類基本用詞在 ', h('a', { href: 'basics.html' }, '㉓ 股票基本術語'), '。')),
   h('section', { class: 'card' }, q, count),
   h('section', { class: 'card' }, items.map(item => item.el)),
   disclaimer('general'));

@@ -1,4 +1,4 @@
-﻿import { h, toolHeader, selectField, disclaimer, figure, lineChart } from '../ui/components.js';
+﻿import { h, toolHeader, selectField, disclaimer, figure, lineChart, pathNav } from '../ui/components.js';
 import { wizard, numberInput, explain, withHelp } from '../ui/wizard.js';
 import { decayPlan } from '../core/decay.js';
 import { parseNum, fmtMoney, fmtPct } from '../core/format.js';
@@ -86,4 +86,5 @@ document.getElementById('app').append(
     h('p', {}, '正二每天收盤後都會把倍數調回 2 倍，所以它保證的是『每一天』大約 2 倍，不是一個月、一年的 2 倍。'),
     h('p', {}, '來回震盪時，跌下來的那天是用比較大的本金在跌，漲回去的那天是用比較小的本金在漲，一來一回就輸給『整段 × 2』。這就是常聽到的波動耗損。'),
     h('p', {}, '反過來，一路往同一個方向走的時候，正二可能比整段 2 倍還多。所以不能用一個固定的『每年耗損幾 %』來估。')),
+  pathNav('decay'),
   disclaimer('general'));

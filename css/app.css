@@ -235,3 +235,21 @@ ul.checks li { margin-block: 10px; overflow-wrap: anywhere; }
   .alloc-growth { background: #f7c85e; color: #17202e; }
   .alloc-bold { background: #e58679; color: #17202e; }
 }
+/* 新手路線：沿用 card 外觀，步驟與連結可在窄螢幕換行。 */
+.path ol{margin:12px 0 0;padding-inline-start:1.5em}
+.path li{padding-inline-start:4px;margin-block:0 20px;overflow-wrap:anywhere}
+.path li:last-child{margin-bottom:0}
+.path li>strong,.path li>span{display:block}
+.path li>span{margin-block:4px}
+.path a,.path-nav a{max-width:100%;white-space:normal}
+.path-nav h2{font-size:16px}
+.path-nav p{margin:8px 0}
+/* ㉘ yearcheck：第 4 條線與表格 */
+.chart .s3{stroke:#0e9f8e}.chart .key.s3::before{background:#0e9f8e}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .chart .s3{stroke:#5eead4}:root:not([data-theme="light"]) .chart .key.s3::before{background:#5eead4}}
+:root[data-theme="dark"] .chart .s3{stroke:#5eead4}:root[data-theme="dark"] .chart .key.s3::before{background:#5eead4}
+.yc-table td.num{text-align:right;white-space:nowrap}
+.yc-best td,.yc-best th{font-weight:700}
+.yc-rules{margin:8px 0;padding-left:20px}
+.yc-details{margin:8px 0}
+.yc-details summary{cursor:pointer;font-weight:600}

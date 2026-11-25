@@ -1,4 +1,4 @@
-import { h, toolHeader, figure, references, disclaimer } from '../ui/components.js';
+import { h, toolHeader, figure, references, disclaimer, pathNav } from '../ui/components.js';
 import { TOOLS } from '../data/tools.js';
 import { LOAN_GROUPS, LOANS, LOAN_MYTHS, LOAN_OPEN, LOAN_REFS, FIGURE_TEXT } from '../data/loans.js';
 
@@ -46,4 +46,5 @@ document.getElementById('app').append(
   h('section', { class: 'card article', id: 'tools' }, h('h2', {}, sections[5][1]),
     [['pledge', '押股票借錢，跌多少會被追繳'], ['margin', '融資融券的維持率與追繳價'], ['lifelev', '房貸、信貸、質押加起來，你其實開了幾倍槓桿']].map(([id, text]) =>
       h('p', {}, toolLinks([id]), '：', text))),
+  pathNav('loans'),
   references(LOAN_REFS), disclaimer('general'));

@@ -1,4 +1,4 @@
-import { h, toolHeader, figure, references, disclaimer } from '../ui/components.js';
+import { h, toolHeader, figure, references, disclaimer, pathNav } from '../ui/components.js';
 import { TOOLS } from '../data/tools.js';
 import { ETF_SECTIONS, ETF_LIMITS, ETF_REFS, FIGURE_TEXT } from '../data/etf101.js';
 
@@ -28,4 +28,5 @@ document.getElementById('app').append(
   h('section', { class: 'card article', id: 'limits' }, h('h2', {}, '這頁的限制'),
     ETF_LIMITS.map(t => h('p', {}, t)),
     h('p', { class: 'muted' }, '列出的機構只是查得到公告的例子，不是推薦；利率會變，以各家最新公告為準。')),
+  pathNav('etf101'),
   references(ETF_REFS), disclaimer('general'));

@@ -1,4 +1,4 @@
-import { h, toolHeader, figure, references, disclaimer } from '../ui/components.js';
+import { h, toolHeader, figure, references, disclaimer, pathNav } from '../ui/components.js';
 import { TOOLS } from '../data/tools.js';
 import { LEVELS, PRODUCTS, WAYS, PRODUCT_LIMITS, PRODUCT_REFS, FIGURE_TEXT } from '../data/products.js';
 
@@ -29,4 +29,5 @@ document.getElementById('app').append(
   h('section', { class: 'card article', id: 'limits' }, h('h2', {}, sections[2][1]),
     PRODUCT_LIMITS.map(t => h('p', {}, t)),
     h('p', { class: 'muted' }, '列出的機構只是查得到公告的例子，不是推薦；利率會變，以各家最新公告為準。')),
+  pathNav('products'),
   references(PRODUCT_REFS), disclaimer('general'));

@@ -1,4 +1,4 @@
-import { h, toolHeader, figure, references, disclaimer } from '../ui/components.js';
+import { h, toolHeader, figure, references, disclaimer, pathNav } from '../ui/components.js';
 import { wizard, explain } from '../ui/wizard.js';
 import { QUESTIONS, PROFILES, scoreQuiz, BUCKETS, allocationPlan } from '../core/riskquiz.js';
 import { TOOLS } from '../data/tools.js';
@@ -70,7 +70,9 @@ document.getElementById('app').append(
       alt: '三桶資金：保守穩健桶，例子為債券 ETF、定存股、00713、VT；成長桶，例子為 0050、QQQ、SPY；積極桶，例子為主動式 ETF、正2、個股。積極型 20／30／50，穩健型 50／30／20，示意主力桶占一半。',
       caption: '三桶依保守穩健、成長、積極排列，比例隨型態與年齡改變。' }),
     h('p', {}, '測驗分數決定你的主力桶：保守和穩健型以保守穩健桶為主，成長型以成長桶為主，積極型以積極桶為主，主力桶大約占一半。'),
-    h('p', {}, '這不是券商的正式評估。各家問卷題目和門檻都不同，結果可能不一樣；正式買賣以你開戶的券商為準。')),
+    h('p', {}, '這不是券商的正式評估。各家問卷題目和門檻都不同，結果可能不一樣；正式買賣以你開戶的券商為準。'),
+    h('p', {}, '想知道各屬性對應什麼商品、為什麼：', h('a', { href: 'riskprofile.html' }, '㉗ 投資屬性是什麼'))),
+  pathNav('riskquiz'),
   references([
     { name: '永豐金證券 投資人風險屬性分析問卷（自然人）113.06', url: 'https://www.sinotrade.com.tw/UploadFiles/2024/202406/83ced505-e15c-478f-af49-d58863f73d12.pdf' },
     { name: '安達人壽 投資型保險商品保戶風險適性問卷', url: 'https://life.chubb.com/content/dam/chubb-sites/life-chubb-com/tw-zh/documents/%E6%8A%95%E8%B3%87%E5%9E%8B%E5%95%86%E5%93%81%E4%BF%9D%E6%88%B6%E9%A2%A8%E9%9A%AA%E9%81%A9%E6%80%A7%E5%95%8F%E5%8D%B7.pdf' },

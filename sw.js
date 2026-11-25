@@ -1,7 +1,7 @@
 // Service worker：安裝時把整站存進手機（全部離線可用、不靠 GitHub）；平常先連網、連不上才用快取（network-first）。
 // VERSION 與 PRECACHE 由 scripts/gen-precache.mjs 產生，改了網站任何檔案後要重跑（tests/pwa.test.js 會檢查）。
 // 網站一改 VERSION 就變 → 手機下次連網時裝新版 service worker、重新下載整份；連不上就繼續用手機裡那份。
-const VERSION = '96f7139fc523';
+const VERSION = '238214503416';
 const CACHE = 'zr-toolbox-' + VERSION;
 const PRECACHE = ["./",
   "css/app.css",
@@ -61,12 +61,14 @@ const PRECACHE = ["./",
   "img/retire/comic.webp",
   "img/retire/joy.webp",
   "img/retire/step3.webp",
+  "img/riskprofile/.gitkeep",
   "img/riskquiz/buckets.svg",
   "img/trigger5050/comic.webp",
   "img/trigger5050/split-5050.svg",
   "img/trigger5050/step2.webp",
   "img/valuation/comic.webp",
   "img/valuation/step3.webp",
+  "img/yearcheck/giveback.svg",
   "img/zr101/comic.webp",
   "img/zr101/map.webp",
   "index.html",
@@ -133,6 +135,7 @@ const PRECACHE = ["./",
   "js/pages/token.js",
   "js/pages/trigger5050.js",
   "js/pages/valuation.js",
+  "js/pages/yearcheck.js",
   "js/pages/zr101.js",
   "js/pwa.js",
   "js/ui/components.js",
@@ -164,6 +167,7 @@ const PRECACHE = ["./",
   "tools/token.html",
   "tools/trigger5050.html",
   "tools/valuation.html",
+  "tools/yearcheck.html",
   "tools/zr101.html"];
 
 self.addEventListener('install', e => {

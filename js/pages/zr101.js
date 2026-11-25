@@ -1,4 +1,4 @@
-import { h, toolHeader, figure, references, disclaimer } from '../ui/components.js';
+import { h, toolHeader, figure, references, disclaimer, pathNav } from '../ui/components.js';
 import { TOOLS } from '../data/tools.js';
 import { ZR_SECTIONS, ZR_WAYS, ZR_MIXES, DAJEN, ZR_STEPS, ZR_LIMITS, ZR_REFS, FIGURE_TEXT, ZR_PERIODIC } from '../data/zr101.js';
 
@@ -38,4 +38,5 @@ document.getElementById('app').append(
     s.id === 'dajen' ? dajen() : null,
     s.id === 'start' ? h('ol', {}, ZR_STEPS.map(step => h('li', {}, step.text, links(step.tools)))) : null)),
   h('section', { class: 'card article', id: 'limits' }, h('h2', {}, '這頁的限制'), ZR_LIMITS.map(text => h('p', {}, text))),
+  pathNav('zr101'),
   references(ZR_REFS), disclaimer('general'));

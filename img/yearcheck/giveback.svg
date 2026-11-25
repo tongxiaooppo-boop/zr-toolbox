@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 200" role="img" aria-labelledby="title desc">
+  <title id="title">最高點不等於賺到的錢</title>
+  <desc id="desc">示意折線：從「投入」起點往上到「最高點」，再往下到「現在」。最高點到現在之間的向下箭頭標「回吐」，起點到現在之間標「報酬」。</desc>
+  <style>
+    svg { font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif; }
+    text { font-size: 12px; fill: #1c2330; }
+    .line { fill: none; stroke: #2563eb; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .dot { fill: #2563eb; }
+    .base { stroke: #9aa3b2; stroke-width: 1; stroke-dasharray: 4 4; }
+    .give { stroke: #b45309; stroke-width: 2; fill: none; }
+    .give-head { fill: #b45309; }
+    .gain { stroke: #15803d; stroke-width: 2; fill: none; }
+    .gain-head { fill: #15803d; }
+    .give-text { fill: #b45309; font-weight: 700; }
+    .gain-text { fill: #15803d; font-weight: 700; }
+    @media (prefers-color-scheme: dark) {
+      text { fill: #e8ebf0; }
+      .line { stroke: #6ea0ff; }
+      .dot { fill: #6ea0ff; }
+      .base { stroke: #9aa3b2; }
+      .give { stroke: #fbbf24; }
+      .give-head, .give-text { fill: #fbbf24; }
+      .gain { stroke: #4ade80; }
+      .gain-head, .gain-text { fill: #4ade80; }
+    }
+  </style>
+  <line class="base" x1="20" y1="150" x2="340" y2="150"/>
+  <polyline class="line" points="30,150 80,125 130,135 190,40 240,80 280,70 320,100"/>
+  <circle class="dot" cx="30" cy="150" r="4"/>
+  <circle class="dot" cx="190" cy="40" r="4"/>
+  <circle class="dot" cx="320" cy="100" r="4"/>
+  <text x="30" y="172" text-anchor="start">投入</text>
+  <text x="190" y="28" text-anchor="middle">最高點</text>
+  <text x="320" y="170" text-anchor="end" dx="0">現在</text>
+  <line class="give" x1="336" y1="42" x2="336" y2="94"/>
+  <polygon class="give-head" points="330,92 342,92 336,102"/>
+  <text class="give-text" x="330" y="72" text-anchor="end">回吐</text>
+  <line class="gain" x1="336" y1="146" x2="336" y2="108"/>
+  <polygon class="gain-head" points="330,110 342,110 336,102" transform="translate(0,0)"/>
+  <text class="gain-text" x="330" y="132" text-anchor="end">報酬</text>
+</svg>
