@@ -12,7 +12,7 @@
 //       scoreKey：只看總分的型態；key：套用封頂後的最終型態；caps：真的把型態往下拉的規則（依 CAPS 順序）
 //       zr：正2（00631L，RR5）可能適合的四個條件，全過才 ok
 //     不合格 throw Error（中文，頁面直接顯示）
-//   BUCKETS、AGE_BANDS、ALLOC、allocationPlan：三桶配置，見檔尾
+//   BUCKETS、AGE_BANDS、ALLOC、allocationPlan：三桶配置；LOSS_LIMITS、SCENARIOS、comparePortfolio：承受力 vs 現有組合，見檔尾
 
 export const QUESTIONS = Object.freeze([
   { id: 'age', no: 1, text: '你的年齡', hint: '年紀越輕，虧了之後越有時間賺回來。', options: [
@@ -113,4 +113,47 @@ export function allocationPlan({ key, age, loss }) {
   const row = key === 'growth' ? (loss >= 4 ? 'growthHigh' : 'growthLow') : key;
   const [safe, growth, bold] = ALLOC[row][5 - age];
   return { safe, growth, bold, band: AGE_BANDS[age - 1], row };
+}
+
+// ---------- 承受力 vs 現有組合（v5.12，使用者 2026-11-25：「把投資狂熱拉回來」；資料 R12 2.3） ----------
+//   LOSS_LIMITS：第 8 題分數 1–5 → 自己說能承受的最大虧損（0、0.10、0.20、0.30、0.50）
+//   SCENARIOS：三個歷史股災，各類資產高點到低點的大約跌幅（負小數）
+//     safe＝保守穩健桶用「一半股票型（大盤×0.66）＋一半債券／定存」的固定估計（使用者 2026-11-25 選）
+//     approx：正2 該次跌幅是公式近似（00631L 2008 未成立；2022 只有近似值）
+//   comparePortfolio({ safe, growth, lever, stock, loss, plan })
+//     safe／growth／lever／stock＝現有金額（元，≥0，合計 > 0）：保守穩健、成長、正2、個股與主動式
+//     loss＝第 8 題分數；plan＝allocationPlan 的結果（建議三桶，百分比整數）
+//     → { total, now:{ safe, growth, bold }, target:{ safe, growth, bold }, diff:{…}（皆小數，diff＝now−target）,
+//         exposure（成長＋正2×2＋個股；保守穩健桶算 0，頁面要註明）, borrowed（exposure > 1）, limit,
+//         scenarios:[{ key, label, loss（負小數）, amount（虧損金額，負數）, times（|loss|÷limit；limit 0 時為 null）, over, approx }] }
+export const LOSS_LIMITS = Object.freeze([0, 0.10, 0.20, 0.30, 0.50]);
+
+export const SCENARIOS = Object.freeze([
+  { key: '2008', label: '2008 金融海嘯', safe: -0.163, growth: -0.58, lever: -0.85, stock: -0.58, approx: true },
+  { key: '2020', label: '2020 疫情', safe: -0.106, growth: -0.306, lever: -0.518, stock: -0.306, approx: false },
+  { key: '2022', label: '2022 升息', safe: -0.154, growth: -0.29, lever: -0.48, stock: -0.29, approx: true }
+]);
+
+export function comparePortfolio({ safe, growth, lever, stock, loss, plan }) {
+  const amt = { safe, growth, lever, stock };
+  const names = { safe: '保守穩健', growth: '成長', lever: '正2', stock: '個股與主動式' };
+  for (const [k, v] of Object.entries(amt)) {
+    if (!Number.isFinite(v) || v < 0) throw new Error(`「${names[k]}」金額請填 0 或正數。`);
+  }
+  const total = safe + growth + lever + stock;
+  if (!(total > 0)) throw new Error('四格金額至少要有一格大於 0。');
+  if (!Number.isInteger(loss) || loss < 1 || loss > 5) throw new Error('第 8 題還沒選。');
+  if (!plan || ![plan.safe, plan.growth, plan.bold].every(Number.isFinite)) throw new Error('請先完成測驗。');
+  const w = { safe: safe / total, growth: growth / total, lever: lever / total, stock: stock / total };
+  const now = { safe: w.safe, growth: w.growth, bold: w.lever + w.stock };
+  const target = { safe: plan.safe / 100, growth: plan.growth / 100, bold: plan.bold / 100 };
+  const diff = { safe: now.safe - target.safe, growth: now.growth - target.growth, bold: now.bold - target.bold };
+  const exposure = w.growth + w.lever * 2 + w.stock;
+  const limit = LOSS_LIMITS[loss - 1];
+  const scenarios = SCENARIOS.map(sc => {
+    const l = w.safe * sc.safe + w.growth * sc.growth + w.lever * sc.lever + w.stock * sc.stock;
+    return { key: sc.key, label: sc.label, loss: l, amount: l * total, times: limit ? -l / limit : null,
+      over: -l > limit, approx: sc.approx && w.lever > 0 };
+  });
+  return { total, now, target, diff, exposure, borrowed: exposure > 1, limit, scenarios };
 }

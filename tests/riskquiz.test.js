@@ -115,3 +115,38 @@ test('allocation: lookups by type, age (Q1 score) and loss (Q8 score)', () => {
   assert.throws(() => allocationPlan({ key: 'growth', age: 0, loss: 3 }), /第 1 題/);
   assert.throws(() => allocationPlan({ key: 'growth', age: 3, loss: NaN }), /第 8 題/);
 });
+
+import { LOSS_LIMITS, SCENARIOS, comparePortfolio } from '../js/core/riskquiz.js';
+
+const near = (a, b, msg) => assert.ok(Math.abs(a - b) < 1e-3, `${msg}: ${a} ≠ ${b}`);
+
+test('compare: 過熱例 10/20/40/30 萬 vs 穩健型 50/30/20、可承受 20%（R12 2.4 驗算）', () => {
+  const r = comparePortfolio({ safe: 100000, growth: 200000, lever: 400000, stock: 300000, loss: 3,
+    plan: { safe: 50, growth: 30, bold: 20 } });
+  assert.equal(r.total, 1000000);
+  near(r.now.bold, 0.7, 'now.bold'); near(r.diff.safe, -0.4, 'diff.safe'); near(r.diff.bold, 0.5, 'diff.bold');
+  near(r.exposure, 1.3, 'exposure'); assert.equal(r.borrowed, true); assert.equal(r.limit, 0.2);
+  const [a, b, c] = r.scenarios;
+  near(a.loss, -0.6463, '2008'); near(b.loss, -0.3708, '2020'); near(c.loss, -0.3524, '2022');
+  near(a.amount, -646300, '2008 金額'); near(a.times, 3.2315, '2008 倍數'); near(b.times, 1.854, '2020 倍數');
+  assert.deepEqual(r.scenarios.map(s => [s.over, s.approx]), [[true, true], [true, false], [true, true]]);
+});
+
+test('compare: 照建議配、不放正2 → 曝險 ≤ 1、approx 不標', () => {
+  const r = comparePortfolio({ safe: 50, growth: 30, lever: 0, stock: 20, loss: 3, plan: { safe: 50, growth: 30, bold: 20 } });
+  near(r.exposure, 0.5, 'exposure'); assert.equal(r.borrowed, false);
+  near(r.diff.safe, 0, 'diff'); near(r.scenarios[0].loss, -0.3715, '2008'); // .5×-.163＋.3×-.58＋.2×-.58
+  assert.equal(r.scenarios.some(s => s.approx), false);
+});
+
+test('compare: 第 8 題選不能虧 → times 為 null；錯誤輸入', () => {
+  const plan = { safe: 80, growth: 20, bold: 0 };
+  const r = comparePortfolio({ safe: 1, growth: 0, lever: 0, stock: 0, loss: 1, plan });
+  assert.equal(r.limit, 0); assert.equal(r.scenarios[0].times, null); assert.equal(r.scenarios[0].over, true);
+  assert.deepEqual(LOSS_LIMITS, [0, 0.1, 0.2, 0.3, 0.5]); assert.equal(SCENARIOS.length, 3);
+  assert.throws(() => comparePortfolio({ safe: 0, growth: 0, lever: 0, stock: 0, loss: 3, plan }), /至少要有一格/);
+  assert.throws(() => comparePortfolio({ safe: -1, growth: 5, lever: 0, stock: 0, loss: 3, plan }), /保守穩健/);
+  assert.throws(() => comparePortfolio({ safe: 1, growth: NaN, lever: 0, stock: 0, loss: 3, plan }), /成長/);
+  assert.throws(() => comparePortfolio({ safe: 1, growth: 0, lever: 0, stock: 0, loss: 0, plan }), /第 8 題/);
+  assert.throws(() => comparePortfolio({ safe: 1, growth: 0, lever: 0, stock: 0, loss: 3 }), /先完成測驗/);
+});
