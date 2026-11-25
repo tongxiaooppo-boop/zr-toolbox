@@ -37,6 +37,7 @@ export const TOOLS = Object.freeze([
   { id: 'basics', no: '㉓', group: 'science', title: '股票基本術語', oneLine: '上市櫃、集保、交割、委託單、漲跌停、T+2……下單前要懂的 48 個詞', href: 'tools/basics.html', gate: 6, status: 'ready', terms: [] },
   { id: 'etf101', no: '⑳', group: 'science', title: 'ETF 入門', oneLine: 'ETF 是什麼、費用怎麼算、配息與正二要注意什麼', href: 'tools/etf101.html', gate: 6, status: 'ready', terms: [] },
   { id: 'products', no: '㉒', group: 'science', title: '商品與賺錢方式', oneLine: '股票、ETF、債券、權證、期貨……怎麼賺、怎麼虧、適不適合新手', href: 'tools/products.html', gate: 6, status: 'ready', terms: [] },
+  { id: 'crash', no: '㉙', group: 'science', title: '股災與心態', oneLine: '台股跌過幾次大的、花多久回來、正2 當時跌多少，跌的時候先檢查什麼', href: 'tools/crash.html', gate: 6, status: 'planned', terms: [] },
   { id: 'loans', no: '㉑', group: 'science', title: '借錢投資的管道', oneLine: '質借、融資、信貸、房貸、保單……利息、追繳、最壞情況一次比', href: 'tools/loans.html', gate: 6, status: 'ready', terms: [] }
 ]);
 
@@ -48,11 +49,11 @@ export const SHORTCUTS = Object.freeze([
 
 // 新手路線（使用者 2026-11-25 同意，決策 docs/decision/決策-2026-11-25-科普梳理.md）。
 // 首頁頂端照這個順序列出；每頁用 components.js 的 pathNav(id) 顯示「你在第幾步、下一步」。
-// ids 只放已存在 TOOLS 的 id；還沒做的頁（複利與持續投資、股災與心態）做好時再加進來；㉕ recover 已列入，planned 時 pathPlace 會跳過。
+// ids 只放已存在 TOOLS 的 id；㉙ crash 已列入第 3 步；㉕ recover 已列入，planned 時 pathPlace 會跳過。
 export const PATH = Object.freeze([
   { step: 1, title: '認識自己', question: '我能承受多少漲跌？', ids: ['riskquiz', 'riskprofile'] },
   { step: 2, title: '認識市場', question: '股票怎麼買？有哪些商品？', ids: ['basics', 'products', 'etf101'] },
-  { step: 3, title: '為什麼長期投資', question: '為什麼要持續投入？跌了怎麼辦？', ids: ['dca'] },
+  { step: 3, title: '為什麼長期投資', question: '為什麼要持續投入？跌了怎麼辦？', ids: ['dca', 'crash'] },
   { step: 4, title: '正2 進階', question: '正2 是什麼、怎麼用？', ids: ['zr101', 'decay', 'recover'] },
   { step: 5, title: '借錢投資（最進階）', question: '要不要借錢買？', ids: ['loans'] }
 ]);

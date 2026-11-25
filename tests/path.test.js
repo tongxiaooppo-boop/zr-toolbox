@@ -8,7 +8,7 @@ test('path: 5 steps in order, every id exists, no duplicates', () => {
   const ids = PATH.flatMap(p => p.ids);
   assert.equal(new Set(ids).size, ids.length);
   for (const id of ids) assert.ok(TOOLS.some(t => t.id === id), id);
-  assert.deepEqual(ids, ['riskquiz', 'riskprofile', 'basics', 'products', 'etf101', 'dca', 'zr101', 'decay', 'recover', 'loans']);
+  assert.deepEqual(ids, ['riskquiz', 'riskprofile', 'basics', 'products', 'etf101', 'dca', 'crash', 'zr101', 'decay', 'recover', 'loans']);
 });
 
 test('path: pathPlace gives step and next ready tool, skipping planned ones', () => {
@@ -17,7 +17,10 @@ test('path: pathPlace gives step and next ready tool, skipping planned ones', ()
   assert.equal(quiz.step, 1); assert.equal(quiz.title, '認識自己');
   assert.equal(quiz.next.id, rp.status === 'ready' ? 'riskprofile' : 'basics'); // ㉗ 做好前跳過
   assert.equal(pathPlace('etf101').next.id, 'dca');    // 第 3 步：⑦ 持續投入（2026-11-25 加）
-  assert.equal(pathPlace('dca').next.id, 'zr101');
+  const crash = TOOLS.find(t => t.id === 'crash');
+  assert.equal(pathPlace('dca').next.id, crash.status === 'ready' ? 'crash' : 'zr101'); // ㉙ 股災與心態（2026-11-25 加）
+  assert.equal(pathPlace('crash').step, 3);
+  if (crash.status === 'ready') assert.equal(pathPlace('crash').next.id, 'zr101');
   assert.equal(pathPlace('decay').next.id, TOOLS.find(t => t.id === 'recover').status === 'ready' ? 'recover' : 'loans'); // ㉕ 做好前跳過
   assert.equal(pathPlace('loans').step, 5);
   assert.equal(pathPlace('loans').next, null);
