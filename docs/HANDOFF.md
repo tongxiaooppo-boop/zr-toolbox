@@ -3,7 +3,7 @@
 ## 2026-11-25 進度（最新）
 
 - **⚠ 下一階段開頭先做（使用者 2026-11-25 收尾時交代）**：
-  1. **細審 Codex（sol）科普梳理＋㉗ 那一輪**（`collab/from-codex-path.md`）：已隨收尾 commit，Opus 只跑過 tests 177／smoke 27 全過，並看了 decay／loans／zr101 三頁只加 pathNav；**還沒細看**：首頁路線區塊、㉗ 頁文字是否逐字照 `js/data/riskprofile.js`、basics／glossary 互連、etf101／products／riskquiz 的改動、CSS。Codex 為過 registry 測試建了 `img/riskprofile/`（Opus 補 `.gitkeep`；㉗ 共用 `img/riskquiz/buckets.svg`），要決定是否改 registry 規則接受共用圖。
+  1. ✅ **Codex（sol）科普梳理＋㉗ 已細審（2026-11-25）**：㉗ 頁逐項符合 `to-codex-riskprofile.md`、`js/data/riskprofile.js` 未被改；首頁路線、8 頁 pathNav、兩辭典互連、CSS 檔尾皆照任務書。唯一修正：basics 頁有新舊兩段都連辭典（任務書「只加一段」所致），Opus 刪掉舊段。registry 圖片資料夾規則不改，㉗ 用 `img/riskprofile/.gitkeep` 佔位、共用 `img/riskquiz/buckets.svg`。tests 177、smoke 27 全過。
   2. ㉘「年初 100 萬，現在變多少」（Sonnet 做頁、Opus 寫 `js/core/backtest.js`＋`scripts/backtest-update.mjs`＋`tests/backtest.test.js`）：已驗收 tests／smoke、無「回測」字樣、SVG 無數字。頁面用語不准用「回測」（使用者要求）。**每月底使用者說「更新年初 100 萬」→ `node scripts/backtest-update.mjs` → gen-precache → test → commit**。
   3. 使用者問「寫成 py、網頁觸發 ok 嗎？」待答：Opus 建議**不改 Python**（計算邏輯已是 JS 且有測試，再寫一份 py 會兩套不一致）；「網頁觸發」可用 **GitHub Actions `workflow_dispatch`**（repo 的 Actions 頁按 Run workflow，手機也能按；跑 node 更新腳本並 commit，Pages 自動更新）。網站本身放按鈕直接觸發需要 token，靜態網站不能安全保存，不做。待使用者決定。
   4. 之後照原順序：㉕ 正2 回本計算機 → 持續投入計算機（含複利科普）→ 股災與心態頁，做好的加進 `PATH`。
