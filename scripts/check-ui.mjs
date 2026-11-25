@@ -29,6 +29,8 @@ if (/#2563eb|#6ea0ff/i.test(css)) fail('還留著舊藍色 accent');
 const home = readFileSync('js/pages/home.js', 'utf8');
 if (!home.includes('img/home/hero.webp')) fail('首頁要放 img/home/hero.webp');
 if (/class: 'no'/.test(home)) fail('首頁卡片不顯示編號');
+for (const w of ['持續投資', '感謝過去的自己', '日富一日，年富一年']) if (!home.includes(w)) fail('首頁標語缺「' + w + '」');
+if (!/\.slogan/.test(css)) fail('要有 .slogan 樣式');
 for (const [p, f] of [['js/pages/dca.js', 'img/dca/joy.webp'], ['js/pages/retire.js', 'img/retire/joy.webp']]) {
   if (!readFileSync(p, 'utf8').includes(f)) fail(p + ' 要放 ' + f);
 }

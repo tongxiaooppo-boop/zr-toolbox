@@ -54,6 +54,14 @@
 - `js/pages/dca.js`、`js/pages/retire.js`：在 `toolHeader(...)` 的下一個位置放 `figure({ src: '../img/dca/joy.webp' 或 '../img/retire/joy.webp', alt: '<一句描述>', caption: '示意圖：投資有賺有賠。' })`。其餘內容不動。
 - 新增圖片後跑 `node scripts/gen-precache.mjs` 更新 `sw.js`。
 
+## 5. 標語（使用者 2026-11-25 指定）
+
+- `js/pages/home.js` 頂端加常數（文字照抄、順序照排）：
+  `const SLOGANS = ['持續投資', '感謝過去的自己', '日富一日，年富一年', '時間是長期投資人的朋友', '慢慢來，比較快'];`
+- 首頁在 `.site-title` 之後、`.site-sub` 之前放 `h('p', { class: 'slogan' }, SLOGANS[new Date().getDate() % SLOGANS.length])`（每天換一句，不用亂數，同一天重整看到同一句）。
+- `css/app.css` 新增 `.slogan`：`font-size:20px;font-weight:900;color:var(--brand);margin:4px 0 8px`。
+- 標語旁**不要**加數字或報酬率；hero 的 figcaption（投資有賺有賠…）照第 4 節保留，不能拿掉。
+
 ## PROOF_CMD
 
 ```
