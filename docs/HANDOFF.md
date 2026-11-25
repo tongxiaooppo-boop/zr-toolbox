@@ -5,7 +5,7 @@
 - **⚠ 下一階段開頭先做（使用者 2026-11-25 收尾時交代）**：
   1. ✅ **Codex（sol）科普梳理＋㉗ 已細審（2026-11-25）**：㉗ 頁逐項符合 `to-codex-riskprofile.md`、`js/data/riskprofile.js` 未被改；首頁路線、8 頁 pathNav、兩辭典互連、CSS 檔尾皆照任務書。唯一修正：basics 頁有新舊兩段都連辭典（任務書「只加一段」所致），Opus 刪掉舊段。registry 圖片資料夾規則不改，㉗ 用 `img/riskprofile/.gitkeep` 佔位、共用 `img/riskquiz/buckets.svg`。tests 177、smoke 27 全過。
   2. ㉘「年初 100 萬，現在變多少」（Sonnet 做頁、Opus 寫 `js/core/backtest.js`＋`scripts/backtest-update.mjs`＋`tests/backtest.test.js`）：已驗收 tests／smoke、無「回測」字樣、SVG 無數字。頁面用語不准用「回測」（使用者要求）。**每月底使用者說「更新年初 100 萬」→ `node scripts/backtest-update.mjs` → gen-precache → test → commit**。
-  3. 使用者問「寫成 py、網頁觸發 ok 嗎？」待答：Opus 建議**不改 Python**（計算邏輯已是 JS 且有測試，再寫一份 py 會兩套不一致）；「網頁觸發」可用 **GitHub Actions `workflow_dispatch`**（repo 的 Actions 頁按 Run workflow，手機也能按；跑 node 更新腳本並 commit，Pages 自動更新）。網站本身放按鈕直接觸發需要 token，靜態網站不能安全保存，不做。待使用者決定。
+  3. 使用者問「寫成 py、網頁觸發 ok 嗎？」待答：Opus 建議**不改 Python**（計算邏輯已是 JS 且有測試，再寫一份 py 會兩套不一致）；「網頁觸發」可用 **GitHub Actions `workflow_dispatch`**（repo 的 Actions 頁按 Run workflow，手機也能按；跑 node 更新腳本並 commit，Pages 自動更新）。網站本身放按鈕直接觸發需要 token，靜態網站不能安全保存，不做。**使用者 2026-11-25 決定：不改 py；Actions 按鈕延後，改天再做**，目前維持每月底手動跑。
   4. 之後照原順序：㉕ 正2 回本計算機 → 持續投入計算機（含複利科普）→ 股災與心態頁，做好的加進 `PATH`。
 
 - ㉖ 投資屬性測驗 core 完成（Opus，commit b96f297）：`js/core/riskquiz.js`（`QUESTIONS`、`PROFILES`、`CAPS`、`scoreQuiz`）＋`tests/riskquiz.test.js`（13 項，全套 168 全過）。門檻用 8 個人設校準：保守 10–24／穩健 25–33／成長 34–38／積極 39–50；第 8 題最高級改成「-50% 腰斬也撐得住」；正2 條件＝積極＋收入穩定（Q2≥4）＋備用金 6 個月（Q3≥4）＋能承受腰斬（Q8＝5）。編號用 ㉖（㉕ 留給回本計算機）。
