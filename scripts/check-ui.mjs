@@ -1,4 +1,4 @@
-// 驗收 UI 統一美化（Neo-brutalism；2026-11-25 v2 改喜慶紅金配色）的機械條件（Opus 寫，Codex 不准改）。用法：node scripts/check-ui.mjs
+// 驗收 UI 統一美化（Neo-brutalism；2026-11-25 v2 改穩健成長配色：深海軍藍＋暖金）的機械條件（Opus 寫，Codex 不准改）。用法：node scripts/check-ui.mjs
 import { readFileSync, readdirSync } from 'node:fs';
 
 const css = readFileSync('css/app.css', 'utf8');
@@ -7,10 +7,11 @@ let bad = 0;
 const fail = m => { console.log('FAIL ' + m); bad++; };
 const need = (re, m) => { if (!re.test(css)) fail(m); };
 
-need(/--bg:\s*#fff3e0/i, '淺色 --bg 要是 #fff3e0（暖杏）');
-need(/--accent:\s*#ffb703/i, '淺色 --accent 要是 #ffb703（金）');
-need(/--festive:\s*#d62839/i, '淺色 --festive 要是 #d62839（喜慶紅）');
-need(/--festive:\s*#ff6b6b/i, '深色 --festive 要是 #ff6b6b');
+need(/--bg:\s*#f8f5ee/i, '淺色 --bg 要是 #f8f5ee（暖米白）');
+need(/--accent:\s*#f2b134/i, '淺色 --accent 要是 #f2b134（暖金）');
+need(/--brand:\s*#1f3a68/i, '淺色 --brand 要是 #1f3a68（深海軍藍）');
+need(/--brand:\s*#8fb4ff/i, '深色 --brand 要是 #8fb4ff');
+if (/--festive|#d62839/i.test(css)) fail('不要過年紅金（--festive／#d62839）');
 need(/\.hero\b/, '要有 .hero（首頁主圖）樣式');
 if (/#ff5a36|#ff7a59/i.test(css)) fail('還留著舊橘紅 accent #ff5a36／#ff7a59');
 need(/--shadow:\s*5px 5px 0/, '要有 --shadow: 5px 5px 0 …');
