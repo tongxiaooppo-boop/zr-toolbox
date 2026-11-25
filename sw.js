@@ -1,7 +1,7 @@
 // Service worker：安裝時把整站存進手機（全部離線可用、不靠 GitHub）；平常先連網、連不上才用快取（network-first）。
 // VERSION 與 PRECACHE 由 scripts/gen-precache.mjs 產生，改了網站任何檔案後要重跑（tests/pwa.test.js 會檢查）。
 // 網站一改 VERSION 就變 → 手機下次連網時裝新版 service worker、重新下載整份；連不上就繼續用手機裡那份。
-const VERSION = 'd5b2c2f37390';
+const VERSION = 'a9691c627774';
 const CACHE = 'zr-toolbox-' + VERSION;
 const PRECACHE = ["./",
   "css/app.css",
@@ -61,6 +61,7 @@ const PRECACHE = ["./",
   "img/retire/comic.webp",
   "img/retire/joy.webp",
   "img/retire/step3.webp",
+  "img/riskquiz/buckets.svg",
   "img/trigger5050/comic.webp",
   "img/trigger5050/split-5050.svg",
   "img/trigger5050/step2.webp",
@@ -124,6 +125,7 @@ const PRECACHE = ["./",
   "js/pages/products.js",
   "js/pages/rebalance.js",
   "js/pages/retire.js",
+  "js/pages/riskquiz.js",
   "js/pages/token.js",
   "js/pages/trigger5050.js",
   "js/pages/valuation.js",
@@ -153,6 +155,7 @@ const PRECACHE = ["./",
   "tools/products.html",
   "tools/rebalance.html",
   "tools/retire.html",
+  "tools/riskquiz.html",
   "tools/token.html",
   "tools/trigger5050.html",
   "tools/valuation.html",
