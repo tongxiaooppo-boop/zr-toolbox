@@ -1,5 +1,12 @@
 # zr-toolbox 交接檔
 
+## 2026-11-26 晚：手機寬表全部不用橫拉
+
+- 無頭 Chrome 量 360／390 寬所有頁的 table（表格寬 vs 外框寬）：㉚ 每年報酬兩表 360 寬超出 27px；㉙ 股災、⑳ 定期配比、借錢管道（900／2200px）與 ⑦ 三張表要橫拉。
+- 改法：通用 `.card-table`（`css/app.css` 檔尾，≤600px 一列一張卡、`td[data-label]` 當小標、第一格當卡片標題），套到 crash、zr101、loans、dca（`table()` 自動帶 data-label）；電腦版不變。crash／loans 的「表格可以左右滑」改成「電腦上可以左右滑，手機上…一張卡」。㉚ 每年報酬表格子不寫 %（標題加「（%）」）、`#lump/#yearly` 限定縮 padding。
+- 結果：360、390 寬全站 0 張表超出；tests 203、smoke 30。
+- 前一段待辦 ③ 已完成。
+
 ## 2026-11-26 下午進度（最新）
 
 - **theme-color 改深海軍藍 `#1f3a68`**（index、manifest、29 個工具頁；calc-guide.html 本來就沒有這個 meta）。

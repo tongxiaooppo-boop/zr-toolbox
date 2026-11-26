@@ -23,9 +23,9 @@ function params(s) {
 
 function table(headers, rows) {
   return h('div', { class: 'dca-table-scroll', tabindex: '0', role: 'region', 'aria-label': headers.join('、') },
-    h('table', { class: 'trade-table' },
+    h('table', { class: 'trade-table card-table' },
       h('thead', {}, h('tr', {}, headers.map(t => h('th', { scope: 'col' }, t)))),
-      h('tbody', {}, rows.map(row => h('tr', {}, row.map(t => h('td', {}, t)))))));
+      h('tbody', {}, rows.map(row => h('tr', {}, row.map((t, i) => h('td', i ? { 'data-label': headers[i] } : {}, t)))))));
 }
 
 function stageFields(s) {

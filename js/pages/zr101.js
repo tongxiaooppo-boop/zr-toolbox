@@ -10,14 +10,15 @@ const links = ids => h('p', { class: 'related' }, '接著算：', ids.map((id, i
   const { no, title } = TOOLS.find(t => t.id === id);
   return [i ? '、' : '', h('a', { href: id + '.html' }, no + ' ' + title)];
 }));
+const MIX_COLS = ['變動後 原型／正二／現金（萬）', '合計（萬）', '配回目標（萬）', '要做的事（萬）'];
 const periodic = () => [
   h('h4', {}, '大仁 50/50 怎麼配回'), ZR_PERIODIC.examples.map(text => h('p', {}, text)),
   h('h4', {}, '四種定期配比'), h('p', {}, ZR_PERIODIC.weights), h('p', {}, ZR_PERIODIC.multiples),
   h('p', {}, ZR_PERIODIC.assumption),
   h('div', { class: 'compare-wrap', tabindex: '0', role: 'region', 'aria-label': '定期配比情境比較，可橫向捲動' },
-    h('table', {}, h('caption', {}, '定期配比的假設例子'),
-      h('thead', {}, h('tr', {}, ['配置', '變動後 原型／正二／現金（萬）', '合計（萬）', '配回目標（萬）', '要做的事（萬）'].map(label => h('th', { scope: 'col' }, label)))),
-      h('tbody', {}, ZR_MIXES.map(m => h('tr', {}, h('th', { scope: 'row' }, m.name), [m.after, m.total, m.target, m.action].map(value => h('td', {}, value)))))))
+    h('table', { class: 'card-table' }, h('caption', {}, '定期配比的假設例子'),
+      h('thead', {}, h('tr', {}, ['配置', ...MIX_COLS].map(label => h('th', { scope: 'col' }, label)))),
+      h('tbody', {}, ZR_MIXES.map(m => h('tr', {}, h('th', { scope: 'row' }, m.name), [m.after, m.total, m.target, m.action].map((value, i) => h('td', { 'data-label': MIX_COLS[i] }, value)))))))
 ];
 const dajen = () => [
   h('dl', {}, [['期間', DAJEN.period], ['起始', DAJEN.start], ['規則', DAJEN.rule], ['配回日期', DAJEN.dates.join('、')], ['50/50 期末', DAJEN.result5050], ['0050 期末', DAJEN.result0050]].map(([label, value]) => [h('dt', {}, label), h('dd', {}, value)])),

@@ -8,6 +8,8 @@ const ALT = '示意折線：從「投入」起點往上到「最高點」，再�
 const SHORT = { allin: '全押', dajen: '大仁', q5050: '季配', q532: '532', h0050: '0050' };
 const md = d => d.slice(5, 7) + '/' + d.slice(8, 10);
 const signPct = n => (n >= 0 ? '+' : '−') + fmtPct(Math.abs(n));
+// 每年報酬表的格子不寫 %（標題已註明單位），手機上才放得下 5 欄
+const signNum = n => signPct(n).replace('%', '');
 const absPct = n => '−' + fmtPct(Math.abs(n));
 const wrap = (label, table) => h('div', { class: 'compare-wrap', tabindex: '0', role: 'region', 'aria-label': label }, table);
 const th = text => h('th', { scope: 'col' }, text);
@@ -68,7 +70,7 @@ for (let i = 0; i < five.length; i++) for (let j = i + 1; j < five.length; j++) 
 // 每年報酬表：每列最高加粗
 const retRow = (head, rets) => {
   const mx = Math.max(...rets);
-  return h('tr', {}, h('th', { scope: 'row' }, head), rets.map(r => h('td', {}, r === mx ? h('strong', {}, signPct(r)) : signPct(r))));
+  return h('tr', {}, h('th', { scope: 'row' }, head), rets.map(r => h('td', {}, r === mx ? h('strong', {}, signNum(r)) : signNum(r))));
 };
 const legendText = S.map(s => SHORT[s.id] + '＝' + s.name).join('；') + '。';
 
@@ -108,13 +110,13 @@ document.getElementById('app').append(
         cell(5, s.trades === 0 ? '不動' : s.trades)))))),
     h('p', {}, `正2 三種五五類做法裡，年化最接近的兩種是 ${closest[0].name} 和 ${closest[1].name}，只差 ${(gap * 100).toFixed(1)} 個百分點。`),
     h('h3', {}, '每年報酬'),
-    wrap('每年報酬表', h('table', { class: 'yc-table yc-month' }, h('caption', {}, '上市那天投入後，各做法每一年的報酬'),
+    wrap('每年報酬表', h('table', { class: 'yc-table yc-month' }, h('caption', {}, '上市那天投入後，各做法每一年的報酬（%）'),
       h('thead', {}, h('tr', {}, th('年'), S.map(s => th(SHORT[s.id])))),
       h('tbody', {}, yearsMeta.map((y, i) => retRow(yearLabel(y.year), S.map(s => s.years[i])))))),
     h('p', { class: 'muted yc-legend' }, legendText)),
   h('section', { class: 'card', id: 'yearly' }, h('h2', {}, '每年年初投入 100 萬，到年底變多少'),
     h('p', {}, `每一年第一個交易日各拿一筆新的 100 萬，照同一種做法放到那年最後一個交易日；每年分開算，大仁的基準每年重新開始。第一年從上市日開始，今年算到 ${L.asOf}。`),
-    wrap('每年年初投入的報酬表', h('table', { class: 'yc-table yc-month' }, h('caption', {}, '每年年初投入 100 萬，到年底的報酬'),
+    wrap('每年年初投入的報酬表', h('table', { class: 'yc-table yc-month' }, h('caption', {}, '每年年初投入 100 萬，到年底的報酬（%）'),
       h('thead', {}, h('tr', {}, th('年'), S.map(s => th(SHORT[s.id])))),
       h('tbody', {}, L.yearly.map(y => retRow(yearLabel(y.year), ids.map(id => get(y, id).ret))), winRow))),
     h('p', { class: 'muted yc-legend' }, legendText)),

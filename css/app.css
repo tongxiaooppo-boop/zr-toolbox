@@ -332,3 +332,22 @@ details.group .shortcuts{margin-top:4px}
   .compare-wrap .yc-month th[scope=row]{min-width:3.4em}
 }
 .yc-part{display:block;font-size:11px;font-weight:400;white-space:nowrap}
+/* 手機寬表改卡片（crash、zr101、loans、dca）：一列一張卡，td 用 data-label 當小標；第一格當卡片標題 */
+@media (max-width:600px){
+  .compare-wrap:has(.card-table){overflow-x:visible}
+  .card-table,.compare-wrap .card-table,.article .loan-table.card-table{display:block;min-width:0;border:0}
+  .card-table thead{display:none}
+  .card-table tbody,.card-table caption{display:block}
+  .card-table tr{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;padding:10px 12px;border-bottom:2px solid var(--line)}
+  .card-table tr:last-child{border-bottom:0}
+  .card-table :is(th,td){display:block;position:static;min-width:0;max-width:none;padding:0;border:0;text-align:left;white-space:normal;overflow-wrap:anywhere}
+  .card-table tr > :first-child{grid-column:1/-1;background:none;color:var(--text);font-size:16px;font-weight:900}
+  .card-table td::before{content:attr(data-label);display:block;font-size:12px;color:var(--muted);font-weight:400}
+  .compare-wrap .card-table td{grid-column:1/-1}
+  .compare-wrap .card-table :is(th,td){border:0}
+  .dca-table-scroll .trade-table.card-table{white-space:normal}
+  /* ㉚ 每年報酬表再縮一點，360 寬也放得下 */
+  .compare-wrap .yc-month{font-variant-numeric:tabular-nums}
+  :is(#lump,#yearly) .yc-month :is(th,td){padding:5px 3px}
+  :is(#lump,#yearly) .yc-month th[scope=row]{min-width:3em}
+}
