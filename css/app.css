@@ -351,3 +351,15 @@ details.group .shortcuts{margin-top:4px}
   :is(#lump,#yearly) .yc-month :is(th,td){padding:5px 3px}
   :is(#lump,#yearly) .yc-month th[scope=row]{min-width:3em}
 }
+
+/* 三桶壓力測試 */
+.stress { min-width: 0; }
+.stress-from { display: block; font-size: .8em; color: var(--muted); }
+.stress-proxy { display: inline-block; margin-left: .35em; padding: 0 .3em; border: 1px solid currentColor; border-radius: .3em; font-size: .75em; color: var(--warn); }
+.stress-layout { min-width: 0; }
+.stress-layout label { min-width: 0; }
+.stress-layout span, .stress-body { overflow-wrap: anywhere; }
+.stress-table-scroll { max-width: 100%; overflow-x: auto; }
+@media (max-width: 600px) {
+  .stress-layout { display: grid; grid-template-columns: minmax(0, 1fr); }
+}

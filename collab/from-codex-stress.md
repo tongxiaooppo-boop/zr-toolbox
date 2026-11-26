@@ -1,0 +1,25 @@
+# 三桶壓力測試執行回報
+
+- 完成項（對應第 1–4 節）
+  - 第 1 節：在指定兩段之間插入 `stressSection(p, s.a[7])`，靜態匯入資料、核心計算與百分比格式函式。
+  - 第 2 節：新增預設 B 的 A／B／C 商品布局、兩張歷史說明卡、第 8 題對照、8 次股災表格與四點說明。文案依任務檔，跌幅與回本資料均使用核心回傳值；切換時只重畫 stress-body 的子節點。
+  - 第 3 節：參考資料尾端新增 FRED DEXTAUS 與 FinMind。
+  - 第 4 節：僅在 CSS 檔尾追加本功能 class，包含起算日小字、代替標籤、文字換行、表格容器與手機布局單欄。
+  - 已執行 `node scripts/gen-precache.mjs` 重產 sw.js，未 commit。
+- 異動檔案清單
+  - `js/pages/riskquiz.js`
+  - `css/app.css`（僅檔尾追加）
+  - `sw.js`（腳本重產）
+  - `collab/from-codex-stress.md`
+- PROOF_CMD 輸出的 pass／fail 數字
+  - `npm.cmd test`：pass 212、fail 0。
+  - `node --check js/pages/riskquiz.js` 與 `git diff --check` 通過。
+  - 額外以記憶體中的簡化 h／explain 節點執行實際 stressSection：A／C／B 切換各有 8 列，A／C 表格內容與 B 不同，切回 B 恢復原內容，section 與 stress-body 本身保持不變。此項是程式驗證，不能替代瀏覽器驗收。
+- 範例答案在 B 布局下
+  - 比例：穩健 20%／成長 30%／積極 50%；第 8 題分數 3。
+  - 2008 組合跌幅：-59.8%。
+  - 2008 卡片包含「積極桶用的是模擬的正2。」與延後起算說明。
+  - 2020 起最深那次：2020 新冠疫情；組合跌幅 -36.7%。
+  - 第 8 題對照的 value 文字：你能接受 -20%，過去最深 -59.8%。
+- 需要 Opus 決定的事
+  - 瀏覽器與 390px 寬度視覺驗收尚未完成。瀏覽器連接工具回報 `The browser access host is unavailable`；改選現有 Chrome 視窗時，自動審核拒絕，理由是會自動讀取與本次任務無關、可能私密的 Cline Dashboard 工作階段。未繞過拒絕，也未操作該視窗。需取得使用者批准操作該視窗後，補驗「帶入範例」、布局切換與 390px 無水平捲動。
