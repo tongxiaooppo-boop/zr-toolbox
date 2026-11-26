@@ -47,19 +47,19 @@ const steps = [
       s.exDone = document.getElementById('exdone').value;
       s.prevClose = num('prevclose'); s.cash = num('cash'); s.stockDiv = num('stockdiv'); s.par = num('par');
       if (!(s.prevClose > 0)) throw new Error('除權息前收盤價要大於 0，例：50。');
-      if (!(s.cash >= 0) || !(s.stockDiv >= 0)) throw new Error('股利不能是負的，沒有就填 0。');
-      if (s.cash === 0 && s.stockDiv === 0) throw new Error('現金股利和股票股利至少填一個。');
+      if (!(s.cash >= 0) || !(s.stockDiv >= 0)) throw new Error('股利不會是負的，沒有就填 0。');
+      if (s.cash === 0 && s.stockDiv === 0) throw new Error('現金股利和股票股利，至少要填一個。');
       if (!(s.par > 0)) throw new Error('面額要大於 0，多數公司是 10 元。');
     }
   },
   {
     title: '健保身分',
-    hint: '股利一次領到 2 萬元以上，會先被扣二代健保補充保費。',
+    hint: '股利一次領到 2 萬元以上，會先扣二代健保補充保費。',
     about: '這一步決定要不要扣補充保費。大多數人選「一般」。',
     body: s => [
       withHelp(selectField({ id: 'identity', label: '健保身分', termId: 'nhi-premium', plain: '不確定就選一般',
         options: [{ value: 'general', label: '一般（受僱、自己投保、依附眷屬）' }, { value: 'exempt', label: '符合免扣資格（例：中低收入戶，依健保署規定）' }], value: s.identity || 'general' }),
-      { text: ['一般身分：單次股利所得達 20,000 元，全額 × 2.11%，由發股利的公司直接扣。', '以雇主或自營業主身分投保的人另有扣除規則，這裡沒有算，請以健保署為準。'] })],
+      { text: ['一般身分：單次股利所得達 20,000 元，全額 × 2.11%，由發股利的公司直接扣。', '以雇主或自營業主身分投保的人，扣法不一樣，這裡沒有算，要問健保署。'] })],
     read: s => { s.identity = document.getElementById('identity').value; }
   }
 ];
@@ -80,17 +80,17 @@ function result(s) {
     how: `${name}：每股 ${s.cash} 元 × ${shares(x.shares)}＝${fmtMoney(r.cashTotal)}（元以下捨去）。`,
     means: '發放日以公告為準，匯進你的交割帳戶。' }));
   if (s.stockDiv !== 0) out.push(explain({ label: '配股', value: shares(r.newShares),
-    how: `配股比例＝${s.stockDiv} ÷ 面額 ${s.par}＝${fmtPct(r.stockRate, 2)}；${shares(x.shares)} × 配股比例＝${r.newSharesExact.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} 股。` + (r.newSharesExact !== r.newShares ? '不足 1 股的部分依公司公告處理（通常折發現金）。' : ''),
+    how: `配股比例＝${s.stockDiv} ÷ 面額 ${s.par}＝${fmtPct(r.stockRate, 2)}；${shares(x.shares)} × 配股比例＝${r.newSharesExact.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} 股。` + (r.newSharesExact !== r.newShares ? '不到 1 股的部分，照公司公告處理（通常折成現金發給你）。' : ''),
     means: `除權後你有 ${shares(r.sharesAfter)}。` }));
   out.push(
     explain({ label: '二代健保補充保費', value: fmtMoney(r.premium), tone: r.premium > 0 ? 'warn' : undefined,
       how: premiumHow, means: '由發股利的公司直接從現金股利扣掉。' }),
     explain({ label: '實領現金', value: fmtMoney(r.netCash), tone: 'ok',
       how: `現金股利 ${fmtMoney(r.cashTotal)} − 補充保費 ${fmtMoney(r.premium)}。`,
-      means: '這是會進帳的錢；所得稅另外在報稅時算（見下方注意）。' }),
+      means: '這是會進你帳戶的錢。所得稅要等報稅時另外算（看下方說明）。' }),
     explain({ label: '除權息參考價', value: `${refPrice} 元`,
       how: s.stockDiv === 0 ? `${s.prevClose} − ${s.cash}。` : `（${s.prevClose} − ${s.cash}）÷（1 ＋ ${fmtPct(r.stockRate, 2)}）。`,
-      means: '除權息當天的開盤參考，不是預測會成交在哪；實際參考價會對齊升降單位，以證交所公告為準。' }),
+      means: '這是除權息當天開盤的參考，不是預測會成交在哪。實際參考價會對齊升降單位，要看證交所公告。' }),
     explain({ label: '除權息前後總值', value: `${fmtMoney(r.valueBefore)} → ${fmtMoney(r.valueAfter)}`,
       how: `前：${shares(x.shares)} × ${s.prevClose} 元。後：${shares(r.sharesAfter)} × ${refPrice} 元 ＋ 現金股利 ${fmtMoney(r.cashTotal)}。`,
       means: '總值幾乎不變：股利是從股價搬到你口袋，不是多賺的。' + (r.premium > 0 ? `扣掉補充保費 ${fmtMoney(r.premium)}，反而少一點。` : '') }));
@@ -107,8 +107,8 @@ function result(s) {
     means: `除權息前是 ${signed(r.profitBefore)}，差的就是補充保費。手續費、證交稅沒算，買賣成本請用 ⑨。` }));
   out.push(h('div', { class: 'note' }, [
     '所得稅沒有算：股利所得可選合併計稅（8.5% 可抵減，每戶上限 8 萬元）或分開計稅 28%，要看你全年所得。',
-    'ETF 的收益分配不一定全是股利所得，補充保費與所得稅的計算以配息通知為準；這裡用全額估，是上限。',
-    '現金增資、減資、分割、匯費等沒有算；實際金額以公司公告與券商入帳為準。'
+    'ETF 的收益分配不一定全是股利所得，補充保費和所得稅要看配息通知。這裡用全額估，所以是上限。',
+    '現金增資、減資、分割、匯費這些沒有算。實際金額要看公司公告和券商入帳。'
   ].map(n => h('p', {}, n))));
   return out;
 }
@@ -122,6 +122,6 @@ document.getElementById('app').append(
   h('section', { class: 'card' }, h('h2', {}, '怎麼讀'),
     figure({ src: '../img/dividend/comic.webp', alt: '四格漫畫：一、除權息前一天，小安有某檔股票 10,000 股 × 50 元＝500,000 元。二、股利來了：現金股利 2.4 元 × 10,000 股＝24,000 元，股票股利 0.5 元多 500 股，健保補充保費 −612 元。三、除權息當天參考價 45.33 元，10,500 股 × 45.33 元約 476,000 元，加現金 24,000 元還是 500,000 元。四、老師說股價要從 45.33 元漲 10.29% 回到 50 元才叫填權息；股利是從股價搬到你口袋，股價漲回來才算真的賺到。補充保費＝（現金 24,000＋股票股利面額 5,000）× 2.11%。' }),
     h('p', {}, '發股利那天叫除權息：股價先扣掉發出去的股利，所以你的總值幾乎不變。'),
-    h('p', {}, '股利要等股價漲回除權息前的價格（填息），才算真的賺到；一直沒漲回來叫貼息，領了股利還是虧。'),
+    h('p', {}, '股價要漲回除權息前的價格（填息），股利才算真的賺到。一直漲不回來叫貼息，領了股利還是虧。'),
     h('p', {}, '單次股利達 2 萬元會先扣 2.11% 補充保費；殖利率比較要用同一種分母（現價或你的成本）。')),
   disclaimer('general'));

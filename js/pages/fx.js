@@ -23,13 +23,13 @@ async function fillRates(currency, kind, date, buyInput, sellInput, status) {
     const r = await fetchFxRate(currency, { date, token: getToken() });
     if (requests.get(status) !== seq || !status.isConnected) return;
     if (r.clearToken) setToken('');
-    if (!r.ok) { status.textContent = r.message + (r.action === 'show-quota-guide' ? ' 申請方式見下方 token 說明。' : ''); return; }
+    if (!r.ok) { status.textContent = r.message + (r.action === 'show-quota-guide' ? ' 怎麼申請，看下方 token 說明。' : ''); return; }
     const pair = ratePair(r.row, kind);
     if (!pair) { status.textContent = `臺灣銀行 ${r.date} 沒有${kind === 'cash' ? '現鈔' : '即期'}報價，請自己填。`; return; }
     buyInput.value = pair.buy; sellInput.value = pair.sell;
     status.textContent = `臺灣銀行 ${r.date} 牌告${kind === 'cash' ? '（現鈔）' : '（即期）'}：買入 ${pair.buy}、賣出 ${pair.sell}。你的銀行可能不同，可以改。`;
   } catch {
-    if (requests.get(status) === seq && status.isConnected) status.textContent = '查詢失敗，請稍後再試，或自己填匯率。';
+    if (requests.get(status) === seq && status.isConnected) status.textContent = '查詢失敗了，晚點再試，或自己填匯率。';
   }
 }
 function protectManual(status, inputs) {
@@ -68,7 +68,7 @@ const steps = [
       if (currency !== s.currency || kind !== s.kind) { s.nowBuy = NaN; s.nowSell = NaN; }
       s.currency = currency; s.kind = kind; s.dateIn = document.getElementById('dateIn').value;
       s.twdIn = num('twdIn'); s.inSell = num('inSell'); s.inBuy = num('inBuy'); s.feeIn = num('feeIn');
-      if ([s.twdIn, s.inSell, s.inBuy].some(blank)) throw new Error('請填付出的台幣和兩個匯率。');
+      if ([s.twdIn, s.inSell, s.inBuy].some(blank)) throw new Error('付出的台幣和兩個匯率都要填。');
       fxPlan(params({ ...s, nowBuy: s.inBuy, nowSell: s.inSell, foreignNow: NaN }));
     }
   },
@@ -91,7 +91,7 @@ const steps = [
     },
     read: s => {
       s.nowBuy = num('nowBuy'); s.nowSell = num('nowSell'); s.feeOut = num('feeOut');
-      if ([s.nowBuy, s.nowSell].some(blank)) throw new Error('請填現在的兩個匯率。');
+      if ([s.nowBuy, s.nowSell].some(blank)) throw new Error('現在的兩個匯率都要填。');
       fxPlan(params(s));
     }
   }
@@ -112,7 +112,7 @@ function result(s) {
     h('p', { class: 'note' }, '中間價＝(銀行買入＋銀行賣出) ÷ 2，用來把匯率的漲跌和銀行的價差分開。'),
     explain({ label: '換完馬上換回會少', value: fmtPct(r.spreadPctIn, 2), tone: 'warn', how: '(賣出 ' + s.inSell + ' − 買入 ' + s.inBuy + ') ÷ 賣出 ' + s.inSell + '。', means: '只換匯、什麼都不做的成本，還沒算手續費。' + (s.kind === 'cash' ? '現鈔的價差比即期大。' : '') })];
   if (r.breakEvenBuy !== null) out.push(explain({ label: '不虧的匯率', value: rate4(r.breakEvenBuy), tone: s.nowBuy >= r.breakEvenBuy ? 'ok' : 'warn', how: '(付出 ' + fmtMoney(s.twdIn) + ' ＋ 換回手續費 ' + fmtMoney(params(s).feeOut) + ') ÷ 現在外幣 ' + fx2(r.foreignNow) + '。', means: '銀行買入匯率要高於這個，換回台幣才不虧；現在是 ' + s.nowBuy + '。' }));
-  out.push(h('p', { class: 'note' }, '匯率是臺灣銀行牌告（經 FinMind）或你填的數字，實際以你的銀行成交為準；沒算海外股票的稅（例：美股股利預扣）和券商手續費。'));
+  out.push(h('p', { class: 'note' }, '匯率是臺灣銀行牌告（經 FinMind）或你填的數字，實際要看你的銀行怎麼成交。海外股票的稅（例：美股股利預扣）和券商手續費，這裡沒算。'));
   return out;
 }
 const example = { currency: 'USD', kind: 'spot', dateIn: '', twdIn: 330000, inBuy: 32.9, inSell: 33, feeIn: NaN, foreignNow: 11000, nowBuy: 31.4, nowSell: 31.5, feeOut: NaN };
@@ -120,5 +120,5 @@ document.getElementById('app').append(toolHeader(tool), wizard({ steps, result, 
   h('section', { class: 'card' }, h('h2', {}, '怎麼讀'),
     figure({ src: '../img/fx/comic.webp', alt: '四格漫畫：一、換美元去投資。小安拿著 330,000 元台幣；銀行賣出 33.0｜銀行買入 32.9；換到 10,000 美元。二、一年後漲了 10%。錢袋變成 11,000 美元，小安說：賺 10% 了！三、換回台幣。銀行賣出 31.5｜銀行買入 31.4；換回 345,400 元。小安問：怎麼只賺 4.7%？四、錢去哪了。股票漲 ＋32,950；美元變便宜 −16,500；換匯價差 −1,050；合計 ＋15,400。匯率是假設的例子，不是預測。' }),
     h('p', {}, '投資海外要換兩次匯：台幣換外幣時用銀行賣出匯率（比較貴），換回台幣時用銀行買入匯率（比較便宜），中間差的就是銀行的價差。'),
-    h('p', {}, '外幣資產漲了，換回台幣不一定賺一樣多：外幣變便宜（台幣升值）會吃掉一部分報酬，外幣變貴則會多賺。'),
+    h('p', {}, '外幣資產漲了，換回台幣不一定賺一樣多。外幣變便宜（台幣升值），會吃掉一部分報酬；外幣變貴，反而多賺。'),
     h('p', {}, '這裡把台幣損益拆成四塊：資產漲跌、匯率變動、兩次換匯價差、手續費，加起來剛好等於總損益。')), disclaimer('general'));

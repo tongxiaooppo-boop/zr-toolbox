@@ -37,18 +37,18 @@ const steps = [
   },
   {
     title: '商品類型與券商費率',
-    hint: '商品類型已經依代號猜好，請確認。折扣和最低手續費看券商 App 的「手續費設定」或開戶時的說明。',
+    hint: '商品類型已經照代號幫你猜好了，看一下對不對。折扣和最低手續費看券商 App 的「手續費設定」或開戶時的說明。',
     about: '這一步決定「被收多少費用」。手續費給券商、買賣都收；證交稅給政府、只有賣出收。',
     figure: { src: '../img/cost/step2.webp', alt: '卡通圖：一買一賣，錢被誰收走？左邊手續費給券商，買賣都收，成交金額 × 0.1425% × 折扣，2.8 折就是 0.0399%，最低收費整股常見 20 元、零股常見 1 元。右邊證交稅給政府，只有賣出才收：股票 0.3%、ETF 0.1%、股票當沖 0.15%，債券 ETF 停徵到 2026 年底。老師說：折扣只打在手續費，證交稅不會打折。' },
     body: s => [
       withHelp(selectField({ id: 'kind', label: '商品類型', termId: 'transaction-tax', plain: '影響賣出時的證交稅', options: KIND, value: s.kind || 'stock' }),
-        { text: ['代號 00 開頭的多半是 ETF（例：0050、00631L），00 開頭又以 B 結尾的是債券 ETF（例：00679B），其他是股票。', '已經幫你依代號猜好；不確定就看券商 App 上的商品名稱。'] }),
+        { text: ['代號 00 開頭的多半是 ETF（例：0050、00631L），00 開頭又以 B 結尾的是債券 ETF（例：00679B），其他是股票。', '已經照代號幫你猜好；不確定就看券商 App 上的商品名稱。'] }),
       withHelp(selectField({ id: 'day', label: '是不是當沖', plain: '同一天買進又賣出', options: DAY, value: s.dayTrade || 'no' }),
         { text: ['現股當沖＝同一個交易日先買後賣（或先賣後買）同一檔。', '股票當沖的證交稅減半為 0.15%（到 2027-12-31）；ETF 當沖還是 0.1%。'] }),
       numberInput({ id: 'discount', label: '券商手續費折扣', termId: 'broker-fee', plain: '2.8 折就填 2.8；沒打折填 10', value: s.discount ?? 10, suffix: '折',
         help: { text: ['券商說「手續費 2.8 折」就填 2.8，等於 0.1425% × 0.28 ＝ 0.0399%。', '有些券商是先收全額、月底才退回折扣（退佣）；想看當下實付就填 10。'] } }),
       numberInput({ id: 'minfee', label: '單筆最低手續費', plain: '整股常見 20 元，零股常見 1 元', value: s.minFee ?? 20, suffix: '元',
-        help: { text: ['手續費算出來比這個少，就收這個數字。', '已經依股數預填：整張填 20、零股填 1。你的券商不同就改掉。'] } })],
+        help: { text: ['手續費算出來比這個少，就收這個數字。', '已經照股數先填好：整張填 20、零股填 1。你的券商不一樣就改掉。'] } })],
     read: s => {
       s.kind = document.getElementById('kind').value; s.dayTrade = document.getElementById('day').value;
       s.discount = num('discount'); s.minFee = num('minfee');
@@ -84,10 +84,10 @@ function result(s) {
   const out = [
     explain({ label: '買入總成本', value: fmtMoney(r.buyTotal),
       how: `${name}：${x.buyPrice} 元 × ${x.shares.toLocaleString('en-US')} 股＝${yuan(r.buyAmount)}；手續費 ${feeHow(r.buyAmount, r.buyFee)}。`,
-      means: '買進時實際從帳戶付出去的錢（成交後第 2 個營業日扣款）。' }),
+      means: '買進時你實際付出去的錢（成交後第 2 個營業日扣款）。' }),
     explain({ label: '賣出實拿', value: fmtMoney(sell.net),
       how: `${s.sellPrice} 元 × ${x.shares.toLocaleString('en-US')} 股＝${yuan(sell.amount)}；扣手續費 ${feeHow(sell.amount, sell.fee)}；扣證交稅 ${yuan(sell.amount)} × ${fmtPct(r.rate, r.rate === 0.0015 ? 2 : 1)}＝${yuan(sell.tax)}。`,
-      means: '扣完費用，真正回到帳戶的錢（成交後第 2 個營業日入帳）。' }),
+      means: '扣完費用，真正進到你帳戶的錢（成交後第 2 個營業日入帳）。' }),
     explain({ label: '這筆交易賺賠', value: `${signed(r.profit)}（${fmtPct(r.profitPct, 2)}）`, tone: r.profit >= 0 ? 'ok' : 'bad',
       how: `賣出實拿 ${fmtMoney(sell.net)} − 買入總成本 ${fmtMoney(r.buyTotal)}。報酬率用買入總成本當分母。`,
       means: r.profit >= 0 ? '扣掉所有費用後真正賺到的錢。' : (s.sellPrice >= x.buyPrice ? '賣價沒比買價低，還是虧：一買一賣的費用吃掉了價差。' : '賣價比買價低，加上費用，虧得比價差多。') }),
@@ -104,7 +104,7 @@ function result(s) {
   if (dayTrade && s.kind === 'stock') notes.push(`股票現股當沖證交稅 0.15% 是減半優惠，到 ${TAX_UNTIL.dayTrade}。`);
   if (dayTrade && s.kind !== 'stock') notes.push('ETF 當沖沒有減半，證交稅還是 0.1%。');
   if (s.discount < 10) notes.push('如果你的券商是月底退佣，當下會先收全額手續費，退回的錢晚點才入帳。');
-  notes.push('股利、借券費、融資利息沒有算進來；實際金額以券商對帳單為準。');
+  notes.push('股利、借券費、融資利息沒有算進來；實際金額看券商對帳單。');
   out.push(h('div', { class: 'note' }, notes.map(n => h('p', {}, n))));
   return out;
 }

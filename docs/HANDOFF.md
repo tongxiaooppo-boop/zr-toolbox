@@ -1,6 +1,13 @@
 # zr-toolbox 交接檔
 
-## 2026-11-26 進度（最新）
+## 2026-11-26 下午進度（最新）
+
+- **theme-color 改深海軍藍 `#1f3a68`**（index、manifest、29 個工具頁；calc-guide.html 本來就沒有這個 meta）。
+- **計算機頁面文案白話化**：護欄 `scripts/check-plain-pages.mjs`（Opus 寫：程式骨架不准變、字串內英數字／數字／算式符號不准變、alt／src／id／class 等不准改；支援 `路徑=替代檔` 自我測試）＋任務書 `collab/to-sonnet-plain-pages.md`，3 個 Sonnet 平行改 `js/pages/*.js`，30 檔 5,536 字串改寫 121 個（原文多半已白話，沒硬改）。Opus 抽讀 cost／dividend／pledge／retire／margin／exposure／trigger5050 前後對照無誤。tests 198、smoke 29 全過。
+- **App 圖示**：Codex 交 3 款候選（`docs/figures/cartoon/out/icon2-*.png`，out 目錄 gitignore；提示檔 `icon-02-投資成長.md` 未 commit），**使用者不滿意，改請 sol 自己構想**。回來後 Opus 看預覽、使用者挑，再縮 192/512 換上。
+- 115 年度基本生活費 2026-11-26 查仍未公告（往年 11/27–28），之後再查。
+
+## 2026-11-26 進度
 
 - **三桶改版（決策 `docs/decision/決策-2026-11-26-三桶改版.md`）**：保守（先留）＝6 個月生活費＋3 年內要用的錢，不算在 5/3/2；三桶＝穩健／成長／積極（key `steady`/`growth`/`bold`），例子必須台灣買得到，照 R13 v2（`docs/research/R13-三桶商品查證.md`，Codex sol 查證；Opus 否決「跌得比 0050 少就算穩健」，0056 放成長、2886/5880 不列）。core `RESERVE`、`reservePlan`、`BUCKETS`（name＋note）＋測試；㉖ 結果頁先顯示保守（先留）提醒再分三桶；㉗ 頁例子改讀 core；`buckets.svg` 重畫。`ALLOC` 不變。待辦：壓力測試照新三桶重算（要寫「股災跌多少」時）。
 - **首頁縮短**：4 區（認識自己／股票常識／計算機＝入門三件事，正2 專區內分入門／做法／加槓桿），`<details>` 預設收合，`#self`/`#science`/`#calc`/`#zr` 自動打開；新手路線改 5 顆按鈕；站名改「股票兩三件事」（33 檔＋manifest）。

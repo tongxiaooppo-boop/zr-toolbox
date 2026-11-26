@@ -23,7 +23,7 @@ document.getElementById('app').append(
     h('ol', {}, sections.map(([id, title]) => h('li', {}, h('a', { href: '#' + id }, title))))),
   h('section', { class: 'card article', id: 'history' }, h('h2', {}, '台股跌過幾次大的'),
     figure({ src: '../img/crash/curve.svg', alt: '示意曲線：大盤和正2 從同一個高點一起下跌，正2 跌得更深，之後兩條線慢慢回升，正2 回到前高比較慢。', caption: '示意圖，不是實際走勢。' }),
-    h('p', { class: 'muted' }, '表格可以左右滑。跌幅是高點收盤到低點收盤，名目價格。'),
+    h('p', { class: 'muted' }, '表格可以左右滑。跌幅是從高點收盤算到低點收盤，用當時的名目價格。'),
     h('div', { class: 'compare-wrap', tabindex: '0', role: 'region', 'aria-label': '歷次股災比較，可左右捲動' },
       h('table', {}, h('caption', {}, '歷次股災：台股、美股、正2 的跌幅與恢復時間'),
         h('thead', {}, h('tr', {}, ['事件', ...fields.map(([, title]) => title)].map(t => h('th', { scope: 'col' }, t)))),

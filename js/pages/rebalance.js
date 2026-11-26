@@ -60,7 +60,7 @@ const steps = [
   },
   {
     title: '現金與目標比例',
-    hint: '現金只算這個策略留的錢，不是全部存款。比例照你自己的規則填，加起來要 100%。',
+    hint: '現金只填這個策略留的錢，不是你全部的存款。比例照你自己的規則填，加起來要剛好 100%。',
     about: '每一份要占總額幾 %。總額＝持股市值＋現金＋這次新投入。',
     body: s => {
       const body = h('div', {},
@@ -81,7 +81,7 @@ const steps = [
     },
     read: s => {
       s.cash = num('cash');
-      if (Number.isNaN(s.cash)) throw new Error('請填策略現金，沒有就填 0。');
+      if (Number.isNaN(s.cash)) throw new Error('策略現金還沒填，沒有就填 0。');
       s.contribution = num('contribution') || 0;
       s.weights = Object.fromEntries(s.rows.map(({ code }, i) => [code, num('w-' + i) || 0]));
       s.cashPct = num('cashPct') || 0;
@@ -106,7 +106,7 @@ function result(s) {
   const out = [];
   if (r.due) out.push(explain({ label: '到期了嗎？', value: r.ready ? '到期了，可以配回' : '還沒到期', tone: r.ready ? 'warn' : 'ok',
     how: `上次配回 ${s.last} ＋ ${periods[s.months || 6]} ＝ ${r.due}。`,
-    means: r.ready ? '照規則今天可以配回。' : '照規則先不用動；下面是「如果今天配回」的股數。',
+    means: r.ready ? '照規則今天可以配回。' : '照規則現在先不用動。下面是「如果今天配回」的股數。',
     todo: r.ready ? '照下面的股數下單，做完把今天的日期記下來，下次第 4 步填這個日期。' : null }));
   out.push(explain({ label: '總額', value: fmtMoney(r.pool), tone: 'info',
     how: `持股市值 ${fmtMoney(r.total - s.cash)} ＋ 現金 ${fmtMoney(s.cash)}` + (s.contribution > 0 ? ` ＋ 新投入 ${fmtMoney(s.contribution)}` : '') + ` ＝ ${fmtMoney(r.pool)}。`, means: '每一份的目標＝總額 × 比例。' }),
@@ -124,7 +124,7 @@ function result(s) {
     explain({ label: '曝險倍數', value: `${fmtX(r.exposureNow)} → ${fmtX(r.exposureAfter)}`, tone: 'info',
       how: '每檔市值 × Beta 加起來 ÷ 總額。用到的 Beta：' + s.rows.map(row => `${row.code} ${Number.isNaN(row.beta) ? guessBeta(row.code) + '（看代號猜）' : row.beta}`).join('、') + '。',
       means: `約等於「總額的幾倍跟著大盤漲跌」；目標比例算出來是 ${fmtX(r.exposureTarget)}。現金當 0，債券 ETF 當 0 是簡化。` }),
-    h('p', { class: 'note' }, '沒算手續費、證交稅；到期那天休市就順延到下一個交易日。'));
+    h('p', { class: 'note' }, '沒算手續費和證交稅。到期那天剛好休市，就往後延到下一個交易日。'));
   return out;
 }
 
@@ -138,5 +138,5 @@ document.getElementById('app').append(
     figure({ src: '../img/rebalance/comic.webp', alt: '四格漫畫：一、先定好比例：原型 50%｜正二 30%｜現金 20%，每半年看一次。老師說：這叫 532。中間漲跌都不用管。二、半年到了，先算總額：原型 391,000、正二 236,700、現金 172,300，合計 800,000，＋ 這次新投入 50,000，＝ 850,000。小安問：新存的錢也一起算進去？三、照比例算目標：850,000 × 50%＝425,000；850,000 × 30%＝255,000；850,000 × 20%＝170,000。老師說：每一份要變成多少，先算金額。四、換成股數：原型：(425,000 − 391,000) ÷ 195.5 ＝ 173.9 → 買 173 股；正二：(255,000 − 236,700) ÷ 26.3 ＝ 695.8 → 買 695 股；剩下現金 170,200。小安說：小數點直接捨掉，錢一定夠！買進股數無條件捨去；沒算手續費和稅。' }),
     h('p', {}, '定期配比只看時間：選好比例和週期，到期那天用當時的總額照比例配回，中間漲跌都不動。這和 ② 的 50/50 觸發不同，那個看的是正二漲跌一半。'),
     h('p', {}, '網路上的 532、442 有兩種：股版是原型／正二／現金，債版是正二／美債／現金。名字一樣、風險不同，別人說 442 時先問是哪一種。'),
-    h('p', {}, '算出來的是取整後的股數：買進無條件捨去、賣出四捨五入，所以現金一定夠，配完會跟目標差一點點。')),
+    h('p', {}, '算出來的是取整後的股數。買進無條件捨去、賣出四捨五入，所以現金一定夠，只是配完會跟目標差一點點。')),
   disclaimer('general'));

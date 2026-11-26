@@ -23,7 +23,7 @@ const steps = [
     read: s => {
       s.year = document.getElementById('year').value; s.married = document.getElementById('married').value;
       s.people = num('people'); s.elderly = num('elderly');
-      if (blank(s.people)) throw new Error('請填申報戶總人數。');
+      if (blank(s.people)) throw new Error('申報戶總人數還沒填。');
       dividendTaxPlan(params({ ...s, salaries: [], dividends: 0 }));
     }
   },
@@ -35,7 +35,7 @@ const steps = [
         label: i === 0 ? '本人薪資' : i === 1 && s.married === 'yes' ? '配偶薪資' : '家人 ' + (s.married === 'yes' ? i - 1 : i) + ' 薪資',
         plain: '一年的薪資總額，沒有就留白', suffix: '元', value: (s.salaries || [])[i],
         help: i === 0 ? { text: ['薪資特別扣除額每人最多 ' + fmtMoney(TAX_YEARS[s.year].salaryCap) + '，不能合併給別人用。'] } : undefined }));
-      if (s.people > 4) out.push(h('p', { class: 'muted' }, '超過 4 個人有薪資時，把其他人的薪資加在最後一格（薪資扣除額會少算一些）。'));
+      if (s.people > 4) out.push(h('p', { class: 'muted' }, '超過 4 個人有薪資的話，把其他人的薪資加在最後一格（薪資扣除額會少算一些）。'));
       out.push(numberInput({ id: 'otherIncome', label: '其他所得（選填）', plain: '利息、租金、執行業務…合計，留白＝0', suffix: '元', value: s.otherIncome }));
       return out;
     },
@@ -54,7 +54,7 @@ const steps = [
       numberInput({ id: 'otherSpecial', label: '其他特別扣除額（選填）', plain: '身障、教育學費、幼兒、長照、房租…合計，薪資的不用填', suffix: '元', value: s.otherSpecial })],
     read: s => {
       s.dividends = num('dividends'); s.itemized = num('itemized'); s.otherSpecial = num('otherSpecial');
-      if (blank(s.dividends)) throw new Error('請填一年的股利所得，沒有就填 0。');
+      if (blank(s.dividends)) throw new Error('一年的股利所得還沒填，沒有就填 0。');
       dividendTaxPlan(params(s));
     }
   }
@@ -69,7 +69,7 @@ function result(s) {
     explain({ label: '合併計稅', value: pay(c.payable), tone: r.best === 'combined' ? 'ok' : 'info', how: '所得總額 ' + fmtMoney(c.income) + '（含股利 ' + fmtMoney(s.dividends) + '）− ' + fmtMoney(minus) + ' ＝ 所得淨額 ' + fmtMoney(c.net) + '；× ' + fmtPct(c.rate, 0) + ' − 累進差額 ' + fmtMoney(c.diff) + ' ＝ ' + fmtMoney(c.taxBefore) + '；減股利抵減 ' + fmtMoney(c.credit) + '（股利 × 8.5%' + (c.creditCapped ? '，超過上限只能抵 ' + fmtMoney(DIVIDEND_CREDIT_CAP) : '') + '）。', means: c.payable < 0 ? '抵減比稅還多，差額可以退稅。' : '股利跟其他所得一起照級距算，你最高那一級是 ' + fmtPct(c.rate, 0) + '。' }),
     explain({ label: '分開計稅', value: pay(p.payable), tone: r.best === 'separate' ? 'ok' : 'info', how: '不含股利的所得總額 ' + fmtMoney(p.income) + ' − ' + fmtMoney(minus) + ' ＝ 所得淨額 ' + fmtMoney(p.net) + '；× ' + fmtPct(p.rate, 0) + ' − 累進差額 ' + fmtMoney(p.diff) + ' ＝ ' + fmtMoney(p.taxBefore) + '；股利 ' + fmtMoney(s.dividends) + ' × 28% ＝ ' + fmtMoney(p.dividendTax) + '；合計 ' + fmtMoney(p.payable) + '。', means: '股利不管多少都是 28%；所得級距到 40% 的人比較可能划算。' })];
   if (r.provisional) out.push(h('p', { class: 'note' }, r.year + ' 年度的基本生活費財政部還沒公告（通常 11 月下旬），先用每人 ' + fmtMoney(r.params.basicLiving) + ' 估；只影響家裡人多、收入低的情況。'));
-  out.push(h('p', { class: 'note' }, '只算一個申報戶的綜合所得稅；沒算最低稅負制、已經被扣繳的稅、二代健保補充保費。實際以報稅系統試算為準。'), h('p', { class: 'todo' }, ['股利的二代健保補充保費，看 ', link('dividend.html', '⑩ 股息與除權息'), '。']));
+  out.push(h('p', { class: 'note' }, '這裡只算一個申報戶的綜合所得稅；最低稅負制、已經被扣繳的稅、二代健保補充保費都沒算。實際數字以報稅系統試算為準。'), h('p', { class: 'todo' }, ['股利的二代健保補充保費，看 ', link('dividend.html', '⑩ 股息與除權息'), '。']));
   return out;
 }
 const example = { year: '115', married: 'no', people: 1, elderly: NaN, salaries: [800000], otherIncome: NaN, dividends: 300000, itemized: NaN, otherSpecial: NaN };

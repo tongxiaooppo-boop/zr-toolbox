@@ -19,7 +19,7 @@ const steps = [
   {
     title: '你的正二',
     hint: '只填這個 50/50 策略裡的那一檔正二。股數和成本均價照券商 App「現在」顯示的填（分割、除權後券商會自動換算）。',
-    about: '這一步記下正二現在值多少。現價填好代號會自動抓最近收盤價。',
+    about: '這一步記下你的正二現在值多少。代號填好，現價會自動抓最近的收盤價。',
     figure: { src: '../img/common/step-holdings.svg', alt: '券商 App 庫存畫面示意：代號 0050 元大台灣50、股數 10,000、成本均價 80.00、現價 100.00。股票代號填 0050，買入股數填 10000（1 張＝1000 股），買入價填 80；現價會自動抓，不用填。' },
     body: s => [holdingsInput({ id: 'lever', rows: s.lever || [{}], max: 1, label: '你的正二' }), tokenBox()],
     read: s => { s.lever = readHoldings('lever'); holdingSummary(s.lever); }
@@ -64,7 +64,7 @@ const steps = [
             if (!ev.ok) {
               base.value = '';
               s.baseRaw = NaN; s.baseEvents = [];
-              status.textContent = `抓到 ${r.date} 的收盤價 ${r.close} 元，但查不到之後的分割、除權息資料（${ev.message}），沒辦法換算。請改選「從沒配回過」用券商 App 的成本均價，或自己填換算後的價格。`;
+              status.textContent = `抓到 ${r.date} 的收盤價 ${r.close} 元，但查不到之後的分割、除權息資料（${ev.message}），沒辦法換算。你可以改選「從沒配回過」，用券商 App 的成本均價，或自己填換算後的價格。`;
               return;
             }
             const list = normalizeEvents(ev.raw);
@@ -80,7 +80,7 @@ const steps = [
             }
           } else status.textContent = r.message;
         } catch {
-          if (request === seq && from.value === 'date' && date.isConnected) status.textContent = '查詢失敗，請稍後再試，或直接手動填基準價。';
+          if (request === seq && from.value === 'date' && date.isConnected) status.textContent = '查詢失敗，等一下再試，或直接自己填基準價。';
         }
       };
       from.addEventListener('change', () => {
@@ -102,7 +102,7 @@ const steps = [
       s.baseDate = document.getElementById('baseDate').value;
       s.basePrice = num('basePrice');
       s.baseEvents ??= [];
-      if (!(s.basePrice > 0)) throw new Error(s.baseFrom === 'date' ? '基準價還沒抓到：確認日期，或直接手動填基準價。' : '基準價要大於 0。');
+      if (!(s.basePrice > 0)) throw new Error(s.baseFrom === 'date' ? '基準價還沒抓到：看一下日期對不對，或直接自己填基準價。' : '基準價要大於 0。');
     }
   },
   {
@@ -128,19 +128,19 @@ function result(s) {
   const adjustment = s.baseFrom === 'date' && s.baseEvents?.length && s.basePrice === s.baseAdjusted
     ? [explain({ label: '基準價已換算股票事件', value: price(s.basePrice), tone: 'info',
       how: `${s.baseRawDate} 收盤 ${price(s.baseRaw)}` + s.baseEvents.map(e => ` × ${e.after} ÷ ${e.before}（${e.date} ${e.note}）`).join('') + `＝${price(s.basePrice)}。`,
-      means: '分割、除權息之後股價會變，不換算就會把它誤當成漲跌。換算後才能跟現價比。',
+      means: '分割、除權息之後股價會變，不換算的話，會把這個變動誤當成漲跌。換算完才能跟現價比。',
       todo: s.baseEvents.some(e => e.kind === 'dividend') ? '領到的現金股利，記得加進第 3 步的策略現金。' : null })]
     : [];
   const change = explain({ label: `${name} 相對基準價`, value: (r.change > 0 ? '+' : '') + fmtPct(r.change), tone: r.hit ? 'warn' : 'info',
       how: `現價 ${price(L.nowPrice)} ÷ 基準價 ${price(s.basePrice)} − 1。`,
       means: '漲跌是跟上次配回時比，不是跟買入價比。' });
   const note = h('div', { class: 'note' },
-    h('p', {}, '只算這個策略裡的正二和現金；沒算手續費和稅。'),
+    h('p', {}, '這裡只算這個策略裡的正二和現金，沒算手續費和稅。'),
     h('p', {}, '做法出自大仁「50 正 2 槓桿 ETF 搭配再平衡」：一半正二、一半現金，正二相對基準價漲跌 50% 就配回。'));
   // 疑似分割：漲跌幅不可信，不給「要買賣幾股」，只請使用者先換算基準價（Opus 2026-11-09：實測 00631L 分割前後 375.25→26.3）
   if (r.suspectSplit) return [...adjustment, change, explain({ label: '價格差很多倍', value: '先確認基準價', tone: 'bad',
     how: `現價 ${price(L.nowPrice)} 和基準價 ${price(s.basePrice)} 差 5 倍以上。`,
-    means: '中間可能有分割或合併（例：1 股拆成好幾股）。工具抓的是當天的原始價格，沒有換算，所以上面的漲跌幅不能用，也先不算要買賣幾股。',
+    means: '中間可能有分割或合併（例：1 股拆成好幾股）。工具抓的是當天的原始價格，沒換算過，所以上面的漲跌幅不能參考，要買賣幾股也先不算。',
     todo: ['① 打開券商 App，照現在的股數和成本均價重填第 1 步，第 2 步選「從沒配回過」；', '② 第 2 步選「我記得日期」，工具會自動換算分割和除權息。'] }), note];
   const out = [...adjustment, change,
     explain({ label: '到門檻了嗎', value: r.hit ? (r.direction === 'up' ? '漲到了，要配回' : '跌到了，要配回') : '還沒，不用動', tone: r.hit ? 'warn' : 'ok',
@@ -167,7 +167,7 @@ document.getElementById('app').append(
   h('section', { class: 'card' }, h('h2', {}, '怎麼讀'),
     figure({ src: '../img/trigger5050/comic.webp', alt: '四格漫畫：一、一開始正二 5,000 股 × 20 元＝10 萬、現金 10 萬，記下 20 元當基準價。二、20 × 1.5＝30 元漲到要動，20 × 0.5＝10 元跌到也要動，中間不用管。三、漲到 30.5 元：正二 152,500 加現金 100,000＝252,500，各一半 126,250，賣 861 股收回約 26,261 元。四、新基準價 30.5 元，下次漲到 45.75 元或跌到 15.25 元；跌到時反過來拿現金買正二，買進去的錢之後還可能繼續跌。沒算手續費和稅；賣出股數四捨五入。' }),
     figure({ src: '../img/trigger5050/split-5050.svg', alt: '50/50 配回圖解：正二漲到 +50% 時賣出 2.5 萬、跌到 −50% 時買進 2.5 萬，配回後兩邊相等。', caption: '同樣從正二、現金各 10 萬開始，漲到與跌到時各配回一次。' }),
-    h('p', {}, '這是大仁 50/50 的做法：一半正二、一半現金。正二相對基準價漲或跌 50% 時，用當時的總額配回各半；沒到就不動。'),
+    h('p', {}, '這是大仁 50/50 的做法：一半正二、一半現金。正二比基準價漲或跌 50% 時，就用當時的總額重新各配一半；沒到就不動。'),
     h('p', {}, '漲到時會賣掉一些正二收回現金；跌到時會拿現金補正二。跌到時補進去的錢，如果之後繼續跌，一樣會跟著跌。'),
     h('p', {}, ['其他槓桿做法（532、質押、目標倍數）的比較，看 ', link('exposure.html', '⑪ 正二要買多少'), ' 頁尾的對照表。'])),
   disclaimer('general'));

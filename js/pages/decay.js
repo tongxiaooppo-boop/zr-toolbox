@@ -42,7 +42,7 @@ const steps = [
     },
     read: s => {
       s.days = num('days'); s.size = num('size');
-      if (!document.getElementById('days').value.trim() || !document.getElementById('size').value.trim()) throw new Error('請填天數和幅度。');
+      if (!document.getElementById('days').value.trim() || !document.getElementById('size').value.trim()) throw new Error('天數和幅度都要填。');
       decayPlan({ kind: s.kind, days: s.days, size: pct('size') });
     }
   },
@@ -52,7 +52,7 @@ const steps = [
     body: s => [
       numberInput({ id: 'amount', label: '投入金額', plain: '留白就只看 %', suffix: '元', value: s.amount }),
       numberInput({ id: 'annualCost', label: '每年內扣費用', plain: '留白當 0；正二大約 1% 上下', suffix: '%', value: s.annualCost,
-        help: { text: ['正二每天從淨值扣的經理費、保管費等，一年合計大約 1% 上下，詳細看投信網站的公開說明書。', '這裡平均攤到每天（÷ 250）。'] } })],
+        help: { text: ['正二每天從淨值扣的經理費、保管費等，一年合計大約 1% 上下，詳細數字看投信網站的公開說明書。', '這裡平均攤到每天（÷ 250）。'] } })],
     read: s => { s.amount = num('amount'); s.annualCost = num('annualCost'); decayPlan(params(s)); }
   }
 ];
@@ -83,7 +83,7 @@ document.getElementById('app').append(
   wizard({ steps, result, example }),
   h('section', { class: 'card' }, h('h2', {}, '怎麼讀'),
     figure({ src: '../img/decay/comic.webp', alt: '四格漫畫：一、漲 10%、再跌 10%。大盤：100 → 110 → 99。正二：100 → 120 → 96。小安說：大盤才少 1，正二怎麼少 4？二、每天重新變 2 倍。第 2 天正二用 120 在跌：120 × 20%＝24。跌下來的那天本金比較大。老師說：正二保證的是『每一天』大約 2 倍。三、來回震盪 20 天（每天 ±5%），放 100 萬。大盤 975,279；以為（整段 × 2）950,559；正二實際 904,382。小安說：比以為的還少 4 萬多！四、一路漲時反而多。連續 10 天每天漲 1%；大盤 +10.5%；整段 × 2＝+20.9%；正二 +21.9%。老師說：所以不能用一個固定的『每年耗損幾 %』來估。理想化計算：沒算內扣費用、追蹤誤差和折溢價。' }),
-    h('p', {}, '正二每天收盤後都會把倍數調回 2 倍，所以它保證的是『每一天』大約 2 倍，不是一個月、一年的 2 倍。'),
+    h('p', {}, '正二每天收盤後都會把倍數調回 2 倍，所以它做到的是『每一天』大約 2 倍，不是一個月、一年的 2 倍。'),
     h('p', {}, '來回震盪時，跌下來的那天是用比較大的本金在跌，漲回去的那天是用比較小的本金在漲，一來一回就輸給『整段 × 2』。這就是常聽到的波動耗損。'),
     h('p', {}, '反過來，一路往同一個方向走的時候，正二可能比整段 2 倍還多。所以不能用一個固定的『每年耗損幾 %』來估。')),
   pathNav('decay'),

@@ -18,7 +18,7 @@ const steps = [
   {
     title: '其他持股（不含正二）',
     hint: '打開券商 App 的「庫存」，一檔填一列。0050、個股都填這裡，正二下一步再填。',
-    about: '這一步算出你手上的股票「跟著大盤漲跌多少錢」（曝險）。沒有其他持股就把列刪掉，直接下一步。',
+    about: '這一步算出你手上的股票「會跟著大盤漲跌多少錢」（曝險）。沒有其他持股，就把空白的列刪掉，直接按下一步。',
     body: s => [betaHoldingsInput({ id: 'stocks', kind: 'stock', rows: s.stocks ?? [{}] }), tokenBox()],
     read: s => { const rows = readBetaHoldings('stocks').filter(r => !blank(r)); checkBalanceRows(rows, 'stock'); s.stocks = rows; }
   },
@@ -37,7 +37,7 @@ const steps = [
   {
     title: '現金與借款',
     hint: '現金看銀行和證券戶的餘額；借款看質押、融資、信貸的「借款餘額」，全部加起來。',
-    about: '有借錢時，倍數有兩種算法：扣掉借款（淨資產）和不扣（總資產），差很多。',
+    about: '有借錢的話，倍數有兩種算法：扣掉借款（淨資產）和不扣（總資產），兩個差很多。',
     figure: { src: '../img/exposure/step3.webp', alt: '插圖：有借錢時，倍數有兩種算法。股票 1,000 萬、現金 200 萬、借款 300 萬。總資產口徑（不扣借款）：總資產 1,000＋200＝1,200 萬，1,000 萬 ÷ 1,200 萬約 0.83 倍，看起來比大盤還保守。淨資產口徑（扣掉借款）：淨資產 1,200−300＝900 萬，1,000 萬 ÷ 900 萬約 1.11 倍，這才是你自己的錢漲跌幾倍。老師說：借來的錢要還，跌的是你自己的錢，有借錢看淨資產口徑。沒有借錢時，兩種算法一樣。' },
     body: s => [
       numberInput({ id: 'cash', label: '現金', plain: '隨時能拿來買正二的錢，例：2000000', value: s.cash, suffix: '元', help: { text: ['銀行和證券戶裡隨時能動用的錢，全部加起來。', '定存、要繳的保費這類不能動的錢不要算進來，或填在下面「至少要留」。'] } }),
@@ -63,7 +63,7 @@ const steps = [
         : `你現在約等於 ${fmtX(now.bA)}大盤（沒有借錢，兩種算法一樣）。`) : null,
       numberInput({ id: 'target', label: '目標倍數', termId: 'exposure', plain: '想要整體等於幾倍大盤，例：1.4', value: s.target, suffix: '倍', help: { text: ['1 倍＝跟大盤一樣；1.4 倍＝大盤跌 10% 你約跌 14%。', '倍數越高，漲跌都放大；先想跌的時候受不受得了。'] } }),
       withHelp(selectField({ id: 'basis', label: '倍數怎麼算', termId: 'basis', plain: s.debt > 0 ? '你有借錢，建議用淨資產口徑' : '你沒有借錢，兩種算法結果一樣', options: [{ value: 'net', label: '淨資產口徑（扣掉借款）' }, { value: 'asset', label: '總資產口徑（不扣借款）' }], value: s.basis || 'net' }), { text: ['淨資產口徑：分母是扣掉借款後你自己的錢，比較貼近「我的錢漲跌幾 %」。', '總資產口徑：分母不扣借款。有借錢時看起來倍數比較低，但跌的時候虧的是你自己的錢。', '結果頁兩種都會算給你看。'] }),
-      withHelp(selectField({ id: 'borrow', label: '現金不夠時', plain: '要不要算出還要借多少', options: [{ value: 'no', label: '不借新的錢（算出還差多少）' }, { value: 'yes', label: '可以再借（算出要借多少）' }], value: s.allowBorrow || 'no' }), { text: ['選「可以再借」只是算出金額，不代表借得到，也不代表安全。', '要借之前，先用 ④ 質押壓力測試看大盤跌多少會被追繳。'] })];
+      withHelp(selectField({ id: 'borrow', label: '現金不夠時', plain: '要不要算出還要借多少', options: [{ value: 'no', label: '不借新的錢（算出還差多少）' }, { value: 'yes', label: '可以再借（算出要借多少）' }], value: s.allowBorrow || 'no' }), { text: ['選「可以再借」只是幫你算出金額，不代表你借得到，也不代表安全。', '借之前，先用 ④ 質押壓力測試看大盤跌多少你會被追繳。'] })];
     },
     read: s => {
       s.target = num('target'); s.basis = document.getElementById('basis').value; s.allowBorrow = document.getElementById('borrow').value;
@@ -73,7 +73,7 @@ const steps = [
   {
     title: '進階：完整重配（選填）',
     hint: '大部分人不用動這一步，直接按「看結果」。',
-    about: '預設只調正二、其他持股不動。打開完整重配，會連其他持股一起照比重重新分配，沒填比重的會建議全賣。',
+    about: '預設只調正二，其他持股不動。打開完整重配，其他持股也會一起照比重重新分配，沒填比重的那檔會建議你全賣。',
     body: s => [
       withHelp(selectField({ id: 'full', label: '要不要連其他持股一起重配', options: [{ value: 'off', label: '不要，只調正二（預設）' }, { value: 'on', label: '要，全部照比重重新分配' }], value: s.full || 'off' }), { text: ['只調正二：其他持股一股都不動，只算正二要買賣多少。', '完整重配：全部股票（含正二）照下面的比重重新分配；沒填比重的那檔會建議全部賣掉。'] }),
       h('h3', {}, '各檔目標比重（選填）'), h('p', { class: 'tip' }, '比重填相對大小就好，例：60 和 40，不用加起來剛好 100。'),
@@ -84,7 +84,7 @@ const steps = [
       s.wStocks = s.stocks.map((_, i) => num(`ws${i}`)); s.wLevers = s.levers.map((_, i) => num(`wl${i}`));
       const weights = [...s.wStocks, ...s.wLevers];
       if (weights.some(w => !Number.isNaN(w) && w < 0)) throw new Error('比重要填 0 以上的數字；不用就留白。');
-      if (s.full === 'on' && !weights.some(w => w > 0)) throw new Error('完整重配要替至少一檔填目標比重；只想調正二就選「不要」。');
+      if (s.full === 'on' && !weights.some(w => w > 0)) throw new Error('完整重配至少要有一檔填目標比重；只想調正二就選「不要」。');
     }
   }
 ];
@@ -131,7 +131,7 @@ function result(s) {
     table(['代號', '現在市值', '調整後', '買賣'], r.rows.map(x => [named(x.code), fmtMoney(x.value), fmtMoney(x.target), [`${x.trade >= 0 ? '買' : '賣'} ${fmtMoney(Math.abs(x.trade))}`, Number.isFinite(x.shares) ? [h('br'), h('small', {}, shareText(x.shares))] : null]])),
     h('div', { class: 'note' },
       h('p', {}, '算法照朋友那格計算機（使用者以手機版 Claude 依計算模板製作，後續小改），同一組輸入算出同樣的數字。'),
-      h('p', {}, '沒算手續費、稅和借款利息；股數是約略值。'),
+      h('p', {}, '這裡沒算手續費、稅和借款利息，股數也只是約略值。'),
       r.fullMode ? h('p', {}, '完整重配：全部持股（含正二）照比重重新分配，沒填比重的會建議全賣。') : null,
       r.bwDefaulted ? h('p', {}, '各檔 Beta 合起來不是正數，改用 2 計算（跟原頁一樣）。') : null)
   ];
@@ -145,7 +145,7 @@ document.getElementById('app').append(
   h('section', { class: 'card' }, h('h2', {}, '怎麼讀'),
     figure({ src: '../img/exposure/comic.webp', alt: '四格漫畫：一、小安有股票 1,000 萬、現金 200 萬、借款 300 萬，淨資產 1,000＋200−300＝900 萬，1,000 萬 ÷ 900 萬約 1.11 倍。二、想要 1.4 倍：1.4 × 900 萬＝1,260 萬，減 1,000 萬還差 260 萬曝險；曝險就是跟著大盤漲跌的金額。三、正二 1 元算 2 元曝險：260 萬 ÷ 2＝買 130 萬正二，現金 200 萬剩 70 萬，不用借錢。四、1.4 倍代表大盤跌 10%，淨資產約跌 14%；正二是每天 2 倍，放久了會偏離，這只是估計，錢夠不等於安全。沒算手續費、稅和利息；正二每股 20 元時約 65,000 股。' }),
     h('p', {}, '曝險倍數回答的是：大盤漲跌 1%，你的錢大約漲跌幾 %。正二每 1 元市值大約算 2 元曝險，所以用正二調倍數，比全部買 0050 省現金。'),
-    h('p', {}, '「錢夠」跟「達到目標」是兩件事：其他持股本身就超過目標時，錢夠也降不下來；用總資產口徑借錢買正二，有時借了也追不上目標。結果頁會分開寫。'),
+    h('p', {}, '「錢夠」跟「達到目標」是兩件事：其他持股本身就超過目標時，錢再夠也降不下來；用總資產口徑借錢買正二，有時借了也追不上目標。結果頁會分開講。'),
     h('p', {}, '正二的 2 倍是「每天」2 倍，拉長時間會偏離（波動耗損），這裡的倍數只是估計。'),
     h('h3', {}, '網路上其他槓桿做法，在工具箱哪裡算'),
     h('table', { class: 'trade-table' }, h('thead', {}, h('tr', {}, h('th', { scope: 'col' }, '做法'), h('th', { scope: 'col' }, '在哪裡算'))),

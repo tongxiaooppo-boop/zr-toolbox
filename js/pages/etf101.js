@@ -32,6 +32,6 @@ document.getElementById('app').append(
     s.id === 'borrow' ? h('p', {}, h('a', { href: 'loans.html' }, '㉑ 借錢投資的管道：全部管道一次比 →')) : null)),
   h('section', { class: 'card article', id: 'limits' }, h('h2', {}, '這頁的限制'),
     ETF_LIMITS.map(t => h('p', {}, t)),
-    h('p', { class: 'muted' }, '列出的機構只是查得到公告的例子，不是推薦；利率會變，以各家最新公告為準。')),
+    h('p', { class: 'muted' }, '列出的機構只是查得到公告的例子，不是推薦；利率會變，看各家最新公告。')),
   pathNav('etf101'),
   references(ETF_REFS), disclaimer('general'));

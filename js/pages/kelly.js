@@ -22,7 +22,7 @@ const steps = [
       numberInput({ id: 'volPct', label: '每年波動', termId: 'volatility', plain: '例：20', suffix: '%', value: s.volPct, help: { text: ['一年裡漲跌的典型幅度（標準差）。', '大盤 ETF 常見大約 15%–25%；個股通常更大。'] } })],
     read: s => {
       s.cagrPct = num('cagrPct'); s.volPct = num('volPct');
-      if (blank(s.cagrPct) || blank(s.volPct)) throw new Error('請填每年報酬和波動。');
+      if (blank(s.cagrPct) || blank(s.volPct)) throw new Error('每年報酬和波動還沒填。');
       kellyPlan(params({ ...s, borrowPct: 0, cashPct: 0, current: NaN }));
     }
   },
@@ -35,7 +35,7 @@ const steps = [
       numberInput({ id: 'current', label: '你現在幾倍（選填）', plain: '留白就不比較', suffix: '倍', value: s.current, help: { text: ['不知道自己幾倍，可以先用 ⑬ 人生槓桿體檢或 ⑪ 正二要買多少算。', '例：全部買 0050 是 1 倍；一半 0050、一半正二約 1.5 倍。'] } })],
     read: s => {
       s.borrowPct = num('borrowPct');
-      if (blank(s.borrowPct)) throw new Error('請填借錢的年利率。');
+      if (blank(s.borrowPct)) throw new Error('借錢的年利率還沒填。');
       s.cashPct = num('cashPct'); s.current = num('current');
       kellyPlan(params(s));
     }

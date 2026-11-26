@@ -43,19 +43,19 @@ const steps = [
         help: { text: ['想看幾天後的情況，用日曆天算：半年填 182，一年填 365。', '跟年利率一起填才會算利息。'] } })],
     read: s => {
       s.debt = num('debt'); s.use = document.getElementById('use').value; s.rate = num('rate'); s.days = num('days');
-      if (!(s.debt > 0)) throw new Error('借款總額要大於 0；沒有借款就不會被追繳。');
+      if (!(s.debt > 0)) throw new Error('借款總額要大於 0。沒借錢就不會被追繳。');
       if (!Number.isNaN(s.rate) && !(s.rate >= 0 && s.rate <= 100)) throw new Error('年利率填 0–100 之間的數字，例：2.5。');
       if (!Number.isNaN(s.days) && !(Number.isInteger(s.days) && s.days >= 0)) throw new Error('天數要是整數，例：365。');
     }
   },
   {
     title: '契約上的追繳規則',
-    hint: '這三個數字寫在質押契約裡。不確定就先用預設值，之後再問券商或銀行。',
+    hint: '這三個數字寫在質押契約裡。不確定就先用預設值，之後再去問券商或銀行。',
     about: '這一步決定「維持率掉到哪裡會出事」。下圖由上往下：現在、補回目標、追繳線。',
     figure: { src: '../img/pledge/step3-ratio-scale.svg', alt: '維持率刻度：200% 是範例的現在，160% 是補回目標，130% 是追繳線，100% 是擔保品剛好等於借款。130% 以下危險、130–160% 注意、160% 以上安全。認列成數：股票 100 萬 × 認列 100％ ＝ 算 100 萬。' },
     body: s => [
       numberInput({ id: 'call', label: '追繳線', plain: '維持率低於這裡就會被通知補錢；多數券商契約是 130', termId: 'margin-call', value: s.call ?? 130, suffix: '%',
-        help: { text: ['契約裡寫「維持率低於 ○○% 時應補繳」的那個數字。', '多數券商的不限用途借貸是 130%，銀行質押可能不同，以你的契約為準。'] } }),
+        help: { text: ['契約裡寫「維持率低於 ○○% 就要補錢」的那個數字。', '多數券商的不限用途借貸是 130%，銀行質押可能不一樣，照你的契約填。'] } }),
       numberInput({ id: 'target', label: '補回目標', plain: '被追繳後要補回到多少，例如 160 或 166', termId: 'maintenance-ratio', value: s.target ?? 160, suffix: '%',
         help: { text: ['被追繳後，要補到維持率回到多少才算解除。', '不是剛好補到追繳線就好，常見是 160% 或 166%，看契約。'] } }),
       numberInput({ id: 'q', label: '擔保品認列成數', plain: '股票打幾折算維持率；沒打折就是 100', value: s.q ?? 100, suffix: '%',
@@ -84,11 +84,11 @@ function result(s) {
     explain({ label: '目前維持率', value: fmtPct(r.nowRatio, 0), tone: under ? 'bad' : r.nowRatio < s.target / 100 ? 'warn' : 'ok',
       how: `擔保品 ${fmtMoney(summary.value)}${qText} ÷ ${debtText}＝${fmtPct(r.nowRatio, 0)}。`,
       means: `維持率是「擔保品夠不夠還借款」。低於 ${s.call}% 會被追繳，數字越高越安全。`,
-      todo: under ? `現在就低於追繳線，要盡快還款或補擔保品，補回 ${s.target}%。` : null }),
+      todo: under ? `你現在就低於追繳線了，要趕快還款或補擔保品，補回 ${s.target}%。` : null }),
     explain({ label: '股價跌破這裡會被追繳', value: under ? '已經低於追繳線' : (many ? '全部同時跌 ' : '跌 ') + fmtPct(r.callDrop), tone: 'warn',
       how: r.perStock.map(p => `${named(p.code)} ${under ? '要回到' : '跌到'} ${p.callPrice.toFixed(2)} 元${under ? '以上' : ''}（比你的買入價${p.vsBuy >= 0 ? '高' : '低'} ${fmtPct(Math.abs(p.vsBuy))}）`).join('；') + '。',
       means: `在這個價位，維持率剛好是 ${s.call}%。` + (many ? '這裡假設每檔一起漲跌一樣多；質押大盤 ETF 時接近事實，個股會差很多。' : ''),
-      todo: under ? null : '記下這個價位。股價接近時先準備好現金，不要等通知才找錢。' })
+      todo: under ? null : '記下這個價位。股價快到的時候，先把現金準備好，別等通知來了才找錢。' })
   ];
   if (r.useFactor > 0 && !under) out.push(explain({ label: '借來的錢買的股票也會跟著虧', value: '約 ' + fmtMoney(r.useLossAtCall), tone: 'bad',
     how: `跌到追繳線時擔保品約跌 ${fmtPct(r.callDrop)}，${s.use === 'lever' ? '正二粗估跌 2 倍' : '大盤 ETF 跟著跌 1 倍'}：${fmtMoney(s.debt)} × ${fmtPct(Math.min(1, r.useFactor * r.callDrop))}。`,
@@ -105,7 +105,7 @@ function result(s) {
         h('td', {}, fmtPct(row.ratio, 0) + (row.called ? '（追繳）' : '')),
         h('td', {}, row.repay < 0.5 ? '不用' : Math.round(row.repay).toLocaleString('en-US')),
         h('td', {}, row.topup < 0.5 ? '不用' : Math.round(row.topup).toLocaleString('en-US')))))),
-    h('p', { class: 'note' }, '還款和補擔保擇一就好。同樣補回目標，拿現金還款要的錢比較少；補擔保要契約接受，各家認列方式不同。'));
+    h('p', { class: 'note' }, '還款和補擔保品，做一個就好。補回同樣的目標，拿現金還款要的錢比較少；補擔保品要看契約收不收，各家認列的方式也不一樣。'));
   return out;
 }
 
@@ -117,6 +117,6 @@ document.getElementById('app').append(
   h('section', { class: 'card' }, h('h2', {}, '怎麼讀'),
     figure({ src: '../img/pledge/comic.webp', alt: '四格漫畫：一、小安把 0050 一萬股押給券商借 50 萬，股價 100 元、股票值 100 萬。二、老師說維持率＝擔保品市值 ÷ 借款，100 萬 ÷ 50 萬＝200%，越高越安全。三、股價跌 35% 到 65 元，65 萬 ÷ 50 萬＝130%，碰到追繳線，小安收到追繳通知。四、跌 40% 到 60 元，維持率 120%；補回 160% 有兩種做法：拿現金還款 12.5 萬（60 萬 ÷ 37.5 萬），或補擔保品 20 萬（80 萬 ÷ 50 萬），還款要的錢比較少。追繳線 130%、補回 160% 是常見數字，以契約為準。' }),
     h('p', {}, '質押就是把股票押給券商借錢。維持率＝擔保品市值 ÷ 借款，股價跌，維持率就往下掉。'),
-    h('p', {}, '掉到追繳線（多數券商契約是 130%，以你的契約為準）就會被通知補錢，期限內沒補，券商可以賣掉你的股票。補的時候要補回契約寫的目標，不是剛好補到 130%。'),
+    h('p', {}, '掉到追繳線（多數券商契約是 130%，要看你的契約）就會被通知補錢。期限內沒補，券商可以賣掉你的股票。要補就補回契約寫的目標，不是剛好補到 130%。'),
     h('p', {}, '借來的錢如果拿去買正二，正二跌得大約是大盤的 2 倍，帳面虧損和追繳可能同時來。先看結果的表，確定最壞那一列的錢你拿得出來。')),
   disclaimer('executable'));

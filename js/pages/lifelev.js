@@ -47,7 +47,7 @@ const steps = [
       numberInput({ id: 'otherAssets', label: '其他資產（選填）', plain: '車子、保單價值準備金…留白＝0', suffix: '元', value: s.otherAssets })],
     read: s => {
       s.cash = num('cash');
-      if (blank(s.cash)) throw new Error('請填現金，沒有就填 0。');
+      if (blank(s.cash)) throw new Error('現金還沒填，沒有就填 0。');
       s.realEstate = num('realEstate'); s.otherAssets = num('otherAssets');
       lifeLeveragePlan(params(s, { debts: [], monthlyExpense: 1 }));
     }
@@ -89,9 +89,9 @@ function result(s) {
       means: '房價和股市一起跌時，總淨資產會放大幾倍受傷。房子當 1 倍是簡化。' }),
     explain({ label: r.monthlyFree === null ? '每月要付' : '每月結餘', value: r.monthlyFree === null ? fmtMoney(r.monthlyOut) : signedMoney(r.monthlyFree), tone: r.monthlyFree === null ? 'info' : r.monthlyFree < 0 ? 'bad' : 'ok',
       how: (r.monthlyFree === null ? '' : `收入 ${fmtMoney(s.monthlyIncome)} − `) + `生活費 ${fmtMoney(s.monthlyExpense)}` + r.debts.map((d, i) => (r.monthlyFree === null ? ' ＋ ' : ' − ') + `${d.label} ${fmtMoney(d.monthly)}` + (d.payBy === 'amortized' ? `（用年利率 ${s.debts[i].ratePct}%、${s.debts[i].years} 年本息攤還算的）` : d.payBy === 'interest' ? `（只繳利息：餘額 × ${s.debts[i].ratePct}% ÷ 12）` : '')).join('') + (r.monthlyFree === null && r.debts.length ? ` ＝ ${fmtMoney(r.monthlyOut)}。` : '。'),
-      means: r.monthlyFree !== null && r.monthlyFree < 0 ? '每月入不敷出，要動用存款或賣股票。' : `每月花在生活和還款的錢共 ${fmtMoney(r.monthlyOut)}。` }),
+      means: r.monthlyFree !== null && r.monthlyFree < 0 ? '每個月賺的不夠花，得動用存款或賣股票。' : `每月花在生活和還款的錢共 ${fmtMoney(r.monthlyOut)}。` }),
     explain({ label: '現金撐幾個月', value: r.cashMonths.toFixed(1) + ' 個月', tone: r.cashMonths < 3 ? 'bad' : r.cashMonths < 6 ? 'warn' : 'ok',
-      how: `現金 ${fmtMoney(s.cash)} ÷ 每月要付 ${fmtMoney(r.monthlyOut)}。`, means: '收入突然停了，不賣股票能撐多久。大跌時常常也是最不想賣的時候。' }),
+      how: `現金 ${fmtMoney(s.cash)} ÷ 每月要付 ${fmtMoney(r.monthlyOut)}。`, means: '收入突然停了，不賣股票你能撐多久。大跌的時候，往往也是你最不想賣的時候。' }),
     explain({ label: '生活費倍數', value: r.lifeMultiple > 0 ? r.lifeMultiple.toFixed(1) + ' 倍' : '0 倍', tone: 'info',
       how: `金融淨資產 ${fmtMoney(r.financialNet)} ÷ 一年生活費 ${fmtMoney(12 * s.monthlyExpense)}。`,
       means: r.withdrawRate ? '相當於每年領 ' + fmtPct(r.withdrawRate) + '。對照：4% 法則約 25 倍。' : '金融淨資產不是正的。', todo: ['退休要存多少，看 ', link('retire.html', '⑲ 退休提領'), '。'] })
@@ -104,7 +104,7 @@ function result(s) {
   out.push(explain({ label: '大盤跌 ' + fmtPct(r.stressDrop, 0) + ' 後', value: fmtMoney(r.financialNetAfter), tone: r.financialNetAfter <= 0 ? 'bad' : 'warn',
     how: (r.holdings.length ? r.holdings.map(row => `${named(row.code)} ${fmtMoney(row.value)} → ${fmtMoney(row.valueAfter)}`).join('；') : '沒有持股，股票不受影響') + `。金融淨資產 ${fmtMoney(r.financialNet)} → ${fmtMoney(r.financialNetAfter)}；借款不會跟著變少。`,
     means: r.marketLeverageAfter === null ? '金融淨資產變成 0 或負的。' : '曝險倍數 ' + fmtX(r.marketLeverage) + ' → ' + fmtX(r.marketLeverageAfter) + '：越跌倍數越高。', todo: todo.length ? todo : null }),
-    h('p', { class: 'note' }, '只做體檢、不給建議倍數。Beta 是估計值、房子當 1 倍；沒算稅、手續費、利率變動。'));
+    h('p', { class: 'note' }, '這裡只幫你體檢，不建議你開幾倍。Beta 是估計值，房子當 1 倍；沒算稅、手續費，也沒算利率變動。'));
   return out;
 }
 
@@ -120,5 +120,5 @@ document.getElementById('app').append(
     figure({ src: '../img/lifelev/comic.webp', alt: '四格漫畫：一、先列家當。有的：股票 2,481,000、現金 500,000、房子 12,000,000；欠的：房貸 8,000,000、信貸 1,000,000（拿去買股票）。老師說：有的、欠的，全部寫下來。二、金融淨資產：現金 500,000 ＋ 股票 2,481,000 − 信貸 1,000,000 ＝ 1,981,000。老師說：房貸拿去買房子，這裡不扣；信貸拿去買股票，要扣。三、市場曝險倍數：原型 1,955,000 × 1 ＋ 正二 526,000 × 2 ＝ 3,007,000；3,007,000 ÷ 1,981,000 ＝ 1.52 倍。小安說：我以為自己只有 1 倍多一點…。四、大盤跌 30% 會怎樣：金融淨資產 1,981,000 → 1,078,900；曝險倍數 1.52 倍 → 1.66 倍。小安說：越跌倍數越高！老師說：房貸、信貸還是每個月要繳。直線估算；沒算手續費和稅。' }),
     h('p', {}, '同樣買了正二，有人只用閒錢、有人背著房貸和信貸。這個工具把家裡有的、欠的全部列出來，看你真正開了幾倍槓桿。'),
     h('p', {}, '三種倍數分母不同：市場曝險倍數看金融淨資產（只扣拿去投資的借款）；帳面槓桿、總曝險槓桿看總淨資產（扣全部借款、房子也算）。不要拿不同分母的數字互相比。'),
-    h('p', {}, '大跌時股票變少、借款不變，所以越跌倍數越高。現金撐幾個月，決定你大跌時要不要被迫賣股票。')),
+    h('p', {}, '大跌時股票變少、借款不變，所以越跌，倍數越高。現金能撐幾個月，決定你大跌時會不會被逼著賣股票。')),
   disclaimer('general'));
