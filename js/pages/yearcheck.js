@@ -11,6 +11,10 @@ const signPct = n => (n >= 0 ? '+' : '−') + fmtPct(Math.abs(n));
 const absPct = n => '−' + fmtPct(Math.abs(n));
 const wrap = (label, table) => h('div', { class: 'compare-wrap', tabindex: '0', role: 'region', 'aria-label': label }, table);
 const th = text => h('th', { scope: 'col' }, text);
+// 每月表欄名用短名稱，手機不用橫拉；完整名稱寫在表下說明
+const SHORT = { allin: '全押', dajen: '大仁', q5050: '季配', q532: '532', h0050: '0050', h0056: '0056', h00981A: '981A' };
+const SUM_COLS = ['現在', '報酬', '最高曾到（日期）', '從最高回吐', '最大回撤', '領到的股利'];
+const cell = (i, text) => h('td', { 'data-label': SUM_COLS[i] }, text);
 
 const zr = B.series.filter(s => s.group === 'zr');
 const hold = B.series.filter(s => s.group === 'hold');
@@ -41,18 +45,20 @@ document.getElementById('app').append(
   chartCard('正2 四種做法', zr, `正2 四種做法從年初 100 萬到 ${B.asOf} 的每日資產變化（單位：萬元）`),
   chartCard('長抱比較：0050、0056、00981A', hold, `0050、0056、00981A 長抱從年初 100 萬到 ${B.asOf} 的每日資產變化（單位：萬元）`),
   h('section', { class: 'card' }, h('h2', {}, '到現在的成績'),
-    wrap('到現在的成績表，可橫向捲動', h('table', {}, h('caption', {}, `${B.start} 投入 100 萬，到 ${B.asOf} 的結果`),
-      h('thead', {}, h('tr', {}, ['做法', '現在', '報酬', '最高曾到（日期）', '從最高回吐', '最大回撤', '領到的股利'].map(th))),
+    wrap('到現在的成績表', h('table', { class: 'yc-table yc-stack' }, h('caption', {}, `${B.start} 投入 100 萬，到 ${B.asOf} 的結果`),
+      h('thead', {}, h('tr', {}, ['做法', ...SUM_COLS].map(th))),
       h('tbody', {}, B.series.map(s => h('tr', { class: s === best ? 'yc-best' : null },
         h('th', { scope: 'row' }, s.name),
-        h('td', {}, fmtMoney(s.values.at(-1))), h('td', {}, signPct(s.ret)),
-        h('td', {}, `${fmtMoney(s.peak)}（${md(s.peakDate)}）`), h('td', {}, absPct(s.giveback)),
-        h('td', {}, absPct(s.mdd)), h('td', {}, s.dividendTotal ? fmtMoney(s.dividendTotal) : '—')))))),
+        cell(0, fmtMoney(s.values.at(-1))), cell(1, signPct(s.ret)),
+        cell(2, `${fmtMoney(s.peak)}（${md(s.peakDate)}）`), cell(3, absPct(s.giveback)),
+        cell(4, absPct(s.mdd)), cell(5, s.dividendTotal ? fmtMoney(s.dividendTotal) : '—')))))),
     h('p', {}, `目前最多：${best.name}（${signPct(best.ret)}）。從最高點回吐最多：${worst.name}（${absPct(worst.giveback)}）。`)),
   h('section', { class: 'card' }, h('h2', {}, '每個月底變多少（萬元）'),
-    wrap('每個月底資產表，可橫向捲動', h('table', {}, h('caption', {}, '各做法每個月最後一個交易日的資產（萬元）'),
-      h('thead', {}, h('tr', {}, th('做法'), B.months.map((m, i) => th(i === last ? md(m.date) : mm(m.date) + '月')))),
-      h('tbody', {}, B.series.map(s => h('tr', {}, h('th', { scope: 'row' }, s.name), s.monthly.map(v => h('td', {}, Math.round(v / 1e4))))))))),
+    wrap('每個月底資產表', h('table', { class: 'yc-table yc-month' }, h('caption', {}, '各做法每個月最後一個交易日的資產（萬元）'),
+      h('thead', {}, h('tr', {}, th('月'), B.series.map(s => th(SHORT[s.id] || s.name)))),
+      h('tbody', {}, B.months.map((m, i) => h('tr', {}, h('th', { scope: 'row' }, i === last ? md(m.date) : mm(m.date) + '月'),
+        B.series.map(s => h('td', {}, Math.round(s.monthly[i] / 1e4)))))))),
+    h('p', { class: 'muted yc-legend' }, B.series.map(s => (SHORT[s.id] || s.name) + '＝' + s.name).join('；') + '。')),
   h('section', { class: 'card' }, h('h2', {}, '中間發生了什麼'),
     B.series.map(s => {
       const is56 = s.id === 'h0056';

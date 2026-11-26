@@ -297,3 +297,22 @@ details.group .shortcuts{margin-top:4px}
 .wizard-mode button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);box-shadow:var(--shadow-sm)}
 .wizard-part{border:0;border-top:2px solid var(--line);margin:16px 0 0;padding:12px 0 0}
 .wizard-part > legend{font-size:17px;font-weight:900;padding:0 6px 0 0}
+/* ㉘ 表格：欄寬依內容（不平分），手機上成績表改成一做法一張卡、每月表轉直 */
+.yc-table{table-layout:auto}
+.yc-table th[scope=row]{white-space:nowrap;text-align:left}
+.yc-month :is(th,td){padding:6px 4px;text-align:right}
+.yc-month thead th{text-align:right;white-space:nowrap}
+.yc-legend{font-size:13px;margin:8px 0 0}
+@media (max-width:600px){
+  .yc-stack thead{display:none}
+  .yc-stack,.yc-stack tbody,.yc-stack caption{display:block}
+  .yc-stack tr{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;padding:10px 12px;border-bottom:2px solid var(--line)}
+  .yc-stack tr:last-child{border-bottom:0}
+  .yc-stack th[scope=row]{grid-column:1/-1;background:none;color:var(--text);padding:0;border:0;font-size:16px}
+  .yc-stack td{display:block;text-align:left;padding:0;border:0;white-space:nowrap}
+  .yc-stack td::before{content:attr(data-label);display:block;font-size:12px;color:var(--muted);font-weight:400}
+  .yc-month{font-size:13px}
+}
+.compare-wrap .yc-table{min-width:0}
+@media (max-width:600px){.compare-wrap .yc-stack :is(th,td){position:static;border-right:0}}
+@media (max-width:600px){.yc-stack td:nth-of-type(3){grid-column:1/-1}}
