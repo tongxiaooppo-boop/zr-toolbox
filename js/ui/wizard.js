@@ -1,6 +1,15 @@
 // 精靈元件（v5 新增；Opus 定，外包不得改簽名）。每個計算機都是「一步一畫面」：
 //   輸入步驟 1…N → 結果（逐項解說）。結果頁可以跳回任一步改參數重算。
 // 版面（v5.1，使用者 2026-11-09）：桌面（≥900px）左邊計算機、右邊說明欄；手機說明放在下方（步驟內、格子下）。結果步驟不分欄。
+// 兩種型態（v5.13，使用者 2026-11-26：「一頁完整＋一步步」）：wizard() 簽名不變，各頁不用改。
+//   頂端一列切換鈕 .wizard-mode：「一步一步」「一頁看完」（aria-pressed）；選擇存 localStorage 'zr-wizard-mode'＝'steps'|'page'
+//     （讀寫都包 try/catch，讀不到預設 'steps'）。切換時先把目前畫面的值 read 回 state（錯誤不擋），state 兩種型態共用。
+//   'page'：所有步驟依序排在同一張卡片，每步一個 <fieldset class="wizard-part" data-step="i">（標題「i+1. title」、hint、about＋figure 直接放步驟內、body、.wizard-error）。
+//     最上方「帶入範例」（有 example 才有）：state＝example、重畫全部步驟並顯示結果；最下方「算結果」＋「全部清空重來」。
+//     「算結果」：依序呼叫每步 read；第一個 throw 的步驟顯示錯誤並捲到那一步，不顯示結果；全部通過 → 下方 .result 顯示 result(state)，輸入保留在上方。
+//     某一步裡的 select／radio／checkbox 改變（change 事件）→ 先 read 所有步驟（錯誤不擋），再重畫它後面的步驟（後面步驟的欄位可能依前面選擇改變）；數字欄不觸發重畫。
+//     輸入框按 Enter＝「算結果」。右側說明欄（桌面）與 withHelp 照舊。
+//   'steps'：現行行為不變。
 // 介面：
 //   wizard({ steps, result, example })      回傳 <div class="wizard-layout">（左 section.card.wizard、右 aside.wizard-help）
 //     steps：[{ title, hint, about, figure, body(state) → Node[], read(state) }]

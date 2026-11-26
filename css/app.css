@@ -220,7 +220,7 @@ main:has(.wizard-layout){max-width:1120px}
 .choices span { min-width: 0; }
 .alloc-bar { display: flex; height: 28px; border: 2px solid var(--line); border-radius: 8px; overflow: hidden; box-sizing: content-box; margin-block: 16px; }
 .alloc-bar span { display: flex; justify-content: center; align-items: center; min-width: 0; font-size: 12px; font-weight: 700; }
-.alloc-safe { background: #1f3a68; color: #fff; }
+.alloc-steady { background: #1f3a68; color: #fff; }
 .alloc-growth { background: #f2b134; color: #202020; }
 .alloc-bold { background: #c0392b; color: #fff; }
 .quiz-buckets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
@@ -231,7 +231,7 @@ ul.checks { list-style: none; padding-inline-start: 0; }
 ul.checks li { margin-block: 10px; overflow-wrap: anywhere; }
 @media (max-width: 600px) { .quiz-buckets { grid-template-columns: minmax(0, 1fr); } }
 @media (prefers-color-scheme: dark) {
-  .alloc-safe { background: #7294c8; color: #17202e; }
+  .alloc-steady { background: #7294c8; color: #17202e; }
   .alloc-growth { background: #f7c85e; color: #17202e; }
   .alloc-bold { background: #e58679; color: #17202e; }
 }

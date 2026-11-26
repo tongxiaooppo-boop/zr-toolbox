@@ -85,10 +85,11 @@ test('riskquiz: errors', () => {
   assert.throws(() => scoreQuiz([5, 4, 4, 3, 4, 5, 4, 3, 4, undefined]), /第 10 題還沒選/);
 });
 
-import { BUCKETS, ALLOC, allocationPlan } from '../js/core/riskquiz.js';
+import { BUCKETS, ALLOC, allocationPlan, RESERVE, reservePlan } from '../js/core/riskquiz.js';
 
 test('allocation: every cell sums to 100; dominant bucket ≥ 50; bold shrinks with age', () => {
-  assert.deepEqual(BUCKETS.map(b => b.key), ['safe', 'growth', 'bold']);
+  assert.deepEqual(BUCKETS.map(b => b.key), ['steady', 'growth', 'bold']);
+  assert.deepEqual(BUCKETS.map(b => b.label), ['穩健', '成長', '積極']);
   const main = { conservative: 0, balanced: 0, growthHigh: 1, growthLow: 1, aggressive: 2 };
   for (const [row, cells] of Object.entries(ALLOC)) {
     assert.equal(cells.length, 5, row);
@@ -101,7 +102,7 @@ test('allocation: every cell sums to 100; dominant bucket ≥ 50; bold shrinks w
 });
 
 test('allocation: lookups by type, age (Q1 score) and loss (Q8 score)', () => {
-  const pick = p => [p.safe, p.growth, p.bold];
+  const pick = p => [p.steady, p.growth, p.bold];
   assert.deepEqual(pick(allocationPlan({ key: 'aggressive', age: 5, loss: 5 })), [20, 30, 50]);   // 5/3/2 原型
   assert.deepEqual(pick(allocationPlan({ key: 'aggressive', age: 1, loss: 5 })), [50, 30, 20]);
   assert.deepEqual(pick(allocationPlan({ key: 'balanced', age: 4, loss: 3 })), [50, 30, 20]);
@@ -114,4 +115,26 @@ test('allocation: lookups by type, age (Q1 score) and loss (Q8 score)', () => {
   assert.throws(() => allocationPlan({ key: 'x', age: 3, loss: 3 }), /型態不對/);
   assert.throws(() => allocationPlan({ key: 'growth', age: 0, loss: 3 }), /第 1 題/);
   assert.throws(() => allocationPlan({ key: 'growth', age: 3, loss: NaN }), /第 8 題/);
+});
+
+// v5.13（決策 2026-11-26 三桶改版）：保守（先留）不算三桶；例子照 R13 v2，2886、5880、0056 不放穩健
+test('reserve: 保守（先留） is outside the three buckets; examples come from R13 v2', () => {
+  assert.equal(RESERVE.label, '保守（先留）'); assert.equal(RESERVE.months, 6); assert.equal(RESERVE.years, 3);
+  assert.deepEqual(RESERVE.examples.map(e => e.name), ['定存、活存', '台幣貨幣市場基金', 'SGOV（複委託）']);
+  const all = JSON.stringify(BUCKETS);
+  assert.ok(!/保守/.test(all), '三桶裡不能再有「保守」');
+  for (const code of ['2886', '5880', 'VT 類']) assert.ok(!all.includes(code), code);
+  assert.ok(BUCKETS[1].examples.some(e => e.name === '0056'), '0056 在成長桶');
+  for (const b of BUCKETS) for (const e of b.examples) assert.ok(e.name && e.note, b.key);
+});
+test('reserve: reservePlan by Q3 (cash) and Q6 (horizon) scores', () => {
+  const ok = reservePlan({ cash: 4, horizon: 3 });
+  assert.equal(ok.cashOk, true); assert.equal(ok.horizonOk, true); assert.equal(ok.lines.length, 1);
+  const lowCash = reservePlan({ cash: 2, horizon: 5 });
+  assert.equal(lowCash.cashOk, false); assert.equal(lowCash.lines.length, 1); assert.match(lowCash.lines[0], /補到 6 個月/);
+  const both = reservePlan({ cash: 3, horizon: 2 });
+  assert.equal(both.cashOk, false); assert.equal(both.horizonOk, false); assert.equal(both.lines.length, 2);
+  assert.match(both.lines[1], /3 年內/);
+  assert.throws(() => reservePlan({ cash: 0, horizon: 3 }), /第 3 題/);
+  assert.throws(() => reservePlan({ cash: 3, horizon: NaN }), /第 6 題/);
 });

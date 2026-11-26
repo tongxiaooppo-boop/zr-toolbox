@@ -10,7 +10,7 @@ const card = t => h('a', { class: 'tool-card' + (t.status === 'ready' ? '' : ' p
   h('p', {}, t.oneLine));
 
 document.getElementById('app').append(
-  h('h1', { class: 'site-title' }, '正2工具箱與股市學堂'),
+  h('h1', { class: 'site-title' }, '股票兩三件事'),
   h('p', { class: 'slogan' }, SLOGANS[new Date().getDate() % SLOGANS.length]),
   h('p', { class: 'site-sub' }, '點一張卡片就能算；看不懂的詞，點旁邊的 ⓘ。'),
   h('figure', { class: 'hero' },

@@ -82,17 +82,58 @@ export function scoreQuiz(answers) {
   return { total, scoreKey, key, profile, caps, zr: { ok: checks.every(c => c.ok), checks } };
 }
 
-// ---------- 三桶配置（v5.12，決策 docs/decision/決策-2026-11-25-投資屬性配置.md；比例照 R11 5.3） ----------
-//   BUCKETS：[{ key:'safe'|'growth'|'bold', label, examples[] }]（內容是使用者定義的類別與例子，不排序、不是推薦）
-//   ALLOC：四型 × 五個年齡段（依第 1 題分數 5→1：未滿 30、30–39、40–49、50–59、60 以上）的 [safe, growth, bold] 百分比
-//     成長型分兩列：growthHigh（第 8 題能接受 -30% 以上）、growthLow（-20% 以內）
-//     規則：主力桶守 50；積極桶隨年齡遞減，減掉的移到保守穩健桶。RR 只當參考、不限制各桶商品。
+// ---------- 三桶配置（v5.13，決策 docs/decision/決策-2026-11-26-三桶改版.md；比例照 R11 5.3；例子照 R13 v2） ----------
+//   RESERVE：保守（先留）＝生活預備金＋幾年內要用的錢，**不算在三桶（5/3/2）裡**，先留好，剩下的才分三桶
+//     { label, months: 6, years: 3, examples: [{ name, note }] }
+//   reservePlan({ cash, horizon }) cash＝第 3 題分數、horizon＝第 6 題分數（1–5 整數）
+//     → { cashOk, horizonOk, lines: string[] }；cashOk＝備用金 6 個月以上（cash ≥ 4）；horizonOk＝3 年以上不動用（horizon ≥ 3）
+//     lines：給結果頁的白話句子（cashOk、horizonOk 都 true 時只有 1 句）
+//   BUCKETS：[{ key:'steady'|'growth'|'bold', label, examples: [{ name, note }] }]（不排序、不是推薦）
+//   ALLOC：四型 × 五個年齡段（依第 1 題分數 5→1：未滿 30、30–39、40–49、50–59、60 以上）的 [steady, growth, bold] 百分比
+//     分母＝扣掉保守（先留）之後的可投資金額。成長型分兩列：growthHigh（第 8 題能接受 -30% 以上）、growthLow（-20% 以內）
+//     規則：主力桶守 50；積極桶隨年齡遞減，減掉的移到穩健桶。RR 只當參考、不限制各桶商品。
 //   allocationPlan({ key, age, loss }) key＝scoreQuiz 的最終型態；age＝第 1 題分數；loss＝第 8 題分數
-//     → { safe, growth, bold, band, row }（百分比整數，合計 100；band＝年齡段文字；row＝用到的列名）
+//     → { steady, growth, bold, band, row }（百分比整數，合計 100；band＝年齡段文字；row＝用到的列名）
+export const RESERVE = Object.freeze({
+  label: '保守（先留）', months: 6, years: 3,
+  examples: Object.freeze([
+    { name: '定存、活存', note: '本金不會跌；定存提前解約，利息會變少。' },
+    { name: '台幣貨幣市場基金', note: 'RR1，用基金平台買；淨值很少變動，但不是存款。' },
+    { name: 'SGOV（複委託）', note: '超短期美國公債；只適合預留「要用美元」的錢，換回台幣會有匯率漲跌。' }
+  ])
+});
+
+export function reservePlan({ cash, horizon }) {
+  if (!Number.isInteger(cash) || cash < 1 || cash > 5) throw new Error('第 3 題還沒選。');
+  if (!Number.isInteger(horizon) || horizon < 1 || horizon > 5) throw new Error('第 6 題還沒選。');
+  const cashOk = cash >= 4, horizonOk = horizon >= 3, lines = [];
+  if (!cashOk) lines.push('你的備用金不到 6 個月生活費：先把它補到 6 個月，放在定存或貨幣市場基金，再開始投資。');
+  if (!horizonOk) lines.push('這筆錢 3 年內就會用到：它應該放保守（先留），不要拿去分三桶。');
+  if (cashOk && horizonOk) lines.push('你的備用金已經有 6 個月以上，這筆錢也 3 年以上不會動用，可以照下面的比例分三桶。');
+  return { cashOk, horizonOk, lines };
+}
+
 export const BUCKETS = Object.freeze([
-  { key: 'safe', label: '保守穩健', examples: ['債券、債券 ETF', '定存股（電信、官股銀行…）', '00713', 'VT 類全球股'] },
-  { key: 'growth', label: '成長', examples: ['0050', 'QQQ', 'SPY'] },
-  { key: 'bold', label: '積極', examples: ['主動式 ETF', '正2', '個股'] }
+  { key: 'steady', label: '穩健', examples: Object.freeze([
+    { name: '短天期美債 ETF（00719B、00865B；複委託 SHY）', note: '有匯率風險；換成台幣，2020 年最多跌約 7–8%。' },
+    { name: '投資等級公司債 ETF（00720B）', note: '20 年以上的長天期債，利率上升時也會跌；2020、2022 年都跌近三成。' },
+    { name: '股債配置 ETF（複委託 AOM、AOR）', note: '股票約四成到六成、其餘是債券；2022 年約跌兩成。' },
+    { name: '00713、00878', note: '高股息股票 ETF，還是股票；2022 年約跌兩成，0050 同年約跌三成六。' },
+    { name: '定存股（例：2412 中華電）', note: '單一公司，有集中風險；2022 年約跌兩成。' }
+  ]) },
+  { key: 'growth', label: '成長', examples: Object.freeze([
+    { name: '0050、006208', note: '台灣 50 大公司；2022 年約跌三成五。' },
+    { name: '0056', note: '高股息，但 2022 年約跌三成二，跟 0050 差不多深，所以放這一桶。' },
+    { name: '00646、00662', note: '台灣掛牌、追蹤美國 S&P 500／Nasdaq-100，用證券戶就能買。' },
+    { name: 'VT、VOO、SPY（複委託）', note: '全球或美國大盤；股利會先被扣 30% 的稅。' },
+    { name: 'QQQ（複委託）', note: '集中在科技股；2022 年約跌三成五。' }
+  ]) },
+  { key: 'bold', label: '積極', examples: Object.freeze([
+    { name: '正2（00631L、00675L、00663L）', note: '每天 2 倍；2020、2022 年都跌過約五成。' },
+    { name: '主動式 ETF（例：00981A）', note: '經理人自己挑股，2025 年才上市，集中在電子股。' },
+    { name: '主題型 ETF（00891 半導體、00757 FANG+）', note: '集中單一產業或少數公司；00891 在 2022 年約跌四成六。' },
+    { name: '個股', note: '押在單一公司，看錯沒有分散保護。' }
+  ]) }
 ]);
 
 export const AGE_BANDS = Object.freeze(['60 歲以上', '50–59 歲', '40–49 歲', '30–39 歲', '未滿 30 歲']); // 依第 1 題分數 1–5
@@ -111,6 +152,6 @@ export function allocationPlan({ key, age, loss }) {
   if (!Number.isInteger(age) || age < 1 || age > 5) throw new Error('第 1 題還沒選。');
   if (!Number.isInteger(loss) || loss < 1 || loss > 5) throw new Error('第 8 題還沒選。');
   const row = key === 'growth' ? (loss >= 4 ? 'growthHigh' : 'growthLow') : key;
-  const [safe, growth, bold] = ALLOC[row][5 - age];
-  return { safe, growth, bold, band: AGE_BANDS[age - 1], row };
+  const [steady, growth, bold] = ALLOC[row][5 - age];
+  return { steady, growth, bold, band: AGE_BANDS[age - 1], row };
 }
