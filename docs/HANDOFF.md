@@ -8,7 +8,11 @@
 - **配色（使用者：不要綠色、溫和上漲帶希望）**：卡片暖象牙 `#fff6e2`、結果卡淡杏、漲／賺＝台股紅橘 `--ok:#c2410c`、跌／虧＝藍灰 `--bad:#3d4f7a`、錯誤提示改琥珀；圖表第 4 條線青綠改玫瑰紅 `#d6336c`。⚠ `img/yearcheck/giveback.svg` 的「報酬」箭頭仍是綠色（舊圖，未改）。
 - **㉘ 手機不用橫拉**：全站 `.compare-wrap table{min-width:900px}` 是元兇；㉘ 兩表加 `.yc-table`（欄寬依內容）、成績表手機變卡片（`.yc-stack`＋`data-label`）、每月表轉成「月 × 做法」短欄名（`.yc-month`）。其他頁的寬表（科普比較表等）仍是 900px 橫拉，未動。
 - **㉚ 正2 上市以來（新工具 longrun）**：00675L 是 4 檔台股正2 中唯一上市以來沒分割的（00631L 2026-03-31、00663L 2025-06-11、00685L 2026-07-07 都分割過）。兩種算法：上市日 2016-10-05 投入 100 萬放到現在（每年報酬、年化、可勾選線＋等比刻度圖）、每年年初各投入 100 萬（各年獨立，加「贏 0050 的年數」）；比較正2 四種做法＋0050 長抱（配息買回、2025-06-18 1 拆 4 已換算）。Opus：`runBacktest` v5.14（strategies／splits／reinvest／每年季配回／years／cagr）＋5 項測試、`scripts/longrun-update.mjs`→`js/data/longrun.js`（全押 19,881,334、0050 6,876,535、2020 全押 +64.68% 用 Python 獨立重算一致；2026 列＝㉘）、`lineChart` 5 條線／`log`（1-2-5 格線）／`color` 固定色、驗收 `scripts/check-longrun.mjs`；Sonnet 做頁面（`to-sonnet-longrun.md`）；Opus 修手機版（勾選膠囊、長欄整行、年份兩行、圖加高 280＋圖例附現值）。tests 203、smoke 30。**每月底「更新年初 100 萬」時兩支都要跑：`node scripts/backtest-update.mjs` 和 `node scripts/longrun-update.mjs`**，再 gen-precache、test、commit。
+- **頁首返回鈕**：`toolHeader` 的「← 工具箱」小字改成跟頁尾同款按鈕「← 回工具箱」（`.tool-header .back`），30 頁一起生效。
 - 115 年度基本生活費 2026-11-26 查仍未公告（往年 11/27–28），之後再查。
+- 狀態：全部已 push（a836830 之後只有本交接檔），tests 203、smoke 30。
+- **下次可做（待使用者挑）**：① 查 115 年度基本生活費 → 改 `js/core/divtax.js` `TAX_YEARS[115]`；② `img/yearcheck/giveback.svg` 綠色箭頭改色（㉘㉚ 共用）；③ 其他頁 900px 寬表（科普比較表、借錢管道表）比照 ㉘ 做手機版；④ 壓力測試照新三桶重算；⑤ GitHub Actions 每月更新按鈕（延後中）。
+- 工具：手機截圖可用無頭 Chrome（參考 `scripts/smoke.mjs` 的 CDP 寫法，`Emulation.setDeviceMetricsOverride` 390 寬；`Emulation.setEmulatedMedia` 切深淺色）。暫存腳本放 scratchpad，不進 repo。
 
 ## 2026-11-26 進度
 
