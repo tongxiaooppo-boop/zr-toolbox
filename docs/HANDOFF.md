@@ -4,7 +4,7 @@
 
 - **theme-color 改深海軍藍 `#1f3a68`**（index、manifest、29 個工具頁；calc-guide.html 本來就沒有這個 meta）。
 - **計算機頁面文案白話化**：護欄 `scripts/check-plain-pages.mjs`（Opus 寫：程式骨架不准變、字串內英數字／數字／算式符號不准變、alt／src／id／class 等不准改；支援 `路徑=替代檔` 自我測試）＋任務書 `collab/to-sonnet-plain-pages.md`，3 個 Sonnet 平行改 `js/pages/*.js`，30 檔 5,536 字串改寫 121 個（原文多半已白話，沒硬改）。Opus 抽讀 cost／dividend／pledge／retire／margin／exposure／trigger5050 前後對照無誤。tests 198、smoke 29 全過。
-- **App 圖示**：Codex 交 3 款候選（`docs/figures/cartoon/out/icon2-*.png`，out 目錄 gitignore；提示檔 `icon-02-投資成長.md` 未 commit），**使用者不滿意，改請 sol 自己構想**。回來後 Opus 看預覽、使用者挑，再縮 192/512 換上。
+- **App 圖示**：Codex 交 3 款候選（`docs/figures/cartoon/out/icon2-*.png`，out 目錄 gitignore；提示檔 `icon-02-投資成長.md` 未 commit），使用者不滿意，改請 sol 自己構想 → **使用者選定「小孩推雪球」（複利滾雪球）**，已換上：原圖縮 88% 置中、四周補底色 (26,52,101)，讓圖案落在 maskable 安全圓（半徑 40%）內；1024 原檔 `docs/figures/icon-snowball-1024.png`。
 - 115 年度基本生活費 2026-11-26 查仍未公告（往年 11/27–28），之後再查。
 
 ## 2026-11-26 進度
