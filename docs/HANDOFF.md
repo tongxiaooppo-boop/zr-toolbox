@@ -5,6 +5,9 @@
 - **theme-color 改深海軍藍 `#1f3a68`**（index、manifest、29 個工具頁；calc-guide.html 本來就沒有這個 meta）。
 - **計算機頁面文案白話化**：護欄 `scripts/check-plain-pages.mjs`（Opus 寫：程式骨架不准變、字串內英數字／數字／算式符號不准變、alt／src／id／class 等不准改；支援 `路徑=替代檔` 自我測試）＋任務書 `collab/to-sonnet-plain-pages.md`，3 個 Sonnet 平行改 `js/pages/*.js`，30 檔 5,536 字串改寫 121 個（原文多半已白話，沒硬改）。Opus 抽讀 cost／dividend／pledge／retire／margin／exposure／trigger5050 前後對照無誤。tests 198、smoke 29 全過。
 - **App 圖示**：Codex 交 3 款候選（`docs/figures/cartoon/out/icon2-*.png`，out 目錄 gitignore；提示檔 `icon-02-投資成長.md` 未 commit），使用者不滿意，改請 sol 自己構想 → **使用者選定「小孩推雪球」（複利滾雪球）**，已換上：原圖縮 88% 置中、四周補底色 (26,52,101)，讓圖案落在 maskable 安全圓（半徑 40%）內；1024 原檔 `docs/figures/icon-snowball-1024.png`。
+- **配色（使用者：不要綠色、溫和上漲帶希望）**：卡片暖象牙 `#fff6e2`、結果卡淡杏、漲／賺＝台股紅橘 `--ok:#c2410c`、跌／虧＝藍灰 `--bad:#3d4f7a`、錯誤提示改琥珀；圖表第 4 條線青綠改玫瑰紅 `#d6336c`。⚠ `img/yearcheck/giveback.svg` 的「報酬」箭頭仍是綠色（舊圖，未改）。
+- **㉘ 手機不用橫拉**：全站 `.compare-wrap table{min-width:900px}` 是元兇；㉘ 兩表加 `.yc-table`（欄寬依內容）、成績表手機變卡片（`.yc-stack`＋`data-label`）、每月表轉成「月 × 做法」短欄名（`.yc-month`）。其他頁的寬表（科普比較表等）仍是 900px 橫拉，未動。
+- **㉚ 正2 上市以來（新工具 longrun）**：00675L 是 4 檔台股正2 中唯一上市以來沒分割的（00631L 2026-03-31、00663L 2025-06-11、00685L 2026-07-07 都分割過）。兩種算法：上市日 2016-10-05 投入 100 萬放到現在（每年報酬、年化、可勾選線＋等比刻度圖）、每年年初各投入 100 萬（各年獨立，加「贏 0050 的年數」）；比較正2 四種做法＋0050 長抱（配息買回、2025-06-18 1 拆 4 已換算）。Opus：`runBacktest` v5.14（strategies／splits／reinvest／每年季配回／years／cagr）＋5 項測試、`scripts/longrun-update.mjs`→`js/data/longrun.js`（全押 19,881,334、0050 6,876,535、2020 全押 +64.68% 用 Python 獨立重算一致；2026 列＝㉘）、`lineChart` 5 條線／`log`（1-2-5 格線）／`color` 固定色、驗收 `scripts/check-longrun.mjs`；Sonnet 做頁面（`to-sonnet-longrun.md`）；Opus 修手機版（勾選膠囊、長欄整行、年份兩行、圖加高 280＋圖例附現值）。tests 203、smoke 30。**每月底「更新年初 100 萬」時兩支都要跑：`node scripts/backtest-update.mjs` 和 `node scripts/longrun-update.mjs`**，再 gen-precache、test、commit。
 - 115 年度基本生活費 2026-11-26 查仍未公告（往年 11/27–28），之後再查。
 
 ## 2026-11-26 進度

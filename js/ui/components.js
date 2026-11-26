@@ -142,7 +142,14 @@ export function lineChart({ series, label, yFormat = String, baseline, height = 
   const pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
   const W = 360, L = 56, R = 8, T = 8, B = xTicks?.length ? 22 : 8, iw = W - L - R, ih = height - T - B;
   const x = i => L + iw * i / (n - 1), y = v => T + ih * (hi - f(v)) / (hi - lo);
-  const ticks = [hi - pad, (hi + lo) / 2, lo + pad].map(inv);
+  let ticks = [hi - pad, (hi + lo) / 2, lo + pad].map(inv);
+  if (log) { // 等比刻度：格線取 1、2、5 × 10ⁿ 這種好讀的數，最多 5 條
+    const nice = [], a = inv(lo + pad), b = inv(hi - pad);
+    for (let e = Math.floor(Math.log10(a)); e <= Math.ceil(Math.log10(b)); e++) for (const m of [1, 2, 5]) { const v = m * 10 ** e; if (v >= a * 0.999 && v <= b * 1.001) nice.push(v); }
+    const tens = nice.filter(v => Number.isInteger(Math.log10(v))); // 太多條就只留 10ⁿ
+    const pick = nice.length > 5 ? tens : nice;
+    if (pick.length >= 2) ticks = pick;
+  }
   const svg = s('svg', { viewBox: `0 0 ${W} ${height}`, role: 'img', 'aria-label': label },
     ticks.map(t => [s('line', { class: 'grid', x1: L, x2: W - R, y1: y(t), y2: y(t) }),
       s('text', { class: 'tick', x: L - 4, y: y(t) + 4, 'text-anchor': 'end' }, yFormat(t))]),

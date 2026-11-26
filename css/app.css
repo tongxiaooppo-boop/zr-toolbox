@@ -317,3 +317,18 @@ details.group .shortcuts{margin-top:4px}
 @media (max-width:600px){.compare-wrap .yc-stack :is(th,td){position:static;border-right:0}}
 @media (max-width:600px){.yc-stack td:nth-of-type(3){grid-column:1/-1}}
 .chart .s4{stroke:var(--brand)}.chart .key.s4::before{background:var(--brand)}
+/* ㉚ longrun：勾選列改成小膠囊；成績卡長欄佔整行；每年表數字不斷行、年份可換行 */
+#lump .choices{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+#lump .choices legend{font-size:14px;font-weight:700;margin-bottom:4px}
+#lump .choices label{min-height:36px;padding:4px 10px;gap:6px;border:2px solid var(--line);border-radius:999px;font-size:14px}
+#lump .choices input{flex:0 0 auto;width:18px;height:18px;min-height:0;margin:0}
+.compare-wrap .yc-month td{white-space:nowrap}
+.compare-wrap .yc-month th[scope=row]{white-space:normal;min-width:4.2em}
+@media (max-width:600px){
+  #lump .yc-stack td:nth-of-type(3){grid-column:auto}
+  #lump .yc-stack td:nth-of-type(4),#lump .yc-stack td:nth-of-type(5){grid-column:1/-1}
+  .yc-month :is(th,td){padding:5px 2px}
+  .compare-wrap .yc-month{font-size:12px}
+  .compare-wrap .yc-month th[scope=row]{min-width:3.4em}
+}
+.yc-part{display:block;font-size:11px;font-weight:400;white-space:nowrap}
