@@ -18,6 +18,7 @@ export const ZR_SUBS = Object.freeze([
 export const TOOLS = Object.freeze([
   { id: 'zr101', no: '㉔', group: 'zr', sub: 'learn', title: '正二教學', oneLine: '正二是什麼、為什麼不是整段 2 倍、常見做法與大仁 50/50 原文結果，照順序帶你用工具', href: 'tools/zr101.html', gate: 6, status: 'ready', terms: ['daily-2x', 'volatility-decay', 'rebalance', 'exposure'] },
   { id: 'yearcheck', no: '㉘', group: 'zr', sub: 'learn', title: '年初 100 萬，現在變多少', oneLine: '今年年初投入 100 萬，正2 四種做法和 0050、0056、00981A 長抱，到現在各變多少、中間怎麼起伏', href: 'tools/yearcheck.html', gate: 6, status: 'ready', terms: [] },
+  { id: 'longrun', no: '㉚', group: 'zr', sub: 'learn', title: '正2 上市以來，每年變多少', oneLine: '00675L 上市那天投入 100 萬放到現在，和每年年初各投入 100 萬，正2 四種做法對比 0050', href: 'tools/longrun.html', gate: 6, status: 'planned', terms: [] },
   { id: 'recover', no: '㉕', group: 'zr', sub: 'learn', title: '正2 虧了，要漲多少才回本', oneLine: '正2 虧 X%，自己要漲多少、大盤要漲多少；不動、攤平、換 0050 三條路並排比較', href: 'tools/recover.html', gate: 6, status: 'ready', terms: ['daily-2x', 'volatility-decay', 'recovery-gain'] },
   { id: 'decay', no: '⑥', group: 'zr', sub: 'learn', title: '正二不是兩倍？', oneLine: '每日 2 倍的複利偏離與波動耗損', href: 'tools/decay.html', gate: 2, status: 'ready', terms: ['daily-2x', 'volatility-decay', 'tracking-error'] },
   { id: 'glossary', no: '⑫', group: 'science', title: '術語辭典', oneLine: 'Beta、維持率、口徑、再平衡……一句白話', href: 'tools/glossary.html', gate: 1, status: 'ready', terms: [] },

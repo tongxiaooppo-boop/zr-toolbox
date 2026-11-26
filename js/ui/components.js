@@ -127,27 +127,31 @@ function s(tag, attrs = {}, ...children) {
   for (const c of children.flat(Infinity)) if (c != null) el.append(c instanceof Node ? c : document.createTextNode(String(c)));
   return el;
 }
-export function lineChart({ series, label, yFormat = String, baseline, height = 200, xTicks }) {
+// series[i].color：選填 0–4，固定顏色（勾選隱藏線時顏色不跳）；沒給就照順序。
+// log：true＝等比刻度（數值要都 > 0；格線取最高、最低與幾何中點）。v5.14 起最多 5 條線。
+export function lineChart({ series, label, yFormat = String, baseline, height = 200, xTicks, log = false }) {
   if (!label) throw new Error('lineChart 需要 label');
-  if (!Array.isArray(series) || series.length < 1 || series.length > 4) throw new Error('lineChart 需要 1–4 條線');
+  if (!Array.isArray(series) || series.length < 1 || series.length > 5) throw new Error('lineChart 需要 1–5 條線');
   const n = series[0].values.length;
   if (n < 2 || series.some(x => x.values.length !== n || x.values.some(v => !Number.isFinite(v)))) throw new Error('lineChart 每條線要有等長且有效的數值');
-  const all = series.flatMap(x => x.values).concat(baseline ?? []);
+  if (log && series.some(x => x.values.some(v => !(v > 0)))) throw new Error('lineChart 等比刻度的數值要大於 0');
+  const f = log ? Math.log : v => v, inv = log ? Math.exp : v => v;
+  const all = series.flatMap(x => x.values).concat(baseline ?? []).map(f);
   let lo = Math.min(...all), hi = Math.max(...all);
   if (hi - lo < 1e-12) { lo -= 1; hi += 1; }
   const pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
   const W = 360, L = 56, R = 8, T = 8, B = xTicks?.length ? 22 : 8, iw = W - L - R, ih = height - T - B;
-  const x = i => L + iw * i / (n - 1), y = v => T + ih * (hi - v) / (hi - lo);
-  const ticks = [hi - pad, (hi + lo) / 2, lo + pad];
+  const x = i => L + iw * i / (n - 1), y = v => T + ih * (hi - f(v)) / (hi - lo);
+  const ticks = [hi - pad, (hi + lo) / 2, lo + pad].map(inv);
   const svg = s('svg', { viewBox: `0 0 ${W} ${height}`, role: 'img', 'aria-label': label },
     ticks.map(t => [s('line', { class: 'grid', x1: L, x2: W - R, y1: y(t), y2: y(t) }),
       s('text', { class: 'tick', x: L - 4, y: y(t) + 4, 'text-anchor': 'end' }, yFormat(t))]),
     (xTicks || []).map(t => s('text', { class: 'tick', x: x(t.index), y: height - 6, 'text-anchor': 'middle' }, t.text)),
     baseline != null ? s('line', { class: 'base', x1: L, x2: W - R, y1: y(baseline), y2: y(baseline) }) : null,
-    series.map((ser, k) => s('polyline', { class: 'line s' + k, fill: 'none',
+    series.map((ser, k) => s('polyline', { class: 'line s' + (ser.color ?? k), fill: 'none',
       points: ser.values.map((v, i) => x(i).toFixed(1) + ',' + y(v).toFixed(1)).join(' ') })));
   return h('figure', { class: 'chart' }, svg,
-    h('figcaption', { class: 'legend' }, series.map((ser, k) => h('span', { class: 'key s' + k }, ser.name))));
+    h('figcaption', { class: 'legend' }, series.map((ser, k) => h('span', { class: 'key s' + (ser.color ?? k) }, ser.name))));
 }
 
 const GENERAL = '僅供試算與教學，不構成投資建議。畫面上的預設數字是範例，不是建議值。';

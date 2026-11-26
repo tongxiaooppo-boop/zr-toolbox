@@ -7,6 +7,10 @@
 //     → { dates, months:[{ index, date }]（每月最後交易日）, series:[{ id, name, group, rule, values[], final, ret,
 //          peak, peakDate, giveback, mdd, mddDate, monthly[], events:[{ date, text }], dividendTotal }] }
 //   規則：第一天收盤價投入；股數取整數；買進付手續費、賣出付手續費＋證交稅（ETF 0.1%）；現金不計利息。
+//   v5.14（2026-11-26，㉚ 上市以來）：選填 strategies（id 陣列，只驗這些做法用到的代號）、splits（{ code: { date: 倍數 } }，
+//     當天開盤前股數 × 倍數，正2 的大仁基準 ÷ 倍數）、reinvest（true＝長抱組的配息當天買回同一檔）。
+//     每季配回改成每年 1、4、7、10 月第一個交易日（第一天除外）。
+//     另回傳 years:[{ year, from, to, partial }]，每個 series 加 years:[報酬]、cagr（以日曆天 365.25 年化）。
 //     大仁 50/50：正2 收盤價比基準漲跌 ≥50% 時配回五五，基準改成當天收盤價。
 //     每季配回：4、7、10 月的第一個交易日收盤配回目標比例（532：先調 0050 再調正2）。
 export const LEVER = '00675L';
@@ -23,17 +27,29 @@ export const STRATEGIES = Object.freeze([
 
 const NAMES = { [LEVER]: '正2', '0050': '0050', '0056': '0056', '00981A': '00981A' };
 
-export function runBacktest({ days, dividends = {}, start = 1e6, fee = 0.001425, tax = 0.001 }) {
+export function runBacktest({ days, dividends = {}, splits = {}, start = 1e6, fee = 0.001425, tax = 0.001, strategies, reinvest = false }) {
   if (!Array.isArray(days) || days.length < 2) throw new Error('至少要有 2 個交易日。');
-  for (const d of days) for (const c of Object.keys(NAMES)) {
+  const chosen = strategies ? STRATEGIES.filter(st => strategies.includes(st.id)) : STRATEGIES;
+  if (!chosen.length || (strategies && chosen.length !== strategies.length)) throw new Error('strategies 有不認得的做法。');
+  const codes = [...new Set(chosen.flatMap(st => [...Object.keys(st.target), ...(st.id === 'dajen' ? [LEVER] : [])]))];
+  for (const [code, byDate] of Object.entries(splits)) for (const k of Object.values(byDate)) {
+    if (!(Number.isInteger(k) && k >= 2)) throw new Error(`${code} 分割倍數要是 2 以上的整數。`);
+  }
+  for (const d of days) for (const c of codes) {
     if (!(d.px?.[c] > 0)) throw new Error(`${d.date} 缺 ${c} 收盤價。`);
   }
   const dates = days.map(d => d.date);
-  const quarterStarts = new Set(['04', '07', '10'].map(m => dates.find(x => x.slice(5, 7) === m)).filter(Boolean));
+  const quarterStarts = new Set(dates.filter((x, i) => i > 0 && ['01', '04', '07', '10'].includes(x.slice(5, 7)) && dates[i - 1].slice(0, 7) !== x.slice(0, 7)));
   const months = [];
   dates.forEach((x, i) => { if (i === dates.length - 1 || dates[i + 1].slice(0, 7) !== x.slice(0, 7)) months.push({ index: i, date: x }); });
 
-  const series = STRATEGIES.map(st => {
+  const yearEnds = [];
+  dates.forEach((x, i) => { if (i === dates.length - 1 || dates[i + 1].slice(0, 4) !== x.slice(0, 4)) yearEnds.push(i); });
+  const years = yearEnds.map((e, k) => ({ year: Number(dates[e].slice(0, 4)), from: k ? dates[yearEnds[k - 1]] : dates[0], to: dates[e],
+    partial: (k === 0 && dates[0].slice(5) > '01-10') || (k === yearEnds.length - 1 && dates[e].slice(5) < '12-20') }));
+  const calDays = (Date.parse(dates.at(-1)) - Date.parse(dates[0])) / 864e5;
+
+  const series = chosen.map(st => {
     const pos = { cash: start }, events = [];
     let dividendTotal = 0, base = days[0].px[LEVER];
     const value = d => pos.cash + Object.keys(pos).filter(k => k !== 'cash').reduce((s, k) => s + pos[k] * d.px[k], 0);
@@ -54,12 +70,22 @@ export function runBacktest({ days, dividends = {}, start = 1e6, fee = 0.001425,
     const values = days.map((d, i) => {
       if (i === 0) rebalance(d);
       else {
+        for (const [code, byDate] of Object.entries(splits)) {
+          const k = byDate[d.date];
+          if (!k) continue;
+          if (pos[code]) { pos[code] *= k; events.push({ date: d.date, text: `${NAMES[code]} 分割 1 拆 ${k}，股數變成 ${pos[code].toLocaleString()} 股` }); }
+          if (code === LEVER) base /= k;
+        }
         for (const [code, byDate] of Object.entries(dividends)) {
           const per = byDate[d.date];
           if (per && pos[code]) {
             const got = Math.round(pos[code] * per);
             pos.cash += got; dividendTotal += got;
             events.push({ date: d.date, text: `${NAMES[code]} 配息每股 ${per} 元，領 ${got.toLocaleString()} 元` });
+            if (reinvest && st.group === 'hold') {
+              const sh = toTarget(d, code, value(d));
+              if (sh > 0) events.push({ date: d.date, text: `配息買回 ${NAMES[code]} ${sh.toLocaleString()} 股` });
+            }
           }
         }
         if (st.id === 'dajen') {
@@ -85,7 +111,9 @@ export function runBacktest({ days, dividends = {}, start = 1e6, fee = 0.001425,
     const final = values.at(-1);
     return { id: st.id, name: st.name, group: st.group, rule: st.rule, values, final, ret: final / start - 1,
       peak, peakDate: dates[peakIdx], giveback: final / peak - 1, mdd, mddDate: dates[mddIdx],
-      monthly: months.map(m => values[m.index]), events, dividendTotal };
+      monthly: months.map(m => values[m.index]), events, dividendTotal,
+      years: yearEnds.map((e, k) => values[e] / (k ? values[yearEnds[k - 1]] : start) - 1),
+      cagr: calDays > 0 ? Math.pow(final / start, 365.25 / calDays) - 1 : 0 };
   });
-  return { dates, months, series };
+  return { dates, months, years, series };
 }

@@ -245,9 +245,9 @@ ul.checks li { margin-block: 10px; overflow-wrap: anywhere; }
 .path-nav h2{font-size:16px}
 .path-nav p{margin:8px 0}
 /* ㉘ yearcheck：第 4 條線與表格 */
-.chart .s3{stroke:#0e9f8e}.chart .key.s3::before{background:#0e9f8e}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .chart .s3{stroke:#5eead4}:root:not([data-theme="light"]) .chart .key.s3::before{background:#5eead4}}
-:root[data-theme="dark"] .chart .s3{stroke:#5eead4}:root[data-theme="dark"] .chart .key.s3::before{background:#5eead4}
+.chart .s3{stroke:#d6336c}.chart .key.s3::before{background:#d6336c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .chart .s3{stroke:#ff8fab}:root:not([data-theme="light"]) .chart .key.s3::before{background:#ff8fab}}
+:root[data-theme="dark"] .chart .s3{stroke:#ff8fab}:root[data-theme="dark"] .chart .key.s3::before{background:#ff8fab}
 .yc-table td.num{text-align:right;white-space:nowrap}
 .yc-best td,.yc-best th{font-weight:700}
 .yc-rules{margin:8px 0;padding-left:20px}
@@ -316,3 +316,4 @@ details.group .shortcuts{margin-top:4px}
 .compare-wrap .yc-table{min-width:0}
 @media (max-width:600px){.compare-wrap .yc-stack :is(th,td){position:static;border-right:0}}
 @media (max-width:600px){.yc-stack td:nth-of-type(3){grid-column:1/-1}}
+.chart .s4{stroke:var(--brand)}.chart .key.s4::before{background:var(--brand)}
