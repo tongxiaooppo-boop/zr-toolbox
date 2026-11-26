@@ -23,6 +23,7 @@ const steps = [
   {
     title: '你虧多少',
     hint: '選你手上有的數字。',
+    figure: { src: '../img/recover/comic.webp', alt: '三岔路口：不動等它漲回來、攤平再買一些、換成 0050。', caption: '先算清楚，每條路各要漲多少。' },
     body: s => selectField({ id: 'mode', label: '怎麼填虧損', termId: 'recovery-gain', value: s.mode || 'price', options: [
       { value: 'price', label: '填成本和現價' }, { value: 'pct', label: '直接填虧幾 %' }
     ] }),

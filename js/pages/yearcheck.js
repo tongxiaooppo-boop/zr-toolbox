@@ -29,6 +29,7 @@ const dividendCount = s => s.events.length;
 document.getElementById('app').append(
   toolHeader(TOOLS.find(t => t.id === 'yearcheck')),
   h('section', { class: 'card article' }, h('h2', {}, '這頁在算什麼'),
+    figure({ src: '../img/yearcheck/comic.webp', alt: '100 萬分進四個罐子：正2 四種做法、0050、0056、00981A。', caption: '過去不代表未來。' }),
     h('p', {}, `${B.start} 收盤投入 100 萬，照下面 7 種做法放著，算到 ${B.asOf}（共 ${B.tradingDays} 個交易日）。用的是每天真實的收盤價，不是預測。`),
     h('ul', {},
       h('li', {}, '手續費 0.1425%、ETF 賣出證交稅 0.1% 都算進去。'),

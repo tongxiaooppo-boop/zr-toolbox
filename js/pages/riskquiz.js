@@ -1,12 +1,13 @@
 import { h, toolHeader, figure, references, disclaimer, pathNav } from '../ui/components.js';
 import { wizard, explain } from '../ui/wizard.js';
-import { QUESTIONS, PROFILES, scoreQuiz, BUCKETS, allocationPlan } from '../core/riskquiz.js';
+import { QUESTIONS, PROFILES, scoreQuiz, BUCKETS, allocationPlan, RESERVE, reservePlan } from '../core/riskquiz.js';
 import { TOOLS } from '../data/tools.js';
 
 const tool = TOOLS.find(t => t.id === 'riskquiz');
 const steps = QUESTIONS.map((q, i) => ({
   title: `第 ${q.no} 題：${q.text}`,
   hint: q.hint,
+  figure: i === 0 ? { src: '../img/riskquiz/comic.webp', alt: '小安作答，前面四扇門：保守、穩健、成長、積極；老師說沒有好壞，只有適不適合。', caption: '10 題，找出你的投資屬性。' } : undefined,
   body: s => [h('fieldset', { class: 'choices', 'aria-label': q.text },
     ...q.options.map(o => h('label', {},
       h('input', { type: 'radio', name: `q-${q.id}`, value: o.score, checked: s.a?.[i] === o.score }),
@@ -20,8 +21,8 @@ const steps = QUESTIONS.map((q, i) => ({
 }));
 
 const meanings = {
-  conservative: '你最在意本金不要虧。資金以保守穩健為主，少量放成長型 ETF。',
-  balanced: '你能接受一些漲跌，但不想大起大落。一半放保守穩健，其餘放成長和少量積極。',
+  conservative: '你最在意本金不要虧。先把保守（先留）的錢留足，要投資的部分以穩健桶為主，少量放成長。',
+  balanced: '你能接受一些漲跌，但不想大起大落。一半放穩健，其餘放成長和少量積極。',
   growth: '你願意承受較大的漲跌換取長期成長。一半放成長型 ETF，其餘依你能承受的虧損分配。',
   aggressive: '你能承受很大的波動，也期待較高報酬。一半放積極部位，但要先想清楚最壞情況。'
 };
@@ -37,20 +38,24 @@ const reminders = [
 function result(s) {
   const r = scoreQuiz(s.a);
   const p = allocationPlan({ key: r.key, age: s.a[0], loss: s.a[7] });
-  const shares = [p.safe, p.growth, p.bold];
+  const shares = [p.steady, p.growth, p.bold];
   const count = r.zr.checks.filter(c => c.ok).length;
   let how = `10 題加總 ${r.total} 分（保守 10–24、穩健 25–33、成長 34–38、積極 39–50）。`;
   if (r.caps.length) how += `總分本來是${PROFILES.find(profile => profile.key === r.scoreKey).label}，但` + r.caps.map(c => c.text).join('');
-  let allocationHow = '依你的型態與年齡查表：每一型的主力桶占一半，年紀越大積極桶越少、移到保守穩健桶。';
+  let allocationHow = '依你的型態與年齡查表：每一型的主力桶占一半，年紀越大積極桶越少、移到穩健桶。';
   if (p.row === 'growthHigh') allocationHow += '第 8 題你能接受虧 30% 以上，所以積極桶放多一些。';
-  if (p.row === 'growthLow') allocationHow += '第 8 題你能接受的虧損在 20% 以內，所以保守穩健桶放多一些。';
+  if (p.row === 'growthLow') allocationHow += '第 8 題你能接受的虧損在 20% 以內，所以穩健桶放多一些。';
+  const reserve = reservePlan({ cash: s.a[2], horizon: s.a[5] });
   return [
     explain({ label: '你的投資屬性', value: r.profile.label, tone: 'info', how, means: meanings[r.key] }),
-    explain({ label: `三桶資金怎麼分（${p.band}）`, value: `保守穩健 ${p.safe}%／成長 ${p.growth}%／積極 ${p.bold}%`, how: allocationHow }),
-    h('div', { class: 'alloc-bar', role: 'img', 'aria-label': `保守穩健 ${p.safe}%，成長 ${p.growth}%，積極 ${p.bold}%` },
+    explain({ label: '先留：保守（先留）', value: '6 個月生活費＋3 年內要用的錢', how: '這筆錢不算在三桶裡，放定存、貨幣市場基金這類幾乎不會跌的地方；剩下的錢才分三桶。', means: reserve.lines.join(''), tone: reserve.cashOk && reserve.horizonOk ? 'ok' : 'warn' }),
+    h('p', { class: 'muted' }, RESERVE.examples.map(e => e.name).join('、')),
+    explain({ label: `剩下的錢分三桶（${p.band}）`, value: `穩健 ${p.steady}%／成長 ${p.growth}%／積極 ${p.bold}%`, how: allocationHow }),
+    h('div', { class: 'alloc-bar', role: 'img', 'aria-label': `穩健 ${p.steady}%，成長 ${p.growth}%，積極 ${p.bold}%` },
       ...BUCKETS.flatMap((bucket, i) => shares[i] ? [h('span', { class: `alloc-${bucket.key}`, style: `width:${shares[i]}%` }, `${shares[i]}%`)] : [])),
     h('div', { class: 'quiz-buckets' }, ...BUCKETS.map((bucket, i) => h('div', { class: 'bucket' },
-      h('h3', {}, `${bucket.label} ${shares[i]}%`), h('p', {}, bucket.examples.join('、'))))),
+      h('h3', {}, `${bucket.label} ${shares[i]}%`),
+      h('ul', {}, ...bucket.examples.map(e => h('li', {}, h('strong', {}, e.name), ' ', e.note)))))),
     h('p', { class: 'muted' }, '例子只是舉例、沒有排序，不是推薦買哪一檔。'),
     explain({ label: '如果你要放正2', value: `${count}／4 點符合`, tone: count === 4 ? 'ok' : 'warn' }),
     h('ul', { class: 'checks' }, ...r.zr.checks.map(c => h('li', {}, `${c.ok ? '✓' : '✗'} ${c.text}`))),
@@ -67,9 +72,9 @@ document.getElementById('app').append(
   wizard({ steps, result, example }),
   h('section', { class: 'card' }, h('h2', {}, '怎麼讀'),
     figure({ src: '../img/riskquiz/buckets.svg',
-      alt: '三桶資金：保守穩健桶，例子為債券 ETF、定存股、00713、VT；成長桶，例子為 0050、QQQ、SPY；積極桶，例子為主動式 ETF、正2、個股。積極型 20／30／50，穩健型 50／30／20，示意主力桶占一半。',
-      caption: '三桶依保守穩健、成長、積極排列，比例隨型態與年齡改變。' }),
-    h('p', {}, '測驗分數決定你的主力桶：保守和穩健型以保守穩健桶為主，成長型以成長桶為主，積極型以積極桶為主，主力桶大約占一半。'),
+      alt: '先留保守（先留）：定存、貨幣市場基金。剩下分三桶：穩健桶（債券 ETF、股債配置、高股息）、成長桶（0050、0056、S&P 500）、積極桶（正2、主動式 ETF、個股）。積極型 20／30／50，穩健型 50／30／20。',
+      caption: '先留保守的錢，剩下的依穩健、成長、積極分三桶。' }),
+    h('p', {}, '測驗分數決定你的主力桶：保守和穩健型以穩健桶為主，成長型以成長桶為主，積極型以積極桶為主，主力桶大約占一半。'),
     h('p', {}, '這不是券商的正式評估。各家問卷題目和門檻都不同，結果可能不一樣；正式買賣以你開戶的券商為準。'),
     h('p', {}, '想知道各屬性對應什麼商品、為什麼：', h('a', { href: 'riskprofile.html' }, '㉗ 投資屬性是什麼'))),
   pathNav('riskquiz'),

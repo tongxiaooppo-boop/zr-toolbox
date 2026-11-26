@@ -6,6 +6,9 @@ const links = ids => h('p', { class: 'related' }, '接著算：', ids.map((id, i
   const { no, title } = TOOLS.find(t => t.id === id);
   return [i ? '、' : '', h('a', { href: id + '.html' }, no + ' ' + title)];
 }));
+const FIGS = {
+  settle: { src: '../img/basics/settle.webp', alt: '時間線：T 日成交、T+1、T+2 上午 10 點前交割帳戶要有錢；錢不夠＝違約交割。', caption: '成交後第 2 個營業日扣款。' }
+};
 const q = h('input', { type: 'search', placeholder: '輸入關鍵字，例如 交割、漲跌停', class: 'glossary-filter', 'aria-label': '篩選術語' });
 const count = h('p', { class: 'muted', role: 'status', 'aria-live': 'polite' });
 const sections = BASIC_SECTIONS.map(s => {
@@ -18,6 +21,7 @@ const sections = BASIC_SECTIONS.map(s => {
   }));
   return { items, el: h('section', { class: 'card article', id: s.id }, h('h2', {}, s.title),
     s.id === 'order' ? figure({ src: '../img/basics/map.webp', alt: FIGURE_TEXT.map, caption: '送出前，先核對委託單上的四件事。' }) : null,
+    FIGS[s.id] ? figure(FIGS[s.id]) : null,
     h('p', {}, s.intro), items.map(item => item.el)) };
 });
 function filter() {

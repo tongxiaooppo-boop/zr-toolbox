@@ -8,6 +8,8 @@
 //     最上方「帶入範例」（有 example 才有）：state＝example、重畫全部步驟並顯示結果；最下方「算結果」＋「全部清空重來」。
 //     「算結果」：依序呼叫每步 read；第一個 throw 的步驟顯示錯誤並捲到那一步，不顯示結果；全部通過 → 下方 .result 顯示 result(state)，輸入保留在上方。
 //     某一步裡的 select／radio／checkbox 改變（change 事件）→ 先 read 所有步驟（錯誤不擋），再重畫它後面的步驟（後面步驟的欄位可能依前面選擇改變）；數字欄不觸發重畫。
+//     某步 body(state) throw（要等前面步驟的值，例 trigger5050、rebalance、exposure）→ 先畫 .wizard-part.waiting 提示，
+//       之後 change 或「算結果」時重畫；「算結果」時剛畫出來的步驟會停下提示「請先填這一步」。about 在這模式用 .part-about（不被搬到右欄）。
 //     輸入框按 Enter＝「算結果」。右側說明欄（桌面）與 withHelp 照舊。
 //   'steps'：現行行為不變。
 // 介面：
@@ -106,9 +108,14 @@ export function explain({ label, value, tone, how, means, todo }) {
 }
 
 // ---------- 精靈 ----------
+const MODE_KEY = 'zr-wizard-mode';
+function loadMode() { try { return localStorage.getItem(MODE_KEY) === 'page' ? 'page' : 'steps'; } catch { return 'steps'; } }
+function saveMode(m) { try { localStorage.setItem(MODE_KEY, m); } catch { /* 存不了就算了 */ } }
+
 export function wizard({ steps, result, example }) {
   const total = steps.length + 1;
   let state = {}, at = 0;
+  let mode = loadMode();
   const root = h('section', { class: 'card wizard' });
   const side = h('aside', { class: 'card wizard-help', 'aria-label': '說明' });
   const layout = h('div', { class: 'wizard-layout' }, root, side);
@@ -119,12 +126,97 @@ export function wizard({ steps, result, example }) {
   }
   if (typeof matchMedia === 'function') matchMedia(WIDE).addEventListener?.('change', placeAbout);
 
-  function go(i) { at = i; render(); root.querySelector('.wizard-title')?.focus(); layout.scrollIntoView?.({ block: 'start' }); }
+  function go(i) { at = i; draw(); root.querySelector('.wizard-title')?.focus(); layout.scrollIntoView?.({ block: 'start' }); }
   function next() {
     const err = root.querySelector('.wizard-error');
     try { steps[at].read(state); } catch (e) { err.textContent = e.message; return; }
     go(at + 1);
   }
+  const draw = () => (mode === 'page' ? renderPage() : render());
+  function saveCurrent() {
+    if (mode === 'page') steps.forEach(s => { try { s.read(state); } catch { /* 切換不擋 */ } });
+    else if (at < steps.length) { try { steps[at].read(state); } catch { /* 切換不擋 */ } }
+  }
+  function modeBar() {
+    const btn = (m, text) => h('button', { type: 'button', class: 'secondary', 'aria-pressed': String(mode === m), onclick: () => {
+      if (mode === m) return;
+      saveCurrent(); mode = m; saveMode(m); draw();
+    } }, text);
+    return h('div', { class: 'wizard-mode', role: 'group', 'aria-label': '填寫方式' }, btn('steps', '一步一步'), btn('page', '一頁看完'));
+  }
+
+  // ---- 一頁看完 ----
+  let resultSlot;
+  function partNode(i) {
+    const step = steps[i];
+    // 後面步驟的欄位可能依前面步驟的值而定；前面還沒填時 body 會 throw，先放提示，填完前面再重畫
+    let fields, waiting = false;
+    try { fields = [step.body(state)].flat(Infinity); }
+    catch { waiting = true; fields = [h('p', { class: 'muted' }, '這一步的欄位要等前面的步驟填好才會出現。')]; }
+    return h('fieldset', { class: waiting ? 'wizard-part waiting' : 'wizard-part', 'data-step': String(i) },
+      h('legend', {}, `${i + 1}. ${step.title}`),
+      step.hint ? h('p', { class: 'tip' }, step.hint) : null,
+      step.about ? h('p', { class: 'part-about' }, step.about) : null,
+      step.figure ? figure(step.figure) : null,
+      ...fields,
+      h('p', { class: 'wizard-error', role: 'alert' }));
+  }
+  function showResult() {
+    const box = h('div', { class: 'result', 'aria-live': 'polite' });
+    try { box.append(...[result(state)].flat(Infinity).filter(Boolean)); }
+    catch (e) { box.classList.add('error'); box.append(h('p', {}, e.message)); }
+    resultSlot.replaceChildren(box);
+    box.scrollIntoView?.({ block: 'start' });
+  }
+  function calc() {
+    root.querySelectorAll('.wizard-error').forEach(el => { el.textContent = ''; });
+    resultSlot.replaceChildren();
+    for (let i = 0; i < steps.length; i++) {
+      let part = root.querySelector(`.wizard-part[data-step="${i}"]`);
+      if (part.classList.contains('waiting')) { // 前面都讀過了：現在可能畫得出來
+        const fresh = partNode(i); part.replaceWith(fresh); part = fresh;
+        if (!part.classList.contains('waiting')) {
+          part.querySelector('.wizard-error').textContent = '請先填這一步，再按「算結果」。';
+          part.scrollIntoView?.({ block: 'center' });
+          return;
+        }
+      }
+      try { steps[i].read(state); } catch (e) {
+        part.querySelector('.wizard-error').textContent = e.message;
+        part.scrollIntoView?.({ block: 'center' });
+        return;
+      }
+    }
+    showResult();
+  }
+  function renderPage() {
+    resultSlot = h('div', { class: 'result-slot' });
+    root.replaceChildren(modeBar(),
+      example ? h('div', { class: 'example-row' },
+        h('button', { type: 'button', class: 'secondary', onclick: () => { state = structuredClone(example); renderPage(); showResult(); } }, '帶入範例'),
+        h('small', {}, '直接看範例結果；範例數字不是建議值')) : null,
+      ...steps.map((_, i) => partNode(i)),
+      h('div', { class: 'wizard-nav' },
+        h('button', { type: 'button', class: 'secondary', onclick: () => { state = {}; renderPage(); } }, '全部清空重來'),
+        h('button', { type: 'button', class: 'primary', onclick: calc }, '算結果')),
+      resultSlot);
+    layout.classList.remove('wide');
+    side.replaceChildren(h('div', { class: 'help-field' }, h('p', { class: 'muted' }, '點任一格，這裡會說明怎麼填。')));
+  }
+  root.addEventListener('change', e => {
+    if (mode !== 'page') return;
+    const t = e.target;
+    const part = t.closest('.wizard-part'); if (!part) return;
+    const idx = Number(part.dataset.step);
+    const pick = t.tagName === 'SELECT' || (t.tagName === 'INPUT' && (t.type === 'radio' || t.type === 'checkbox'));
+    saveCurrent();
+    if (pick) resultSlot.replaceChildren();
+    for (let j = idx + 1; j < steps.length; j++) {
+      const old = root.querySelector(`.wizard-part[data-step="${j}"]`);
+      if (old && (pick || old.classList.contains('waiting'))) old.replaceWith(partNode(j));
+    }
+  });
+
   function render() {
     const isResult = at === steps.length;
     const step = steps[at];
@@ -155,7 +247,7 @@ export function wizard({ steps, result, example }) {
           at > 0 ? h('button', { type: 'button', class: 'secondary', onclick: () => { try { step.read(state); } catch { /* 往回不擋 */ } go(at - 1); } }, '← 上一步') : h('span'),
           h('button', { type: 'button', class: 'primary', onclick: next }, at === steps.length - 1 ? '看結果 →' : '下一步 →'))];
     }
-    root.replaceChildren(dots, head, ...body.filter(Boolean));
+    root.replaceChildren(modeBar(), dots, head, ...body.filter(Boolean));
     layout.classList.toggle('wide', isResult);
     side.replaceChildren(h('div', { class: 'help-field' }, h('p', { class: 'muted' }, '點任一格，這裡會說明怎麼填。')));
     if (!isResult && (step.about || step.figure)) {
@@ -164,8 +256,12 @@ export function wizard({ steps, result, example }) {
       placeAbout();
     }
   }
-  root.addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT' && at < steps.length) { e.preventDefault(); next(); } });
-  render();
+  root.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+    if (mode === 'page') { e.preventDefault(); calc(); }
+    else if (at < steps.length) { e.preventDefault(); next(); }
+  });
+  draw();
   return layout;
 }
 

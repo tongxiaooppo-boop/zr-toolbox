@@ -2,6 +2,10 @@ import { h, toolHeader, figure, references, disclaimer, pathNav } from '../ui/co
 import { TOOLS } from '../data/tools.js';
 import { ZR_SECTIONS, ZR_WAYS, ZR_MIXES, DAJEN, ZR_STEPS, ZR_LIMITS, ZR_REFS, FIGURE_TEXT, ZR_PERIODIC } from '../data/zr101.js';
 
+const FIGS = {
+  daily: { src: '../img/decay/two-days.svg', alt: '兩天一漲一跌，大盤和正二各自剩多少（取自 ⑥ 正二不是兩倍）。', caption: '每天 2 倍，不等於整段 2 倍。' },
+  risks: { src: '../img/zr101/risks.webp', alt: '小安在山腳，山路上三塊牌子：可能腰斬、回本可能要好幾年、每天 2 倍不是整段 2 倍。', caption: '撐得住再上山。' }
+};
 const links = ids => h('p', { class: 'related' }, '接著算：', ids.map((id, i) => {
   const { no, title } = TOOLS.find(t => t.id === id);
   return [i ? '、' : '', h('a', { href: id + '.html' }, no + ' ' + title)];
@@ -32,6 +36,7 @@ document.getElementById('app').append(
   ...ZR_SECTIONS.map(s => h('section', { class: 'card article', id: s.id }, h('h2', {}, s.title),
     s.id === 'dajen' ? h('p', { class: 'muted' }, h('strong', {}, '原作者回測，工具箱未重算')) : null,
     s.id === 'ways' ? figure({ src: '../img/zr101/map.webp', alt: FIGURE_TEXT.map, caption: '先看資金如何分配，再看何時配回與借款風險。' }) : null,
+    FIGS[s.id] ? figure(FIGS[s.id]) : null,
     h('p', {}, s.intro),
     s.blocks.map(b => [h('h3', {}, b.title), h('p', {}, b.text), b.tools.length ? links(b.tools) : null]),
     s.id === 'ways' ? ZR_WAYS.map(w => [h('h3', {}, w.name), h('p', {}, w.how), links(w.tools), w.id === 'periodic' ? periodic() : null]) : null,

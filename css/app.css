@@ -274,3 +274,26 @@ ul.checks li { margin-block: 10px; overflow-wrap: anywhere; }
 .crash-bar-fill.tw{background:var(--accent)}
 .crash-bar-fill.zr{background:#dc2626}
 .crash-bar-val{font-variant-numeric:tabular-nums;font-size:14px}
+
+/* 首頁收合區＋新手路線按鈕＋計算機兩種型態（v5.13） */
+.hero-small img{max-height:180px;object-fit:cover}
+@media (min-width:600px){.hero-small img{max-height:260px}}
+.path-steps{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.path-steps button{flex:1 1 auto}
+.path-steps button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+.path-panel{margin-top:12px}
+.path-panel:empty{display:none}
+.path-panel > strong,.path-panel > span{display:block}
+details.group{margin:12px 0}
+details.group > summary{display:block;list-style:none;position:relative;padding:10px 40px 10px 14px;font-size:18px;font-weight:900;background:var(--card);border:var(--bw) solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-sm)}
+details.group > summary::-webkit-details-marker{display:none}
+details.group > summary::after{content:"▸";position:absolute;right:14px;top:10px;transition:transform .15s}
+details.group[open] > summary::after{transform:rotate(90deg)}
+details.group > summary .group-line{display:block;font-size:13px;font-weight:400;color:var(--muted)}
+details.group[open] > summary{margin-bottom:12px}
+details.group .shortcuts{margin-top:4px}
+.wizard-mode{display:flex;gap:8px;margin-bottom:12px}
+.wizard-mode button{flex:1;min-height:44px}
+.wizard-mode button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);box-shadow:var(--shadow-sm)}
+.wizard-part{border:0;border-top:2px solid var(--line);margin:16px 0 0;padding:12px 0 0}
+.wizard-part > legend{font-size:17px;font-weight:900;padding:0 6px 0 0}

@@ -1,6 +1,16 @@
 # zr-toolbox 交接檔
 
-## 2026-11-25 進度（最新）
+## 2026-11-26 進度（最新）
+
+- **三桶改版（決策 `docs/decision/決策-2026-11-26-三桶改版.md`）**：保守（先留）＝6 個月生活費＋3 年內要用的錢，不算在 5/3/2；三桶＝穩健／成長／積極（key `steady`/`growth`/`bold`），例子必須台灣買得到，照 R13 v2（`docs/research/R13-三桶商品查證.md`，Codex sol 查證；Opus 否決「跌得比 0050 少就算穩健」，0056 放成長、2886/5880 不列）。core `RESERVE`、`reservePlan`、`BUCKETS`（name＋note）＋測試；㉖ 結果頁先顯示保守（先留）提醒再分三桶；㉗ 頁例子改讀 core；`buckets.svg` 重畫。`ALLOC` 不變。待辦：壓力測試照新三桶重算（要寫「股災跌多少」時）。
+- **首頁縮短**：4 區（認識自己／股票常識／計算機＝入門三件事，正2 專區內分入門／做法／加槓桿），`<details>` 預設收合，`#self`/`#science`/`#calc`/`#zr` 自動打開；新手路線改 5 顆按鈕；站名改「股票兩三件事」（33 檔＋manifest）。
+- **計算機兩種型態**：`wizard.js` 加「一步一步／一頁看完」切換（存 localStorage `zr-wizard-mode`），19 個計算機自動有；後面步驟要等前面值的頁（trigger5050、rebalance、exposure）用 `.wizard-part.waiting` 保護。smoke 兩種模式都驗。
+- **14 張新卡通圖**（Codex sol 畫、Opus 逐字核）放進 10 頁＋zr101 重用 decay/two-days.svg。
+- 分工：Sonnet A（首頁＋wizard＋smoke）、Sonnet B（放圖＋三桶頁面）平行在主目錄做；Opus 修 B 的 SVG `&` 未跳脫。tests 198、smoke 29 全過。
+- **下一步**：① App 圖示重畫（任務書 `collab/to-codex-icon.md` 已備，3 款候選，使用者挑後 Opus 縮 192/512 換上）；② `index.html`／manifest 的 `theme-color` 仍是舊藍 #2563eb，改深海軍藍。
+- ⚠ 教訓：Sonnet 在主目錄工作時，Opus 不可用 `git commit -a`（會把未驗收的改動一起 commit）；兩個 Sonnet 同時跑 smoke 會共用 `.smoke/` profile 而失敗，smoke 由 Opus 最後跑。
+
+## 2026-11-25 進度
 
 - **⚠ 下一階段開頭先做（使用者 2026-11-25 收尾時交代）**：
   1. ✅ **Codex（sol）科普梳理＋㉗ 已細審（2026-11-25）**：㉗ 頁逐項符合 `to-codex-riskprofile.md`、`js/data/riskprofile.js` 未被改；首頁路線、8 頁 pathNav、兩辭典互連、CSS 檔尾皆照任務書。唯一修正：basics 頁有新舊兩段都連辭典（任務書「只加一段」所致），Opus 刪掉舊段。registry 圖片資料夾規則不改，㉗ 用 `img/riskprofile/.gitkeep` 佔位、共用 `img/riskquiz/buckets.svg`。tests 177、smoke 27 全過。

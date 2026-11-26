@@ -3,6 +3,10 @@ import { TOOLS } from '../data/tools.js';
 import { ETF_SECTIONS, ETF_LIMITS, ETF_REFS, FIGURE_TEXT } from '../data/etf101.js';
 
 const tool = TOOLS.find(t => t.id === 'etf101');
+const FIGS = {
+  cost: { src: '../img/etf101/cost.webp', alt: 'ETF 籃子底下的水龍頭滴出硬幣，寫著經理費、保管費（內扣）。', caption: '不會另外寄帳單，淨值已經扣過了。' },
+  dividend: { src: '../img/etf101/dividend.webp', alt: '除息前籃子滿滿，除息後籃子少一點、手上多一袋硬幣。', caption: '領到現金，基金的價值也少了同樣的金額。' }
+};
 const links = ids => h('p', { class: 'related' }, '接著算：', ids.map((id, i) => {
   const { no, title } = TOOLS.find(t => t.id === id);
   return [i ? '、' : '', h('a', { href: id + '.html' }, no + ' ' + title)];
@@ -19,6 +23,7 @@ document.getElementById('app').append(
       h('li', {}, h('a', { href: '#limits' }, '這頁的限制')))),
   ...ETF_SECTIONS.map(s => h('section', { class: 'card article', id: s.id }, h('h2', {}, s.title),
     s.id === 'what' ? figure({ src: '../img/etf101/map.webp', alt: FIGURE_TEXT.map, caption: '先看籃子裡裝什麼，再看它怎麼運作。' }) : null,
+    FIGS[s.id] ? figure(FIGS[s.id]) : null,
     h('p', {}, s.intro),
     s.topics.map(t => [h('h3', {}, t.title), h('p', {}, t.text),
       h('p', { class: 'myth' }, h('strong', {}, '常見誤解：'), t.myth, ' ', h('strong', {}, '其實：'), t.fact),

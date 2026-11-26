@@ -55,6 +55,11 @@ async function check(name, url, fn) {
 await check('home', 'index.html', async () => {
   const p = [], cards = await ev('document.querySelectorAll(".tool-card").length');
   if (cards !== TOOLS.length) p.push(`卡片 ${cards} 張，應為 ${TOOLS.length}`);
+  const groups = await ev('document.querySelectorAll("details.group").length');
+  if (groups !== 4) p.push(`details.group ${groups} 個，應為 4`);
+  if (await ev('[...document.querySelectorAll("details.group")].some(d => d.open)')) p.push('details.group 預設沒有全部收合');
+  await send('Page.navigate', { url: base + 'index.html#calc' }); await sleep(1200);
+  if (!await ev('document.getElementById("calc")?.open === true')) p.push('index.html#calc 沒有自動打開計算機區');
   return p;
 });
 for (const t of TOOLS.filter(t => t.status === 'ready')) await check(t.id, t.href, async () => {
@@ -69,6 +74,15 @@ for (const t of TOOLS.filter(t => t.status === 'ready')) await check(t.id, t.hre
     const text = await ev('document.querySelector(".result")?.innerText.trim()');
     if (!text) p.push('帶入範例後 .result 沒有內容');
     if (await ev('document.querySelector(".result")?.classList.contains("error")')) p.push('帶入範例後出現錯誤：' + text);
+  }
+  if (await ev('!!document.querySelector(".wizard-mode")')) {
+    await ev('localStorage.setItem("zr-wizard-mode", "page")');
+    await send('Page.navigate', { url: base + t.href }); await sleep(1200);
+    await ev('document.querySelector(".example-row button")?.click()'); await sleep(300);
+    const text = await ev('document.querySelector(".result")?.innerText.trim()');
+    if (!text) p.push('一頁看完：帶入範例後 .result 沒有內容');
+    if (await ev('document.querySelector(".result")?.classList.contains("error")')) p.push('一頁看完：帶入範例後出現錯誤：' + text);
+    await ev('localStorage.setItem("zr-wizard-mode", "steps")');
   }
   return p;
 });
