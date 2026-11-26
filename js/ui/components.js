@@ -48,7 +48,7 @@ export function references(items) {
 
 export function toolHeader({ no, title, oneLine }) {
   return h('header', { class: 'tool-header' },
-    h('a', { class: 'back', href: '../index.html' }, '← 工具箱'),
+    h('a', { class: 'back', href: '../index.html' }, '← 回工具箱'),
     h('h1', {}, h('span', { class: 'no' }, no), ' ', title),
     h('p', { class: 'one-line' }, oneLine));
 }
