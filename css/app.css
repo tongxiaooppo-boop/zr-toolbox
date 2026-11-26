@@ -1,17 +1,17 @@
 /* 全站 Neo-brutalism，離線系統字型。 */
-:root{--bg:#f8f5ee;--card:#ffffff;--text:#14213d;--muted:#4a5568;--line:#14213d;--accent:#f2b134;--on-accent:#14213d;--brand:#1f3a68;--on-brand:#ffffff;
---ok:#0a7a35;--warn:#a84a00;--bad:#c00;--soft:#e8eef8;--input:#fff;
---ok-bg:#c7f5d3;--warn-bg:#ffe08a;--bad-bg:#ffd9d4;--info-bg:#e8eef8;
---r:6px;--r-in:4px;--bw:3px;--shadow:5px 5px 0 #14213d;--shadow-sm:3px 3px 0 #14213d;--metric-ok:#0a5a28;color-scheme:light}
+:root{--bg:#f8f5ee;--card:#fff6e2;--text:#14213d;--muted:#4a5568;--line:#14213d;--accent:#f2b134;--on-accent:#14213d;--brand:#1f3a68;--on-brand:#ffffff;
+--ok:#c2410c;--warn:#a84a00;--bad:#3d4f7a;--soft:#fdf0d9;--input:#fff;
+--ok-bg:#ffe1d2;--warn-bg:#ffe08a;--bad-bg:#e3e8f3;--info-bg:#fff1d6;
+--r:6px;--r-in:4px;--bw:3px;--shadow:5px 5px 0 #14213d;--shadow-sm:3px 3px 0 #14213d;--metric-ok:#b3361a;color-scheme:light}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
 --bg:#121826;--card:#1b2335;--text:#f1f4fa;--muted:#c3cad8;--line:#f1f4fa;--accent:#f5c451;--on-accent:#14213d;--brand:#8fb4ff;--on-brand:#14213d;
---ok:#5ee08b;--warn:#ffc04d;--bad:#ff8a80;--soft:#26344f;--input:#17141f;
---ok-bg:#1f4a2e;--warn-bg:#4a3a12;--bad-bg:#3d1a1a;--info-bg:#26344f;
+--ok:#ff9e7a;--warn:#ffc04d;--bad:#aebde3;--soft:#26344f;--input:#17141f;
+--ok-bg:#4a2619;--warn-bg:#4a3a12;--bad-bg:#2a3450;--info-bg:#2f2a22;
 --shadow:5px 5px 0 var(--line);--shadow-sm:3px 3px 0 var(--line);--metric-ok:var(--ok);color-scheme:dark}}
 :root[data-theme="dark"]{
 --bg:#121826;--card:#1b2335;--text:#f1f4fa;--muted:#c3cad8;--line:#f1f4fa;--accent:#f5c451;--on-accent:#14213d;--brand:#8fb4ff;--on-brand:#14213d;
---ok:#5ee08b;--warn:#ffc04d;--bad:#ff8a80;--soft:#26344f;--input:#17141f;
---ok-bg:#1f4a2e;--warn-bg:#4a3a12;--bad-bg:#3d1a1a;--info-bg:#26344f;
+--ok:#ff9e7a;--warn:#ffc04d;--bad:#aebde3;--soft:#26344f;--input:#17141f;
+--ok-bg:#4a2619;--warn-bg:#4a3a12;--bad-bg:#2a3450;--info-bg:#2f2a22;
 --shadow:5px 5px 0 var(--line);--shadow-sm:3px 3px 0 var(--line);--metric-ok:var(--ok);color-scheme:dark}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -69,7 +69,7 @@ button{min-height:44px;max-width:100%;border:var(--bw) solid var(--line);backgro
 .example-row small{color:var(--muted)}
 /* 結果 */
 .result{display:grid;gap:16px;min-height:24px}
-.result.error{display:block;color:var(--bad)}
+.result.error{display:block;color:var(--warn)}
 .metrics{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(140px,100%),1fr));gap:12px;margin:8px 0}
 .metric{background:var(--info-bg);border:var(--bw) solid var(--line);border-radius:var(--r-in);padding:10px;box-shadow:var(--shadow-sm)}
 .metric small{display:block;color:var(--muted);font-size:14px}
@@ -79,7 +79,7 @@ button{min-height:44px;max-width:100%;border:var(--bw) solid var(--line);backgro
 .metric.warn strong{color:var(--text)}
 .metric.info{background:var(--info-bg)}
 .metric.info strong{color:var(--text)}
-.explain{background:var(--card);border:var(--bw) solid var(--line);border-radius:var(--r-in);padding:12px 14px;box-shadow:var(--shadow)}
+.explain{background:var(--info-bg);border:var(--bw) solid var(--line);border-radius:var(--r-in);padding:12px 14px;box-shadow:var(--shadow)}
 .explain:has(.metric.info){background:var(--info-bg)}
 .explain:has(.metric.ok){background:var(--ok-bg)}
 .explain:has(.metric.warn){background:var(--warn-bg)}
@@ -137,7 +137,7 @@ a.button-link{display:inline-flex;padding:10px 16px;border-radius:var(--r);text-
 .wizard-dots li.now{background:var(--accent);box-shadow:var(--shadow-sm)}
 .wizard-nav{display:flex;justify-content:space-between;gap:10px;margin-top:16px}
 .wizard-nav button{flex-shrink:1}
-.wizard-error{color:var(--bad);background:var(--bad-bg);border:var(--bw) solid var(--line);border-radius:var(--r-in);padding:8px 12px;font-size:14px;font-weight:700;margin:8px 0 0}
+.wizard-error{color:var(--text);background:var(--warn-bg);border:var(--bw) solid var(--line);border-radius:var(--r-in);padding:8px 12px;font-size:14px;font-weight:700;margin:8px 0 0}
 .wizard-error:empty{display:none}
 .wizard-jump{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:16px}
 .wizard-jump small{color:var(--muted);width:100%}
