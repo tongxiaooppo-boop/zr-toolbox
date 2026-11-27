@@ -19,7 +19,9 @@ test('retire ⑲ page example: 2% inflation, 15,000 other income, wants 50,000 a
   assert.equal(r2(r.firstWithdraw), 39875.32); assert.equal(r2(r.lastWithdraw), 65311.81); // todo2 測試值
   assert.equal(Math.round(r.firstTotal), 54875); assert.equal(Math.round(r.lastTotal), 80312);
   assert.equal(Math.round(r.rule4Monthly), 33333); assert.equal((r.withdrawRate * 100).toFixed(2), '4.79');
-  assert.equal(r.needWithdraw, 35000); assert.equal(Math.round(r.needPool), 8777360); assert.equal(Math.round(r.gap), 4875);
+  // needPool 2026-11-27 改正（Python 逐月獨立重算）：其他收入不跟通膨，原本 8,777,360 少算
+  assert.equal(r.needWithdraw, 35000); assert.equal(Math.round(r.needPool), 9525118); assert.equal(Math.round(r.gap), 4875);
+  assert.equal(Math.round(r.lastGap), -1583); // 第一個月多 4,875，最後一個月反而差 1,583
   assert.equal(Math.round(r.lastOtherReal), 9158); // 15,000 ÷ (1.02)^(299/12)
   close(r.endBalance, 0, 1e-4);
   assert.equal(Math.round(r.rows[0].withdraw), 39875); assert.equal(Math.round(r.rows[1].withdraw), Math.round(39875.31548931088 * 1.02));
@@ -48,7 +50,11 @@ test('retire ⑲: other income already covers the target → need only the resid
   const r = retirePlan({ pool: 1000000, years: 10, annualReturn: 0.02, otherIncome: 40000, targetSpend: 30000, residual: 500000 });
   assert.equal(r.needWithdraw, 0); close(r.needPool, r.pvResidual); assert.ok(r.gap > 10000);
   const n = retirePlan({ pool: 1000000, years: 10, annualReturn: 0.02 });
-  assert.ok(Number.isNaN(n.needPool) && Number.isNaN(n.gap) && Number.isNaN(n.needWithdraw));
+  assert.ok(Number.isNaN(n.needPool) && Number.isNaN(n.gap) && Number.isNaN(n.needWithdraw) && Number.isNaN(n.lastGap));
+});
+test('retire ⑲（2026-11-27）: 其他收入一開始夠，通膨後就不夠 → needPool 只算後面不夠的月份', () => {
+  const r = retirePlan({ pool: 1, years: 25, annualReturn: 0, inflation: 0.02, otherIncome: 40000, targetSpend: 30000 });
+  assert.equal(r.needWithdraw, 0); assert.equal(Math.round(r.needPool), 554619); // Python 逐月重算
 });
 test('retire ⑲: bad inputs give a readable message', () => {
   const ok = { pool: 10000000, years: 25, annualReturn: 0.035 };

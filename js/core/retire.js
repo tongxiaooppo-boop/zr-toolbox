@@ -31,8 +31,10 @@ export function annuityFactor(i, g, n, timing = 'end') {
  *   firstTotal／lastTotal＝首月／末月提領＋otherIncome
  *   lastOtherReal＝otherIncome 在最後一個月、換回第一個月購買力的價值＝otherIncome ÷ (1＋g)^(N−1)
  *   withdrawRate＝首月提領 × 12 ÷ pool（第一年提領率，跟 4% 比）
- *   needWithdraw＝max(0, targetSpend − otherIncome)；needPool＝needWithdraw × factor＋pvResidual；gap＝firstTotal − targetSpend
- *     （targetSpend 沒填時三個都是 NaN）
+ *   needWithdraw＝max(0, targetSpend − otherIncome)（第一個月的缺口）
+ *   needPool＝Σ max(0, targetSpend × (1＋g)^(k−1) − otherIncome) 折現＋pvResidual（想花的跟通膨漲、其他收入不漲；pool ≥ needPool 才算夠）
+ *   gap＝firstTotal − targetSpend（第一個月）；lastGap＝lastTotal − targetSpend × (1＋g)^(N−1)（最後一個月，照本工具的領法）
+ *     （targetSpend 沒填時四個都是 NaN）
  *   rows：每年一列；withdraw＝那一年第一個月提領，yearTotal＝那一年 12 個月提領合計，endBalance＝年底剩下的資產
  *   endBalance＝最後剩下的資產（模擬出來，應該等於 residual）
  */
@@ -65,10 +67,21 @@ export function retirePlan(p) {
   }
   const hasTarget = !Number.isNaN(targetSpend);
   const needWithdraw = hasTarget ? Math.max(0, targetSpend - otherIncome) : NaN;
+  // needPool：想花的錢每月跟通膨漲、其他收入不漲 → 逐月缺口 max(0, 想花 × (1＋g)^(k−1) − 其他收入) 折現加總（2026-11-27 改正；
+  //   原本用「第一個月缺口 × 成長年金係數」，等於假設其他收入也跟通膨漲，會少算）
+  let needPool = NaN;
+  if (hasTarget) {
+    needPool = pvResidual;
+    for (let k = 1; k <= n; k++) {
+      const d = targetSpend * Math.pow(1 + g, k - 1) - otherIncome;
+      if (d > 0) needPool += d / Math.pow(1 + i, timing === 'start' ? k - 1 : k);
+    }
+  }
   return { monthlyRate: i, monthlyGrowth: g, months: n, pvResidual, available, factor, firstWithdraw, lastWithdraw,
     firstTotal: firstWithdraw + otherIncome, lastTotal: lastWithdraw + otherIncome,
     lastOtherReal: otherIncome / Math.pow(1 + g, n - 1), totalWithdrawn: total,
     withdrawRate: firstWithdraw * 12 / pool, rule4Monthly: pool * 0.04 / 12,
-    needWithdraw, needPool: hasTarget ? needWithdraw * factor + pvResidual : NaN,
-    gap: hasTarget ? firstWithdraw + otherIncome - targetSpend : NaN, endBalance: bal, rows };
+    needWithdraw, needPool,
+    gap: hasTarget ? firstWithdraw + otherIncome - targetSpend : NaN,
+    lastGap: hasTarget ? lastWithdraw + otherIncome - targetSpend * Math.pow(1 + g, n - 1) : NaN, endBalance: bal, rows };
 }

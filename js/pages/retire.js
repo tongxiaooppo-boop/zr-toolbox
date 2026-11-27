@@ -89,10 +89,14 @@ function result(s) {
   out.push(explain({ label: '第一年提領率', value: fmtPct(r.withdrawRate, 2), tone: r.withdrawRate > 0.04 ? 'warn' : 'ok',
     how: `第 1 個月可領 ${fmtMoney(r.firstWithdraw)} × 12 ÷ 資產 ${fmtMoney(s.pool)}。4% 法則第一年每月約 ${fmtMoney(r.rule4Monthly)}。`,
     means: (r.withdrawRate > 0.04 ? '比 4% 高：真實報酬比你假設的低、或剛退休就遇到大跌，錢可能提早用完。' : '沒超過 4%，比較保守。') + '4% 法則來自美國的歷史資料，是經驗法則，不是保證。' }));
-  if (!Number.isNaN(s.target)) out.push(explain({ label: '想花的錢夠不夠', value: signed(r.gap), tone: r.gap >= 0 ? 'ok' : 'bad',
-    how: `第 1 個月總收入 ${fmtMoney(r.firstTotal)} − 想花 ${fmtMoney(s.target)}。`,
-    means: r.gap < 0 ? `每月不夠 ${fmtMoney(-r.gap)}。要剛好夠，退休時要有 ${fmtMoney(r.needPool)}，還差 ${fmtMoney(r.needPool - s.pool)}。` : `夠用，每月多 ${fmtMoney(r.gap)}。要剛好夠，退休時有 ${fmtMoney(r.needPool)} 就可以。`,
-    todo: r.gap < 0 ? '可以多存一點、晚幾年退休、少領幾年，或降低每月花費，改參數重算看看。' : undefined }));
+  if (!Number.isNaN(s.target)) {
+    const enough = s.pool >= r.needPool;
+    out.push(explain({ label: '想花的錢夠不夠', value: enough ? `夠，多 ${fmtMoney(s.pool - r.needPool)}` : `還差 ${fmtMoney(r.needPool - s.pool)}`, tone: enough ? 'ok' : 'bad',
+      how: `每月想花 ${fmtMoney(s.target)}，之後每年跟著通膨調高；其他收入 ${fmtMoney(s.other)} 不調高。把每個月不夠的部分換算回退休那天，加起來要 ${fmtMoney(r.needPool)}，你有 ${fmtMoney(s.pool)}。`,
+      means: `照上面的領法：第 1 個月總收入 ${fmtMoney(r.firstTotal)}，比想花的${r.gap >= 0 ? '多 ' + fmtMoney(r.gap) : '少 ' + fmtMoney(-r.gap)}；最後一個月${r.lastGap >= 0 ? '多 ' + fmtMoney(r.lastGap) : '少 ' + fmtMoney(-r.lastGap)}。` +
+        (enough && r.lastGap < 0 ? '後面的月份會不夠，前面多的錢要留著，不要先花掉。' : ''),
+      todo: enough ? undefined : '可以多存一點、晚幾年退休、少領幾年，或降低每月花費，改參數重算看看。' }));
+  }
   out.push(explain({ label: '總共領出', value: fmtMoney(r.totalWithdrawn),
     how: `${r.months} 個月的提領加起來。`,
     means: r.totalWithdrawn > s.pool ? '比退休時的資產多，因為還沒領的錢會繼續滾。' : '比退休時的資產少，因為報酬是負的或要留下一筆錢。' }),

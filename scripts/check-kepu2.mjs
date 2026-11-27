@@ -60,7 +60,9 @@ if (basics) {
   if (new Set(all.map(t => t.id)).size !== all.length) fail('術語 id 重複');
   if (r5Terms.length !== 48) fail(`R5 術語表讀到 ${r5Terms.length} 列，應為 48（研究檔被改了？）`);
   for (const t of r5Terms) if (!names.includes(t)) fail(`缺術語「${t}」（term 要和 R5 第一欄一字不差）`);
-  for (const t of names) if (!r5Terms.includes(t)) fail(`多出 R5 沒有的術語「${t}」`);
+  // 2026-11-27 使用者要求在「市場與帳戶」補開戶相關詞條；出處 R5-商品與獲利方式（複委託、槓反、借券出借）、R4-個人借錢管道（融資信用戶）
+  const EXTRA = ['開戶（台股）', '複委託（買海外股票）', '買正2 前要簽的文件', '信用戶（融資融券）', '借券出借（把庫存借出去收費）'];
+  for (const t of names) if (!r5Terms.includes(t) && !EXTRA.includes(t)) fail(`多出 R5 沒有的術語「${t}」`);
   refs(basics.BASIC_REFS, 'BASIC_REFS');
   if (!Array.isArray(basics.BASIC_LIMITS) || !basics.BASIC_LIMITS.length) fail('BASIC_LIMITS 至少 1 句');
 }
@@ -101,7 +103,7 @@ if (zr) {
   if (!Array.isArray(zr.ZR_LIMITS) || !zr.ZR_LIMITS.length) fail('ZR_LIMITS 至少 1 句');
 }
 
-const t1 = traceable('js/data/basics.js', ['docs/research/R5-基本術語.md']);
+const t1 = traceable('js/data/basics.js', ['docs/research/R5-基本術語.md', 'docs/research/R5-商品與獲利方式.md', 'docs/research/R4-個人借錢管道.md']);
 const t2 = traceable('js/data/zr101.js', ['docs/research/R3-ETF常識.md', 'docs/research/R6-正二教學素材.md']);
 
 // 頁面與 html

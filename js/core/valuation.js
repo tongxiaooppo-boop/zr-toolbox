@@ -101,6 +101,10 @@ export function valuationPlan({ price, eps, bvps, dividend, pe, pb, yields }) {
     if (!Number.isFinite(base)) throw new Error(`${m.baseLabel}不是數字。`);
     const out = { key: m.key, label: m.label, baseLabel: m.baseLabel, base };
     if (m.key === 'yield' && base < 0) throw new Error('每股股利不能是負的。');
+    // 先判斷這個方法能不能用：不能用的不要求填倍數（2026-11-27 審查：股利 0 時被迫填殖利率）
+    if (m.key === 'pe' && base <= 0) { methods.push({ ...out, ok: false, reason: 'EPS 是 0 或負的，本益比法不能用。' }); continue; }
+    if (m.key === 'pb' && base <= 0) { methods.push({ ...out, ok: false, reason: '每股淨值是 0 或負的，本淨比法不能用。' }); continue; }
+    if (m.key === 'yield' && base === 0) { methods.push({ ...out, ok: false, reason: '沒有配股利，殖利率法不能用。' }); continue; }
     if (!(Array.isArray(mult) && mult.length === 3 && mult.every(pos))) {
       throw new Error(m.key === 'yield' ? '殖利率法要填三個大於 0 的殖利率（便宜、合理、昂貴）。' : `${m.label}要填三個大於 0 的倍數（便宜、合理、昂貴）。`);
     }
@@ -109,9 +113,6 @@ export function valuationPlan({ price, eps, bvps, dividend, pe, pb, yields }) {
       throw new Error(m.key === 'yield' ? '殖利率要由大到小：便宜價用最高的殖利率，昂貴價用最低的。' : `${m.label}的倍數要由小到大：便宜 < 合理 < 昂貴。`);
     }
     out.multiples = [a, b, c];
-    if (m.key === 'pe' && base <= 0) { methods.push({ ...out, ok: false, reason: 'EPS 是 0 或負的，本益比法不能用。' }); continue; }
-    if (m.key === 'pb' && base <= 0) { methods.push({ ...out, ok: false, reason: '每股淨值是 0 或負的，本淨比法不能用。' }); continue; }
-    if (m.key === 'yield' && base === 0) { methods.push({ ...out, ok: false, reason: '沒有配股利，殖利率法不能用。' }); continue; }
     const at = k => (m.key === 'yield' ? base / k : base * k);
     const prices = { cheap: at(a), fair: at(b), expensive: at(c) };
     const zone = zoneOf(price, [prices.cheap, prices.fair, prices.expensive]);

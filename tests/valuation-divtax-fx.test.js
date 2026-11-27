@@ -34,6 +34,16 @@ test('valuation ⑯: EPS 負的不能用本益比、只填股利、剛好等於�
   assert.throws(() => valuationPlan({ price: 100, eps: NaN, bvps: null }), /至少要填一個/);
 });
 
+test('valuation ⑯（2026-11-27）: 不能用的方法不必填倍數', () => {
+  // 股利 0、殖利率留白，只填本淨比 → 本淨比照算、殖利率標不能用
+  const r = valuationPlan({ price: 100, bvps: 10, pb: [1, 2, 3], dividend: 0, yields: [] });
+  assert.deepEqual(r.methods.map(m => [m.key, m.ok]), [['pb', true], ['yield', false]]);
+  assert.deepEqual(r.methods[0].prices, { cheap: 10, fair: 20, expensive: 30 });
+  // EPS 負、本益比留白 / 淨值 0、本淨比留白，也不擋
+  const r2 = valuationPlan({ price: 50, eps: -2, pe: [], bvps: 0, pb: [NaN, NaN, NaN], dividend: 2, yields: [0.06, 0.05, 0.04] });
+  assert.deepEqual(r2.methods.map(m => [m.key, m.ok]), [['pe', false], ['pb', false], ['yield', true]]);
+});
+
 test('valuation ⑯: 證交所比率換回每股數字（ETF 沒有本益比）、歷史分位數', () => {
   const b = ratiosToBase(1460, { PER: 24.75, PBR: 8.61, dividend_yield: 1.03 });
   close(b.eps, 1460 / 24.75); close(b.bvps, 1460 / 8.61); close(b.dividend, 15.038);
