@@ -105,7 +105,7 @@ function result(s) {
   const r = rebalancePlan(params(s, true));
   const out = [];
   if (r.due) out.push(explain({ label: '到期了嗎？', value: r.ready ? '到期了，可以配回' : '還沒到期', tone: r.ready ? 'warn' : 'ok',
-    how: `上次配回 ${s.last} ＋ ${periods[s.months || 6]} ＝ ${r.due}。`,
+    how: `上次配回 ${s.last} ＋ ${periods[s.months || 6]} ＝ ${r.calendarDue}` + (r.due !== r.calendarDue ? `，那天是週末，延到週一 ${r.due}。` : '。'),
     means: r.ready ? '照規則今天可以配回。' : '照規則現在先不用動。下面是「如果今天配回」的股數。',
     todo: r.ready ? '照下面的股數下單，做完把今天的日期記下來，下次第 4 步填這個日期。' : null }));
   out.push(explain({ label: '總額', value: fmtMoney(r.pool), tone: 'info',
@@ -124,7 +124,7 @@ function result(s) {
     explain({ label: '曝險倍數', value: `${fmtX(r.exposureNow)} → ${fmtX(r.exposureAfter)}`, tone: 'info',
       how: '每檔市值 × Beta 加起來 ÷ 總額。用到的 Beta：' + s.rows.map(row => `${row.code} ${Number.isNaN(row.beta) ? guessBeta(row.code) + '（看代號猜）' : row.beta}`).join('、') + '。',
       means: `約等於「總額的幾倍跟著大盤漲跌」；目標比例算出來是 ${fmtX(r.exposureTarget)}。現金當 0，債券 ETF 當 0 是簡化。` }),
-    h('p', { class: 'note' }, '沒算手續費和證交稅。到期那天剛好休市，就往後延到下一個交易日。'));
+    h('p', { class: 'note' }, '沒算手續費和證交稅。到期日碰到週六日已經延到週一；碰到國定假日休市，就再往後延到下一個交易日。'));
   return out;
 }
 

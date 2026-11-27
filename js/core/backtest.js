@@ -13,6 +13,7 @@
 //     另回傳 years:[{ year, from, to, partial }]，每個 series 加 years:[報酬]、cagr（以日曆天 365.25 年化）。
 //     大仁 50/50：正2 收盤價比基準漲跌 ≥50% 時配回五五，基準改成當天收盤價。
 //     每季配回：4、7、10 月的第一個交易日收盤配回目標比例（532：先調 0050 再調正2）。
+//   2026-11-27（審查）：每個 series 加 orders＝第一天建倉之後的成交筆數（一檔買或賣一次算一筆；配回沒有要調整的不算）。
 export const LEVER = '00675L';
 
 export const STRATEGIES = Object.freeze([
@@ -51,16 +52,16 @@ export function runBacktest({ days, dividends = {}, splits = {}, start = 1e6, fe
 
   const series = chosen.map(st => {
     const pos = { cash: start }, events = [];
-    let dividendTotal = 0, base = days[0].px[LEVER];
+    let dividendTotal = 0, base = days[0].px[LEVER], orders = 0, counting = false;
     const value = d => pos.cash + Object.keys(pos).filter(k => k !== 'cash').reduce((s, k) => s + pos[k] * d.px[k], 0);
     const toTarget = (d, code, amount) => {
       const price = d.px[code], now = (pos[code] || 0) * price;
       if (amount < now) {
         const sh = Math.floor((now - amount) / price); if (!sh) return 0;
-        pos[code] -= sh; pos.cash += Math.round(sh * price * (1 - fee - tax)); return -sh;
+        pos[code] -= sh; pos.cash += Math.round(sh * price * (1 - fee - tax)); if (counting) orders++; return -sh;
       }
       const sh = Math.floor(Math.min(amount - now, pos.cash) / (price * (1 + fee))); if (!sh) return 0;
-      pos[code] = (pos[code] || 0) + sh; pos.cash -= Math.round(sh * price * (1 + fee)); return sh;
+      pos[code] = (pos[code] || 0) + sh; pos.cash -= Math.round(sh * price * (1 + fee)); if (counting) orders++; return sh;
     };
     const rebalance = d => {
       const total = value(d);
@@ -68,7 +69,7 @@ export function runBacktest({ days, dividends = {}, splits = {}, start = 1e6, fe
     };
     const tradeText = list => list.filter(([, sh]) => sh).map(([c, sh]) => `${NAMES[c]}${sh > 0 ? '買' : '賣'} ${Math.abs(sh).toLocaleString()} 股`).join('、') || '不用調整';
     const values = days.map((d, i) => {
-      if (i === 0) rebalance(d);
+      if (i === 0) { rebalance(d); counting = true; }
       else {
         for (const [code, byDate] of Object.entries(splits)) {
           const k = byDate[d.date];
@@ -111,7 +112,7 @@ export function runBacktest({ days, dividends = {}, splits = {}, start = 1e6, fe
     const final = values.at(-1);
     return { id: st.id, name: st.name, group: st.group, rule: st.rule, values, final, ret: final / start - 1,
       peak, peakDate: dates[peakIdx], giveback: final / peak - 1, mdd, mddDate: dates[mddIdx],
-      monthly: months.map(m => values[m.index]), events, dividendTotal,
+      monthly: months.map(m => values[m.index]), events, dividendTotal, orders,
       years: yearEnds.map((e, k) => values[e] / (k ? values[yearEnds[k - 1]] : start) - 1),
       cagr: calDays > 0 ? Math.pow(final / start, 365.25 / calDays) - 1 : 0 };
   });

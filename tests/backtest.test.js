@@ -34,6 +34,15 @@ test('backtest: quarterly rebalance on first April day; dividends credited as ca
   assert.deepEqual(r.months.map(m => m.date), ['2026-03-31', '2026-04-02']);
 });
 
+test('backtest: orders counts fills after day 1, not events (審查 2026-11-27)', () => {
+  const days = [day('2026-03-30', 100), day('2026-03-31', 100), day('2026-04-01', 200), day('2026-04-02', 200)];
+  const by = id => runBacktest({ days, dividends: { '0050': { '2026-03-31': 2 } }, fee: 0, tax: 0 }).series.find(s => s.id === id);
+  assert.equal(by('allin').orders, 0); assert.equal(by('q5050').orders, 1);
+  assert.equal(by('q532').orders, 2); // 一次配回：0050 買＋正2 賣＝2 筆
+  const flat = runBacktest({ days: [day('2026-03-31', 100), day('2026-04-01', 100)], fee: 0, tax: 0 }).series.find(s => s.id === 'q5050');
+  assert.equal(flat.events.length, 1); assert.equal(flat.orders, 0); // 「不用調整」不算
+});
+
 test('backtest: errors', () => {
   assert.throws(() => runBacktest({ days: [day('2026-01-02', 100)] }), /至少要有 2 個交易日/);
   assert.throws(() => runBacktest({ days: [day('2026-01-02', 100), { date: '2026-01-05', px: { '00675L': 1 } }] }), /缺 0050/);

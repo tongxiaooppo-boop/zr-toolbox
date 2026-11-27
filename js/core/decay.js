@@ -6,7 +6,7 @@
  */
 export function simulateDaily(indexReturns, { leverage = 2, dailyCost = 0 } = {}) {
   if (!Array.isArray(indexReturns) || indexReturns.length === 0 || indexReturns.length > 2520) throw new Error('請提供 1–2520 天的每日報酬。');
-  if (indexReturns.some(r => !Number.isFinite(r) || r <= -1 || r > 1)) throw new Error('每日報酬須介於 −100%（不含）到 +100%。');
+  if (indexReturns.some(r => !Number.isFinite(r) || r <= -1)) throw new Error('每日報酬須大於 −100%。');
   if (!(leverage >= 1 && leverage <= 3) || !(dailyCost >= 0 && dailyCost < 0.01)) throw new Error('槓桿須為 1–3 倍，每日費用率須為 0–1%。');
   const indexPath = [1], leveredPath = [1];
   for (const r of indexReturns) {

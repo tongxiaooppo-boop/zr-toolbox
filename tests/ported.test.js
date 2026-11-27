@@ -98,6 +98,11 @@ test('unreachable asset-basis target and insolvent equity are rejected', () => {
   assert.equal(betaPlan({ ...beta, target: 2, basis: 'asset', allowBorrow: true }).possible, false);
   assert.throws(() => betaPlan({ ...beta, debt: 20000000 }));
 });
+test('asset basis still works when net worth ≤ 0 (審查 ⑪)', () => {
+  const short = betaPlan({ ...beta, debt: 20000000, basis: 'asset' }); assert.equal(short.possible, false); close(short.shortage, 1400000);
+  const r = betaPlan({ ...beta, debt: 20000000, basis: 'asset', allowBorrow: true });
+  assert.equal(r.possible, true); close(r.targetLever, 20000000 / 3); close(r.achieved, 1.4); close(r.cashAfter, 0);
+});
 test('existing leveraged holdings are subtracted from the target and can be sold', () => {
   const r = betaPlan({ ...beta, lever: 3000000, target: 1 });
   assert.equal(r.possible, true); close(r.targetLever, 1000000); close(r.delta, -2000000); close(r.cashAfter, 4000000);

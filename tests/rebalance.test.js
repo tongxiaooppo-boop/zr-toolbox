@@ -1,7 +1,7 @@
 // ③ 定期配比精靈（v5.8）：多檔＋股數取整。預期值由 Opus 手算，外包不得改。
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { rebalancePlan, guessBeta, WIZARD_TEMPLATES } from '../js/core/rebalance.js';
+import { rebalancePlan, guessBeta, WIZARD_TEMPLATES, nextWeekday } from '../js/core/rebalance.js';
 import { STOCK_NAMES } from '../js/data/stocks.js';
 
 const close = (a, e, eps = 1e-6) => assert.ok(Math.abs(a - e) < eps, `${a} != ${e}`);
@@ -21,7 +21,13 @@ test('rebalance ③ wizard example: 532 stock, 80 萬＋新投入 5 萬 → buy 
   close(r.cashAfter, 170200); close(r.buyAmount, 52100); close(r.sellAmount, 0);
   close(a.nowWeight, .48875); close(b.nowWeight, .295875); close(r.cashWeightNow, .215375); close(r.maxDrift, .015375);
   close(r.exposureNow, 1.0805); close(r.exposureTarget, 1.1); close(r.exposureAfter, 934778.5 / 850000);
-  assert.equal(r.due, '2026-11-08'); assert.equal(r.ready, true);
+  assert.equal(r.calendarDue, '2026-11-08'); assert.equal(r.due, '2026-11-09'); assert.equal(r.ready, true); // 11-08 週日 → 週一
+});
+test('rebalance ③ wizard: due date on a weekend moves to Monday (審查 ③)', () => {
+  assert.equal(rebalancePlan({ ...ex, asOf: '2026-11-08' }).ready, false);
+  assert.equal(nextWeekday('2026-11-07'), '2026-11-09'); assert.equal(nextWeekday('2026-11-06'), '2026-11-06');
+  const r = rebalancePlan({ ...ex, last: '2026-05-11', asOf: '2026-11-11' }); // 11-11 週三，不動
+  assert.equal(r.calendarDue, '2026-11-11'); assert.equal(r.due, '2026-11-11'); assert.equal(r.ready, true);
 });
 test('rebalance ③ wizard: 正二漲到 40 → 零股賣 2,075 股；只用整張 → 0050 不買、00631L 賣 2 張', () => {
   const base = { ...ex, contribution: 0, last: undefined, rows: [ex.rows[0], { ...ex.rows[1], price: 40 }] };

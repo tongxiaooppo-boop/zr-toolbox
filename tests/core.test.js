@@ -149,7 +149,8 @@ test('edge: huge or infinite inputs are rejected instead of producing Infinity',
   assert.equal(fmtPct(1e308), '—');
   assert.throws(() => checkTrigger({ basePrice: Infinity, nowPrice: 1 }));
   assert.throws(() => split5050({ lever: 1e308, cash: 1e308 }));
-  assert.throws(() => simulateDaily([.5, 1.5]));
+  assert.throws(() => simulateDaily([.5, -1]));
+  close(simulateDaily([1.5]).leveredTotal, 3); // 一路同方向：1 天大盤 +150%（審查 ⑥，不再擋單日 >100%）
   assert.deepEqual(simulateDaily([-.6, .9]).leveredPath, [1, 0, 0]);
   assert.throws(() => maxDrawdown([1, Infinity]));
   close(yearsToRecover(.5, 1e-12), Math.log(2) / 1e-12, 1);

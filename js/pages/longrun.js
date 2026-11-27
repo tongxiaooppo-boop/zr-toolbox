@@ -108,6 +108,7 @@ document.getElementById('app').append(
         cell(0, fmtMoney(s.final)), cell(1, signPct(s.ret)), cell(2, signPct(s.cagr)),
         cell(3, `${fmtMoney(s.peak)}（${s.peakDate}）`), cell(4, `${absPct(s.mdd)}（${s.mddDate}）`),
         cell(5, s.trades === 0 ? '不動' : s.trades)))))),
+    h('p', { class: 'muted' }, '買賣次數：第一天買進之後，每一檔買或賣一次算一筆；同一天配回兩檔就算兩筆。0050 長抱的次數是配息買回。'),
     h('p', {}, `正2 三種五五類做法裡，年化最接近的兩種是 ${closest[0].name} 和 ${closest[1].name}，只差 ${(gap * 100).toFixed(1)} 個百分點。`),
     h('h3', {}, '每年報酬'),
     wrap('每年報酬表', h('table', { class: 'yc-table yc-month' }, h('caption', {}, '上市那天投入後，各做法每一年的報酬（%）'),

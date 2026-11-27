@@ -49,7 +49,7 @@ const lump = {
   dates: L.dates, months: L.months, years: L.years,
   series: L.series.map(s => ({ id: s.id, name: s.name, rule: s.rule, values: s.values, final: s.final, ret: s.ret, cagr: s.cagr,
     peak: s.peak, peakDate: s.peakDate, giveback: s.giveback, mdd: s.mdd, mddDate: s.mddDate, years: s.years,
-    dividendTotal: s.dividendTotal, trades: s.events.filter(e => !/配息每股|分割/.test(e.text)).length }))
+    dividendTotal: s.dividendTotal, trades: s.orders }))
 };
 const yearly = [...new Set(dates.map(d => d.slice(0, 4)))].map(y => {
   const slice = days.filter(d => d.date.startsWith(y));

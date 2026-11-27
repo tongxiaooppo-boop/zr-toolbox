@@ -18,6 +18,13 @@ export const TEMPLATES = Object.freeze({
   '442-bond': t('442 債版', 'bond', [.4, .4, .2])
 });
 
+/** 週六、週日往後延到週一（審查 ③，2026-11-27）；國定假日沒有資料，不處理，頁面另外寫。 */
+export function nextWeekday(iso) {
+  const d = dateParts(iso), wd = d.getUTCDay();
+  if (wd === 6) d.setUTCDate(d.getUTCDate() + 2); else if (wd === 0) d.setUTCDate(d.getUTCDate() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
 export function dueDate(last, months) {
   const d = dateParts(last);
   if (![1, 3, 6, 12].includes(months)) throw new Error('請選擇有效的再平衡週期。');
@@ -78,11 +85,12 @@ export function guessBeta(code) {
  *   rows 至少 1 檔；shares 0 或正整數（0＝還沒買、這次要建倉）；price > 0；beta 留白（NaN／undefined）用 guessBeta。
  *   weight、cashWeight 是 0–1 的小數，加總要等於 1（誤差 0.0001 內）。代號不能重複。
  *   unit：1＝可以買賣零股（預設）、1000＝只用整張。
- *   last 有填才算到期：due＝dueDate(last, months)、ready＝asOf ≥ due；沒填 due＝null、ready＝null。
+ *   last 有填才算到期：calendarDue＝dueDate(last, months)；due＝nextWeekday(calendarDue)（遇週六日延到週一）；
+ *   ready＝asOf ≥ due；沒填 calendarDue、due、ready 都是 null。
  * @returns {{
  *   rows:{code, shares, price, beta, weight, value, nowWeight, target, tradeShares, tradeAmount, sharesAfter, valueAfter, weightAfter}[],
  *   total, pool, cashTarget, cashAfter, cashWeightNow, cashWeightAfter,
- *   buyAmount, sellAmount, exposureNow, exposureTarget, exposureAfter, maxDrift, due, ready }}
+ *   buyAmount, sellAmount, exposureNow, exposureTarget, exposureAfter, maxDrift, calendarDue, due, ready }}
  *   total＝持股市值＋現金（新投入前）；pool＝total＋contribution（配回用的總額）；target＝pool×weight。
  *   取整規則：買進無條件捨去、賣出四捨五入（單位＝unit；整張時賣出不超過持有的整張數）。
  *   取整後現金若變負（只有現金比例很低才會發生），從買進金額最大的那檔少買幾單位，直到現金 ≥ 0。
@@ -138,17 +146,17 @@ export function rebalancePlan({ rows, cash, cashWeight, contribution = 0, unit =
     return { code: r.code, shares: r.shares, price: r.price, beta: r.beta, weight: r.weight, value: r.value, nowWeight,
       target: r.target, tradeShares: r.tradeShares, tradeAmount, sharesAfter, valueAfter, weightAfter: valueAfter / pool };
   });
-  let due = null, ready = null;
+  let calendarDue = null, due = null, ready = null;
   if (last) {
     dateParts(last); dateParts(asOf);
     if (asOf < last) throw new Error('今天不能早於上次配回日。');
-    due = dueDate(last, months); ready = asOf >= due;
+    calendarDue = dueDate(last, months); due = nextWeekday(calendarDue); ready = asOf >= due;
   }
   return {
     rows: out, total, pool, cashTarget: pool * cashWeight, cashAfter,
     cashWeightNow: total > 0 ? cash / total : 0, cashWeightAfter: cashAfter / pool,
     buyAmount, sellAmount,
     exposureNow: total > 0 ? expNow / total : 0, exposureTarget: list.reduce((a, r) => a + r.weight * r.beta, 0) ,
-    exposureAfter: expAfter / pool, maxDrift, due, ready
+    exposureAfter: expAfter / pool, maxDrift, calendarDue, due, ready
   };
 }

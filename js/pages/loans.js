@@ -44,7 +44,8 @@ document.getElementById('app').append(
     LOAN_MYTHS.map(m => h('p', { class: 'myth' }, h('strong', {}, '常見誤解：'), m.myth, ' ', h('strong', {}, '其實：'), m.fact))),
   h('section', { class: 'card article', id: 'open' }, h('h2', {}, sections[4][1]),
     h('p', {}, '下面這些是研究時查不到、或不同來源說法不一樣的地方，借之前要直接問銀行或券商。'),
-    h('ul', {}, LOAN_OPEN.map(t => h('li', {}, t)))),
+    h('details', {}, h('summary', {}, `打開看 ${LOAN_OPEN.length} 條還沒查清楚的地方`),
+      h('ul', {}, LOAN_OPEN.map(t => h('li', {}, t))))),
   h('section', { class: 'card article', id: 'tools' }, h('h2', {}, sections[5][1]),
     [['pledge', '押股票借錢，跌多少會被追繳'], ['margin', '融資融券的維持率與追繳價'], ['lifelev', '房貸、信貸、質押加起來，你其實開了幾倍槓桿']].map(([id, text]) =>
       h('p', {}, toolLinks([id]), '：', text))),

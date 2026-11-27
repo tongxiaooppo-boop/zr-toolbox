@@ -23,8 +23,10 @@ export function betaPlan(p) {
   nonnegative([p.ordinary, p.ordinaryBeta, p.lever, p.leverBeta, p.cash, p.debt, p.target, p.minCash]);
   if (p.leverBeta <= 0) throw new Error('正二估計Beta須大於零。');
   const assets = p.ordinary + p.lever + p.cash, net = assets - p.debt;
-  if (net <= 0) throw new Error('淨資產須大於零，才能解讀本頁目標曝險。');
   if (!['net', 'asset'].includes(p.basis)) throw new Error('請選擇曝險分母。');
+  // 審查 ⑪（2026-11-27）：總資產口徑只要總資產 > 0；淨資產 ≤ 0 只擋淨資產口徑
+  if (p.basis === 'net' && net <= 0) throw new Error('淨資產須大於零，才能解讀本頁目標曝險。');
+  if (p.basis === 'asset' && assets <= 0) throw new Error('總資產須大於零。');
   const ordinaryExposure = p.ordinary * p.ordinaryBeta;
   const base = p.basis === 'net' ? net : assets;
   let targetLever = (p.target * base - ordinaryExposure) / p.leverBeta;
