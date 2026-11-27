@@ -1,7 +1,7 @@
 // ⑨ 買賣成本與損益。預期值由 Opus 手算（第 1 組與研究 R2-02 原頁範例一致），外包不得改預期值。
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { tradeCost, brokerFee, taxRate, tickSize, roundUpToTick, guessKind, defaultMinFee } from '../js/core/cost.js';
+import { tradeCost, brokerFee, taxRate, taxExpired, tickSize, roundUpToTick, guessKind, defaultMinFee } from '../js/core/cost.js';
 
 const close = (a, e, eps = 1e-9) => assert.ok(Math.abs(a - e) < eps, `${a} != ${e}`);
 
@@ -21,11 +21,11 @@ test('cost ⑨: ETF 0050 with 2.8 discount — minimum fee 20 kicks in, ETF tax 
 });
 test('cost ⑨: day trade of a stock halves the tax (0.15%); an ETF day trade stays 0.1%', () => {
   const p = { kind: 'stock', shares: 1000, buyPrice: 1000, sellPrice: 1010, discount: 1, minFee: 20 };
-  const d = tradeCost({ ...p, dayTrade: true });
+  const d = tradeCost({ ...p, dayTrade: true, date: '2026-11-27' });
   assert.equal(d.buyTotal, 1001425); assert.deepEqual(d.sell, { amount: 1010000, fee: 1439, tax: 1515, net: 1007046 }); assert.equal(d.profit, 5621);
   const n = tradeCost(p);
   assert.equal(n.sell.tax, 3030); assert.equal(n.profit, 4106);
-  assert.equal(taxRate('etf', true), 0.001); assert.equal(taxRate('stock', true), 0.0015);
+  assert.equal(taxRate('etf', true, '2026-11-27'), 0.001); assert.equal(taxRate('stock', true, '2026-11-27'), 0.0015);
 });
 test('cost ⑨: odd lot of 50 shares with minimum fee 1 and 6 discount', () => {
   const r = tradeCost({ kind: 'stock', shares: 50, buyPrice: 600, sellPrice: 600, discount: 0.6, minFee: 1 });
@@ -39,9 +39,18 @@ test('cost ⑨: without a sell price only the buy side and break-even are comput
 });
 test('cost ⑨: fee floors to whole yuan with a minimum; kinds, bond ETF tax-free, guesses', () => {
   assert.equal(brokerFee(100000), 142); assert.equal(brokerFee(5000), 20); assert.equal(brokerFee(0), 0);
-  assert.equal(taxRate('bond-etf'), 0); assert.throws(() => taxRate('fund'));
+  assert.equal(taxRate('bond-etf', false, '2026-11-27'), 0); assert.throws(() => taxRate('fund'));
   assert.equal(guessKind('00679B'), 'bond-etf'); assert.equal(guessKind('00631L'), 'etf'); assert.equal(guessKind('0050'), 'etf'); assert.equal(guessKind('2330'), 'stock');
-  assert.equal(tradeCost({ kind: 'bond-etf', shares: 1000, buyPrice: 30, sellPrice: 30, discount: 1, minFee: 20 }).sell.tax, 0);
+  assert.equal(tradeCost({ kind: 'bond-etf', shares: 1000, buyPrice: 30, sellPrice: 30, discount: 1, minFee: 20, date: '2026-12-31' }).sell.tax, 0);
+});
+test('cost ⑨（2026-11-27）: 稅率優惠過期後照一般稅率', () => {
+  // 債券 ETF 停徵到 2026-12-31（含）；隔天起 0.1%
+  assert.equal(taxRate('bond-etf', false, '2026-12-31'), 0); assert.equal(taxRate('bond-etf', false, '2027-01-01'), 0.001);
+  assert.equal(tradeCost({ kind: 'bond-etf', shares: 1000, buyPrice: 30, sellPrice: 30, discount: 1, minFee: 20, date: '2027-01-01' }).sell.tax, 30);
+  // 股票當沖 0.15% 到 2027-12-31；之後 0.3%；ETF 當沖一直 0.1%
+  assert.equal(taxRate('stock', true, '2027-12-31'), 0.0015); assert.equal(taxRate('stock', true, '2028-01-01'), 0.003);
+  assert.equal(taxRate('etf', true, '2028-01-01'), 0.001);
+  assert.equal(taxExpired('bond-etf', '2026-12-31'), false); assert.equal(taxExpired('bond-etf', '2027-01-01'), true);
 });
 test('cost ⑨: tick sizes (exchange rule 62) and rounding up to a valid price', () => {
   assert.deepEqual([9.99, 10, 49.95, 50, 99.9, 100, 499.5, 500, 999, 1000].map(x => tickSize(x, 'stock')), [0.01, 0.05, 0.05, 0.1, 0.1, 0.5, 0.5, 1, 1, 5]);

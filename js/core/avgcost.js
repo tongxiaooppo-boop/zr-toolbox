@@ -47,8 +47,8 @@ function summarize(lots, p) {
  *   TargetOk＝{ ok:true, shares, lot:Lot, avgWithFee, totalCost, totalShares }；TargetNo＝{ ok:false, message }
  */
 export function avgCostPlan(p) {
-  const { kind, lots, nowPrice, discount = 1, minFeeBoard = 20, minFeeOdd = 1, add = null, targetAvg } = p;
-  const rate = taxRate(kind);
+  const { kind, lots, nowPrice, discount = 1, minFeeBoard = 20, minFeeOdd = 1, add = null, targetAvg, date } = p;
+  const rate = taxRate(kind, false, date); // date＝賣出日，預設今天（債券 ETF 停徵 2026-12-31 到期）
   if (!Array.isArray(lots) || !lots.length) throw new Error('請至少填一筆買進。');
   if (!(discount > 0 && discount <= 1)) throw new Error('折扣填 0.1–10 折，不打折填 10。');
   if (!(minFeeBoard >= 0) || !(minFeeOdd >= 0)) throw new Error('最低手續費不能是負的。');

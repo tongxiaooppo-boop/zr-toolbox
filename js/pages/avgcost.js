@@ -3,7 +3,7 @@ import { h, toolHeader, selectField, disclaimer, figure } from '../ui/components
 import { wizard, holdingsInput, readHoldings, lotsInput, readLots, tokenBox, numberInput, explain, withHelp } from '../ui/wizard.js';
 import { holdingSummary } from '../core/holdings.js';
 import { avgCostPlan } from '../core/avgcost.js';
-import { guessKind, tickSize, TAX_UNTIL } from '../core/cost.js';
+import { guessKind, tickSize, TAX_UNTIL, taxExpired } from '../core/cost.js';
 import { parseNum, fmtMoney, fmtPct } from '../core/format.js';
 import { STOCK_NAMES } from '../data/stocks.js';
 import { TOOLS } from '../data/tools.js';
@@ -17,7 +17,7 @@ const sh = n => n.toLocaleString('en-US') + ' 股';
 const KIND = [
   { value: 'stock', label: '股票（證交稅 0.3%）' },
   { value: 'etf', label: 'ETF，含 0050、正二（證交稅 0.1%）' },
-  { value: 'bond-etf', label: '債券 ETF（證交稅停徵）' }
+  { value: 'bond-etf', label: taxExpired('bond-etf') ? '債券 ETF（證交稅 0.1%）' : '債券 ETF（證交稅停徵）' }
 ];
 const KIND_NAME = { stock: '股票', etf: 'ETF', 'bond-etf': '債券 ETF' };
 
@@ -138,7 +138,7 @@ function result(s) {
     '賣掉一部分、領現金股利或配股之後，各家券商 App 調整成本均價的方式不同，這裡沒有算。',
     '損益和不虧價都假設一次全部賣出，已扣賣出手續費和證交稅。'
   ];
-  if (s.kind === 'bond-etf') notes.push(`債券 ETF 證交稅停徵到 ${TAX_UNTIL['bond-etf']}，之後可能恢復課徵。`);
+  if (s.kind === 'bond-etf') notes.push(taxExpired('bond-etf') ? `債券 ETF 證交稅停徵到 ${TAX_UNTIL['bond-etf']} 已經結束，這裡照一般 ETF 的 0.1% 算；如果政府延長，本站會再更新。` : `債券 ETF 證交稅停徵到 ${TAX_UNTIL['bond-etf']}；之後賣出，本工具會照一般 ETF 的 0.1% 算（政府延長就再更新）。`);
   if (s.discount < 10) notes.push('如果你的券商是月底退佣，下單當下會先收全額手續費，退回的錢晚點才入帳。');
   out.push(h('div', { class: 'note' }, notes.map(n => h('p', {}, n))));
   return out;

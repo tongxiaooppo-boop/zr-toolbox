@@ -2,7 +2,7 @@
 import { h, toolHeader, selectField, disclaimer, figure } from '../ui/components.js';
 import { wizard, holdingsInput, readHoldings, tokenBox, numberInput, explain, withHelp } from '../ui/wizard.js';
 import { holdingSummary } from '../core/holdings.js';
-import { tradeCost, guessKind, defaultMinFee, tickSize, TAX_UNTIL } from '../core/cost.js';
+import { tradeCost, guessKind, defaultMinFee, tickSize, TAX_UNTIL, taxExpired } from '../core/cost.js';
 import { parseNum, fmtMoney, fmtPct } from '../core/format.js';
 import { STOCK_NAMES } from '../data/stocks.js';
 import { TOOLS } from '../data/tools.js';
@@ -14,7 +14,7 @@ const signed = n => (n >= 0 ? '+' : '−') + fmtMoney(Math.abs(n));
 const KIND = [
   { value: 'stock', label: '股票（證交稅 0.3%）' },
   { value: 'etf', label: 'ETF，含 0050、正二（證交稅 0.1%）' },
-  { value: 'bond-etf', label: '債券 ETF（證交稅停徵）' }
+  { value: 'bond-etf', label: taxExpired('bond-etf') ? '債券 ETF（證交稅 0.1%）' : '債券 ETF（證交稅停徵）' }
 ];
 const KIND_NAME = { stock: '股票', etf: 'ETF', 'bond-etf': '債券 ETF' };
 const DAY = [{ value: 'no', label: '不是，買賣不同天' }, { value: 'yes', label: '是，同一天買進又賣出（現股當沖）' }];
@@ -100,8 +100,8 @@ function result(s) {
       todo: `想不虧，賣單至少掛 ${r.breakEvenTick} 元。` })
   ];
   const notes = [];
-  if (s.kind === 'bond-etf') notes.push(`債券 ETF 證交稅停徵到 ${TAX_UNTIL['bond-etf']}，之後可能恢復課徵。`);
-  if (dayTrade && s.kind === 'stock') notes.push(`股票現股當沖證交稅 0.15% 是減半優惠，到 ${TAX_UNTIL.dayTrade}。`);
+  if (s.kind === 'bond-etf') notes.push(taxExpired('bond-etf') ? `債券 ETF 證交稅停徵到 ${TAX_UNTIL['bond-etf']} 已經結束，這裡照一般 ETF 的 0.1% 算；如果政府延長，本站會再更新。` : `債券 ETF 證交稅停徵到 ${TAX_UNTIL['bond-etf']}；之後賣出，本工具會照一般 ETF 的 0.1% 算（政府延長就再更新）。`);
+  if (dayTrade && s.kind === 'stock') notes.push(taxExpired('dayTrade') ? `股票現股當沖的減半優惠到 ${TAX_UNTIL.dayTrade} 已經結束，這裡照 0.3% 算；如果政府延長，本站會再更新。` : `股票現股當沖證交稅 0.15% 是減半優惠，到 ${TAX_UNTIL.dayTrade}；之後照 0.3% 算。`);
   if (dayTrade && s.kind !== 'stock') notes.push('ETF 當沖沒有減半，證交稅還是 0.1%。');
   if (s.discount < 10) notes.push('如果你的券商是月底退佣，當下會先收全額手續費，退回的錢晚點才入帳。');
   notes.push('股利、借券費、融資利息沒有算進來；實際金額看券商對帳單。');

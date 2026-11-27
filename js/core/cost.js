@@ -1,8 +1,8 @@
 // 工具⑨ 買賣成本與損益（v5，Opus 寫）。純函式。
 // 規則來源（研究 R2-01 證交所 2025 投資指南、R2-02 交易成本工具、R3-04 證交所交易制度）：
 //   手續費＝成交金額 × 0.1425% × 折扣，元以下無條件捨去；低於單筆最低手續費時收最低（整股常見 20 元、零股常見 1 元，依券商）
-//   證交稅＝賣出成交金額 × 稅率，元以下無條件捨去，買進不收：股票 0.3%、ETF 0.1%、債券 ETF 停徵（至 2026-12-31）、
-//           股票現股當沖 0.15%（至 2027-12-31；ETF 當沖仍是 0.1%）
+//   證交稅＝賣出成交金額 × 稅率，元以下無條件捨去，買進不收：股票 0.3%、ETF 0.1%、債券 ETF 停徵（至 2026-12-31，之後 0.1%）、
+//           股票現股當沖 0.15%（至 2027-12-31，之後 0.3%；ETF 當沖仍是 0.1%）；taxRate 依日期判斷（v5.15）
 //   升降單位（營業細則第 62 條）：股票 <10 元 0.01、10–<50 0.05、50–<100 0.1、100–<500 0.5、500–<1000 1、≥1000 5；ETF <50 0.01、≥50 0.05
 // 單位：discount 是小數（2.8 折＝0.28、不打折＝1）；金額為元。
 
@@ -23,9 +23,24 @@ export function guessKind(code) {
 /** 整股（1000 的倍數）預設最低手續費 20 元，零股 1 元 */
 export function defaultMinFee(shares) { return shares >= 1000 && shares % 1000 === 0 ? 20 : 1; }
 
-export function taxRate(kind, dayTrade = false) {
+/** 今天（本地時間）'YYYY-MM-DD' */
+export function today() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+/** 優惠是否已過期：key＝'bond-etf'｜'dayTrade'；date＝交易日 'YYYY-MM-DD'（預設今天） */
+export function taxExpired(key, date = today()) { return date > TAX_UNTIL[key]; }
+
+/**
+ * 證交稅率（2026-11-27 加日期）：優惠過期後照一般稅率算——債券 ETF 2027-01-01 起 0.1%（同一般 ETF）、
+ * 股票現股當沖 2028-01-01 起 0.3%。政府若延長，改 TAX_UNTIL 就好。
+ */
+export function taxRate(kind, dayTrade = false, date = today()) {
   if (!KINDS.includes(kind)) throw new Error('請選擇商品類型：股票、ETF 或債券 ETF。');
-  return kind === 'stock' && dayTrade ? TAX_RATE.dayTrade : TAX_RATE[kind];
+  if (kind === 'bond-etf') return taxExpired('bond-etf', date) ? TAX_RATE.etf : TAX_RATE['bond-etf'];
+  if (kind === 'stock' && dayTrade) return taxExpired('dayTrade', date) ? TAX_RATE.stock : TAX_RATE.dayTrade;
+  return TAX_RATE[kind];
 }
 
 export function tickSize(price, kind) {
@@ -71,15 +86,15 @@ export function breakEvenPrice(cost, shares, kind, rate, { discount = 1, minFee 
 
 /**
  * @param {{kind:'stock'|'etf'|'bond-etf', dayTrade?:boolean, shares:number, buyPrice:number, sellPrice?:number,
- *          discount?:number, minFee?:number}} p  sellPrice 可省略（只算買進與損益兩平）
+ *          discount?:number, minFee?:number, date?:string}} p  sellPrice 可省略（只算買進與損益兩平）；date＝賣出日（預設今天，決定稅率優惠有沒有過期）
  * @returns {{buyAmount, buyFee, buyTotal, rate, sell:null|{amount, fee, tax, net}, totalCost, profit, profitPct,
  *           breakEven, breakEvenTick, feeRate}}
  *   totalCost＝買進手續費＋賣出手續費＋證交稅；profitPct＝profit ÷ buyTotal；
  *   breakEven＝賣出實拿剛好等於買入總成本的理論價；breakEvenTick＝實際掛得出去、而且不虧的最低價位
  */
 export function tradeCost(p) {
-  const { kind, dayTrade = false, shares, buyPrice, sellPrice, discount = 1, minFee = 20 } = p;
-  const rate = taxRate(kind, dayTrade);
+  const { kind, dayTrade = false, shares, buyPrice, sellPrice, discount = 1, minFee = 20, date } = p;
+  const rate = taxRate(kind, dayTrade, date);
   if (!Number.isInteger(shares) || shares <= 0) throw new Error('股數要是正整數（1 張＝1000 股）。');
   if (!(buyPrice > 0)) throw new Error('買入價要大於 0。');
   if (!(discount > 0 && discount <= 1)) throw new Error('折扣填 0.1–10 折，不打折填 10。');
