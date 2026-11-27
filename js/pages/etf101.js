@@ -4,6 +4,9 @@ import { ETF_SECTIONS, ETF_LIMITS, ETF_REFS, FIGURE_TEXT } from '../data/etf101.
 
 const tool = TOOLS.find(t => t.id === 'etf101');
 const FIGS = {
+  trade: { src: '../img/etf101/split.webp', alt: '分割前披薩切少少幾片，分割後同樣大小切很多小片，總價值不變。', caption: '不是賺了，也不是賠了，只是切得比較細。' },
+  leveraged: { src: '../img/decay/two-days.svg', alt: '兩天一漲一跌，大盤和正二各自剩多少（取自 ⑥ 正二不是兩倍）。', caption: '每天 2 倍，不等於整段 2 倍。' },
+  borrow: { src: '../img/loans/call.webp', alt: '三格漫畫：股價下跌、跌破追繳線要補錢、沒補股票會被賣掉（斷頭）。', caption: '押股票借錢，要先知道追繳線在哪。' },
   cost: { src: '../img/etf101/cost.webp', alt: 'ETF 籃子底下的水龍頭滴出硬幣，寫著經理費、保管費（內扣）。', caption: '不會另外寄帳單，淨值已經扣過了。' },
   dividend: { src: '../img/etf101/dividend.webp', alt: '除息前籃子滿滿，除息後籃子少一點、手上多一袋硬幣。', caption: '領到現金，基金的價值也少了同樣的金額。' }
 };

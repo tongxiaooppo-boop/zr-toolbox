@@ -5,6 +5,14 @@
 - `img/yearcheck/giveback.svg`（㉘㉚ 共用）改全站配色：報酬＝`--ok` 紅橘、回吐＝`--bad` 藍灰（原琥珀跟紅橘太像）、主線＝`--brand` 深海軍藍，深色模式同步。tests 212。
 - 115 年度基本生活費 11/27 查仍未公告（中央社 11/27 報的是 114 年度 21.3 萬；外界估 115 年度約 22 萬），`TAX_YEARS[115]` 不動，之後再查。
 - 已確認不必做：「R11 第四節舊壓力測試」只在調研文件，頁面沒有引用。
+- **全站審查（terra 13 組一次問答，Opus 逐條核實）**：約 55 條，一半是 Infinity／1e308 極端輸入（不處理）。成立的：
+  - Opus 修 core：⑯ 估價——不能用的方法（股利 0、EPS／淨值 ≤0）不再強迫填倍數；⑲ 退休——`needPool` 改逐月缺口折現（其他收入不隨通膨，舊式範例少算 75 萬：8,777,360→9,525,118），加 `lastGap`，頁面「夠不夠」改看 pool vs needPool。
+  - ⑨⑮ 證交稅依日期（`taxRate(kind, dayTrade, date)`、`taxExpired`、`today`；使用者同意）：債券 ETF 2027-01-01 起 0.1%、股票當沖 2028-01-01 起 0.3%；政府延長就改 `TAX_UNTIL`。
+  - Codex 修頁面 F1–F8（`collab/to-codex-fixes.md`，Opus 驗收 diff＋PROOF）：⑦ 一次投入比較滾到同一年、自動查價兩個競態、㉖ 文案、③⑬ 文案、⑤④ 改用 `called`／融資跌到 0 不印負價、⑧ 無回撤序列、stress-update 逾時。
+  - 不修（頁面已寫明的簡化）：1,500 股整筆當零股、股利報稅超過 4 人合併、回測沒算最低手續費。
+- **補圖**（`collab/to-codex-figures2.md`，Codex 畫、Opus 逐字核）：㉓ market（含複委託）／match／company、⑳ split；重用 ⑳ two-days.svg、loans/call、㉔ rebalance/comic。⑳ 最長無圖段 2,184→796 字。還偏長：㉓「基金與衍生商品」節沒圖（1,490 字）、㉑「還查不清楚」、㉒ 商品分層。
+- ㉓「市場與帳戶」加 5 詞條（使用者要求）：開戶、複委託、買正2 前要簽的文件、信用戶、借券出借；`check-kepu2` 加 `EXTRA` 白名單、百分比溯源加 R5 商品表／R4。
+- 審查改用 terra（使用者：luna 快下架）。tests 215、smoke 30。
 - 剩：115 基本生活費、Actions 每月更新按鈕（延後）。
 
 ## 2026-11-26 深夜：三桶壓力測試框架（Opus）

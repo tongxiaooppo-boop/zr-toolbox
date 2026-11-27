@@ -7,6 +7,9 @@ const links = ids => h('p', { class: 'related' }, '接著算：', ids.map((id, i
   return [i ? '、' : '', h('a', { href: id + '.html' }, no + ' ' + title)];
 }));
 const FIGS = {
+  market: { src: '../img/basics/market.webp', alt: '買台股：證券戶用來下單、交割銀行戶買股扣款賣股入帳、集保帳戶存股票，箭頭相連。買海外股票：在同一家券商另外申請複委託戶，要簽風險預告和稅務文件。', caption: '買台股開三個戶頭；買美股要再開複委託。' },
+  match: { src: '../img/basics/match.webp', alt: '排隊買股票：價格優先，出價高的排前面；時間優先，價格一樣先來的排前面。', caption: '想買到，價格要夠；價格一樣，就看誰先掛。' },
+  company: { src: '../img/basics/company.webp', alt: '天平：一邊是市值大的公司，一邊是好幾家市值小的公司，大公司那邊比較重。', caption: '大盤漲跌，主要看大公司。' },
   settle: { src: '../img/basics/settle.webp', alt: '時間線：T 日成交、T+1、T+2 上午 10 點前交割帳戶要有錢；錢不夠＝違約交割。', caption: '成交後第 2 個營業日扣款。' }
 };
 const q = h('input', { type: 'search', placeholder: '輸入關鍵字，例如 交割、漲跌停', class: 'glossary-filter', 'aria-label': '篩選術語' });
