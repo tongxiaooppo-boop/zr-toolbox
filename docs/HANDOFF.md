@@ -9,7 +9,7 @@
   - ㉚ 買賣次數：`runBacktest` 每個 series 加 `orders`（第一天之後的成交筆數，配回「不用調整」不算）；`longrun-update.mjs` 改用它，用同一結束日 2026-11-25 重產 `js/data/longrun.js`，其他欄位逐一比對完全相同，只有 532 季配 40→80；頁面表下加一行說明。
 - `00-風格與角色.md` 配色改成新配色（不用綠）；舊圖不重生（使用者定）。之後任務書不用再寫「配色覆蓋」。
 - ㉑ loans「還查不清楚的地方」17 條改成預設收合（`<details>`），不配圖。
-- **補圖第三批任務書** `collab/to-codex-figures3.md` v1 已寫好，**待使用者在 Codex 面板派工**：㉓ fund 節一張（申購贖回／買權賣權／到期日）、㉓ `leveraged-sign` 詞條前一張（買正2／融資／借券各要多做什麼，新增 `TERM_FIGS`）、㉒「先弄懂再碰」「新手不建議」兩層各一張（新增 `LEVEL_FIGS`）。回來後 Opus：跑 PROOF_CMD、逐字核圖、smoke。
+- **補圖第三批完成**（Codex 照 `collab/to-codex-figures3.md` v1 做；Opus 驗收：diff 只有指定插入、PROOF OK、4 張圖逐字核對一致無綠色、tests 218、smoke 30）：㉓ fund 節一張（申購贖回／買權賣權／到期日）、㉓ `leveraged-sign` 詞條前一張（買正2／融資／借券各要多做什麼，新增 `TERM_FIGS`）、㉒「先弄懂再碰」「新手不建議」兩層各一張（新增 `LEVEL_FIGS`）。
 - tests 218、smoke 30。**尚未 push**（使用者：先不 push，改完再說）。
 - 其他待辦不變：115 基本生活費、Actions 每月更新按鈕（延後）。「最長無圖段」量測腳本還沒重寫，補圖回來後要量再寫（scratchpad）。
 

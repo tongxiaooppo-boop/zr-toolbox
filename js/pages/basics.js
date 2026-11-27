@@ -10,14 +10,18 @@ const FIGS = {
   market: { src: '../img/basics/market.webp', alt: '買台股：證券戶用來下單、交割銀行戶買股扣款賣股入帳、集保帳戶存股票，箭頭相連。買海外股票：在同一家券商另外申請複委託戶，要簽風險預告和稅務文件。', caption: '買台股開三個戶頭；買美股要再開複委託。' },
   match: { src: '../img/basics/match.webp', alt: '排隊買股票：價格優先，出價高的排前面；時間優先，價格一樣先來的排前面。', caption: '想買到，價格要夠；價格一樣，就看誰先掛。' },
   company: { src: '../img/basics/company.webp', alt: '天平：一邊是市值大的公司，一邊是好幾家市值小的公司，大公司那邊比較重。', caption: '大盤漲跌，主要看大公司。' },
+  fund: { src: '../img/basics/fund.webp', alt: '三件事：怎麼取得（申購是向基金公司買新發行的單位，交易所是向別的投資人買；贖回把單位交還換回錢，可能比本金少）、契約給你什麼權利（買權照約定價格買進、賣權照約定價格賣出，權利金是買權利的價錢）、什麼時候到期（到期日）。有期限的商品，不能一直等回本。', caption: '先看怎麼取得、有什麼權利、哪天到期。' },
   settle: { src: '../img/basics/settle.webp', alt: '時間線：T 日成交、T+1、T+2 上午 10 點前交割帳戶要有錢；錢不夠＝違約交割。', caption: '成交後第 2 個營業日扣款。' }
+};
+const TERM_FIGS = {
+  'leveraged-sign': { src: '../img/basics/sign.webp', alt: '先有證券戶，再分三條：買正2 要簽風險預告書、符合一項資格；融資融券要另外開信用戶、簽信用交易契約；借券出借要向券商申請，被借走才收費。', caption: '簽了只代表知道風險，不代表適合重押。' }
 };
 const q = h('input', { type: 'search', placeholder: '輸入關鍵字，例如 交割、漲跌停', class: 'glossary-filter', 'aria-label': '篩選術語' });
 const count = h('p', { class: 'muted', role: 'status', 'aria-live': 'polite' });
 const sections = BASIC_SECTIONS.map(s => {
   const items = s.terms.map(t => ({
     search: [t.term, t.plain, t.example].join('\n').toLowerCase(),
-    el: h('div', { class: 'basic-item', id: t.id }, h('h3', {}, t.term),
+    el: h('div', { class: 'basic-item', id: t.id }, TERM_FIGS[t.id] ? figure(TERM_FIGS[t.id]) : null, h('h3', {}, t.term),
       h('p', {}, t.plain), h('p', { class: 'muted' }, t.example),
       h('p', { class: 'myth' }, h('strong', {}, '常見誤解：'), t.myth, ' ', h('strong', {}, '其實：'), t.fact),
       t.tools.length ? links(t.tools) : null)

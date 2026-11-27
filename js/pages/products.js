@@ -4,6 +4,10 @@ import { LEVELS, PRODUCTS, WAYS, PRODUCT_LIMITS, PRODUCT_REFS, FIGURE_TEXT } fro
 
 const tool = TOOLS.find(t => t.id === 'products');
 const sections = [['ways', '錢是怎麼賺來的'], ['levels', '新手從哪裡開始'], ['limits', '這頁的限制']];
+const LEVEL_FIGS = {
+  careful: { src: '../img/products/careful.webp', alt: '買之前先答三題：它怎麼運作？交割和費用怎麼算？最壞會虧多少？答不出來，就先別買。', caption: '答不出來，就先別買。' },
+  no: { src: '../img/products/no.webp', alt: '四個警示牌：有到期日、有槓桿、要借錢、規則很複雜；有些虧損會比保證金還多。', caption: '看到這些先停下來。' }
+};
 const links = ids => h('p', { class: 'related' }, '接著算：', ids.map((id, i) => {
   const { no, title } = TOOLS.find(t => t.id === id);
   return [i ? '、' : '', h('a', { href: id + '.html' }, no + ' ' + title)];
@@ -21,7 +25,7 @@ document.getElementById('app').append(
     WAYS.map(w => [h('h3', {}, w.name), h('p', {}, w.plain), h('p', { class: 'muted' }, '哪些商品有：', w.products, ' 要注意：', w.cost)])),
   h('section', { class: 'card article', id: 'levels' }, h('h2', {}, sections[1][1]),
     figure({ src: '../img/products/map.webp', alt: FIGURE_TEXT.map, caption: '按複雜度和最壞損失分層，不是主管機關評等。' }),
-    LEVELS.map(level => [h('h3', {}, level.title), h('p', {}, level.line),
+    LEVELS.map(level => [h('h3', {}, level.title), LEVEL_FIGS[level.id] ? figure(LEVEL_FIGS[level.id]) : null, h('p', {}, level.line),
       PRODUCTS.filter(p => p.level === level.id).map(p => h('details', { class: 'product' },
         h('summary', {}, h('strong', {}, p.name), ' ', p.plain),
         h('dl', {}, [['how', '怎麼買'], ['earn', '怎麼賺'], ['lose', '怎麼虧（最壞）'], ['cost', '成本與稅']].map(([key, title]) => [h('dt', {}, title), h('dd', {}, p[key])])),

@@ -1,7 +1,7 @@
 // Service worker：安裝時把整站存進手機（全部離線可用、不靠 GitHub）；平常先連網、連不上才用快取（network-first）。
 // VERSION 與 PRECACHE 由 scripts/gen-precache.mjs 產生，改了網站任何檔案後要重跑（tests/pwa.test.js 會檢查）。
 // 網站一改 VERSION 就變 → 手機下次連網時裝新版 service worker、重新下載整份；連不上就繼續用手機裡那份。
-const VERSION = '56dda492f6eb';
+const VERSION = 'cdb5d5ee4da9';
 const CACHE = 'zr-toolbox-' + VERSION;
 const PRECACHE = ["./",
   "css/app.css",
@@ -11,10 +11,12 @@ const PRECACHE = ["./",
   "img/avgcost/step1.webp",
   "img/basics/comic.webp",
   "img/basics/company.webp",
+  "img/basics/fund.webp",
   "img/basics/map.webp",
   "img/basics/market.webp",
   "img/basics/match.webp",
   "img/basics/settle.webp",
+  "img/basics/sign.webp",
   "img/common/help-avg-cost.svg",
   "img/common/step-holdings.svg",
   "img/cost/comic.webp",
@@ -68,8 +70,10 @@ const PRECACHE = ["./",
   "img/pledge/step2-debt.svg",
   "img/pledge/step2.webp",
   "img/pledge/step3-ratio-scale.svg",
+  "img/products/careful.webp",
   "img/products/comic.webp",
   "img/products/map.webp",
+  "img/products/no.webp",
   "img/rebalance/532-stock.svg",
   "img/rebalance/comic.webp",
   "img/rebalance/step1.webp",
