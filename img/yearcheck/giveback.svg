@@ -3,25 +3,25 @@
   <desc id="desc">示意折線：從「投入」起點往上到「最高點」，再往下到「現在」。最高點到現在之間的向下箭頭標「回吐」，起點到現在之間標「報酬」。</desc>
   <style>
     svg { font-family: -apple-system, "Segoe UI", "Noto Sans TC", sans-serif; }
-    text { font-size: 12px; fill: #1c2330; }
-    .line { fill: none; stroke: #2563eb; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-    .dot { fill: #2563eb; }
+    text { font-size: 12px; fill: #14213d; }
+    .line { fill: none; stroke: #1f3a68; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+    .dot { fill: #1f3a68; }
     .base { stroke: #9aa3b2; stroke-width: 1; stroke-dasharray: 4 4; }
-    .give { stroke: #b45309; stroke-width: 2; fill: none; }
-    .give-head { fill: #b45309; }
-    .gain { stroke: #15803d; stroke-width: 2; fill: none; }
-    .gain-head { fill: #15803d; }
-    .give-text { fill: #b45309; font-weight: 700; }
-    .gain-text { fill: #15803d; font-weight: 700; }
+    .give { stroke: #3d4f7a; stroke-width: 2; fill: none; }
+    .give-head { fill: #3d4f7a; }
+    .gain { stroke: #c2410c; stroke-width: 2; fill: none; }
+    .gain-head { fill: #c2410c; }
+    .give-text { fill: #3d4f7a; font-weight: 700; }
+    .gain-text { fill: #c2410c; font-weight: 700; }
     @media (prefers-color-scheme: dark) {
-      text { fill: #e8ebf0; }
-      .line { stroke: #6ea0ff; }
-      .dot { fill: #6ea0ff; }
+      text { fill: #f1f4fa; }
+      .line { stroke: #8fb4ff; }
+      .dot { fill: #8fb4ff; }
       .base { stroke: #9aa3b2; }
-      .give { stroke: #fbbf24; }
-      .give-head, .give-text { fill: #fbbf24; }
-      .gain { stroke: #4ade80; }
-      .gain-head, .gain-text { fill: #4ade80; }
+      .give { stroke: #aebde3; }
+      .give-head, .give-text { fill: #aebde3; }
+      .gain { stroke: #ff9e7a; }
+      .gain-head, .gain-text { fill: #ff9e7a; }
     }
   </style>
   <line class="base" x1="20" y1="150" x2="340" y2="150"/>
