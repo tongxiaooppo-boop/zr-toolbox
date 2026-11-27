@@ -27,7 +27,7 @@ const meanings = {
   conservative: '你最在意本金不要虧。先把保守（先留）的錢留足，要投資的部分以穩健桶為主，少量放成長。',
   balanced: '你能接受一些漲跌，但不想大起大落。一半放穩健，其餘放成長和少量積極。',
   growth: '你願意承受較大的漲跌換取長期成長。一半放成長型 ETF，其餘依你能承受的虧損分配。',
-  aggressive: '你能承受很大的波動，也期待較高報酬。一半放積極部位，但要先想清楚最壞情況。'
+  aggressive: '你能承受很大的波動，也期待較高報酬。積極部位放得比較多（年輕時是一半），但要先想清楚最壞情況。'
 };
 const reminders = [
   '正2（00631L）風險等級 RR5，是最高等級。官方把它定位成策略交易型商品，不是設計來長期持有的。',
@@ -98,7 +98,7 @@ function result(s) {
   const count = r.zr.checks.filter(c => c.ok).length;
   let how = `10 題加總 ${r.total} 分（保守 10–24、穩健 25–33、成長 34–38、積極 39–50）。`;
   if (r.caps.length) how += `總分本來是${PROFILES.find(profile => profile.key === r.scoreKey).label}，但` + r.caps.map(c => c.text).join('');
-  let allocationHow = '依你的型態與年齡查表：每一型的主力桶占一半，年紀越大積極桶越少、移到穩健桶。';
+  let allocationHow = '依你的型態與年齡查表：年紀越大，積極桶越少、移到穩健桶。';
   if (p.row === 'growthHigh') allocationHow += '第 8 題你能接受虧 30% 以上，所以積極桶放多一些。';
   if (p.row === 'growthLow') allocationHow += '第 8 題你能接受的虧損在 20% 以內，所以穩健桶放多一些。';
   const reserve = reservePlan({ cash: s.a[2], horizon: s.a[5] });

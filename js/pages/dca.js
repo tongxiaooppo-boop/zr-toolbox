@@ -184,9 +184,11 @@ function result(s) {
   if (s.stage2 === 'no') {
     const single = dcaPlan({ initial: s.initial, monthly: s.monthly, years: s.years, annualReturn: s.ret / 100, timing: s.timing,
       stepUp: s.stepUp / 100, discount: s.discount / 10, minFee: s.minFee, holdYears: s.holdYears, holdReturn: hr / 100 });
+    const lumpValue = s.holdYears > 0 ? single.lumpValue * Math.pow(1 + hr / 100, s.holdYears) : single.lumpValue;
     out.push(
-      explain({ label: '如果一開始一次投入', value: fmtMoney(single.lumpValue),
-        how: `同樣 ${fmtMoney(single.principal)} 第一天全部投入：${fmtMoney(single.principal)} × (1＋${s.ret}%)^${s.years}；扣一次手續費 ${fmtMoney(single.lumpFee)}，賺 ${signed(single.lumpGain)}。`,
+      explain({ label: '如果一開始一次投入', value: fmtMoney(lumpValue),
+        how: s.holdYears > 0 ? `同樣 ${fmtMoney(single.principal)} 第一天全部投入：${fmtMoney(single.principal)} × (1＋${s.ret}%)^${s.years}，停扣後再 × (1＋${hr}%)^${s.holdYears}，算到第 ${s.years + s.holdYears} 年；扣一次手續費 ${fmtMoney(single.lumpFee)}，賺 ${signed(lumpValue - single.principal - single.lumpFee)}。`
+          : `同樣 ${fmtMoney(single.principal)} 第一天全部投入：${fmtMoney(single.principal)} × (1＋${s.ret}%)^${s.years}；扣一次手續費 ${fmtMoney(single.lumpFee)}，賺 ${signed(single.lumpGain)}。`,
         means: s.ret > 0 ? '報酬為正時，越早投入滾越久，所以一次投入比較多；但前提是錢一開始就在手上，定期定額通常是因為每月才有薪水。'
           : s.ret < 0 ? '報酬為負時，分批投入虧得比較少。' : '報酬為 0 時兩種一樣，只差手續費。' }),
       explain({ label: '年化報酬別算錯', value: fmtPct(s.ret / 100, 2), tone: 'warn',

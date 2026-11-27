@@ -98,7 +98,8 @@ function result(s) {
   const hasBase = r.base !== null;
   const out = [];
   if (r.drop === 0) {
-    out.push(explain({ label: '沒有虧', value: r.up > 0 ? '現在比' + what + '高 ' + fmtPct(r.up) : '剛好回到' + (what || '原本水準'), tone: 'ok',
+    out.push(explain({ label: '沒有虧', value: s.mode === 'series' && r.mdd === 0 ? '這串紀錄沒有跌過' : r.up > 0 ? '現在比' + what + '高 ' + fmtPct(r.up) : '剛好回到' + (what || '原本水準'), tone: 'ok',
+      how: s.mode === 'series' && r.mdd === 0 ? '每一筆都不比前面的最高點低，最大跌幅是 0。' : undefined,
       means: '不用回本。可以把買入價換成最高點再算一次，看離最高點多遠。' }));
   } else {
     out.push(

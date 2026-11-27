@@ -296,12 +296,13 @@ function holdingRow(r = {}, onRemove, side = 'long') {
   const buy = h('input', { class: 'h-buy', type: 'text', inputmode: 'decimal', autocomplete: 'off', placeholder: '例：165.2', value: show(r.buyPrice), 'aria-label': t.buy[0] });
   const now = h('input', { class: 'h-now', type: 'text', inputmode: 'decimal', autocomplete: 'off', placeholder: '輸入代號後自動帶入', value: show(r.nowPrice), 'aria-label': '現價' });
   let seq = 0;
+  now.addEventListener('input', () => { ++seq; });
   code.addEventListener('change', async () => {
+    const my = ++seq;
     const c = normalizeCode(code.value);
     name.textContent = STOCK_NAMES[c] || '';
     if (!c) { status.textContent = code.value.trim() ? '代號格式不對，例：0050、00631L。' : ''; return; }
     code.value = c;
-    const my = ++seq;
     status.textContent = `查詢 ${c} 最近收盤價…`;
     const r = await fetchClose(c, { token: getToken() });
     if (my !== seq) return; // 使用者已經改了代號
@@ -366,6 +367,7 @@ export function betaHoldingsInput({ id, rows = [{}], kind = 'stock', max = kind 
     const price = input('price', '輸入代號後自動帶入', '現價（元）');
     const beta = input('beta', guessed ? '' : lever ? '2' : '1', 'Beta');
     let seq = 0;
+    price.addEventListener('input', () => { ++seq; });
     code.addEventListener('change', async () => {
       const my = ++seq, c = normalizeCode(code.value);
       name.textContent = STOCK_NAMES[c] || '';

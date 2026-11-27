@@ -76,7 +76,7 @@ function result(s) {
   const { summary } = r, many = summary.rows.length > 1;
   const debtText = r.interest > 0.5 ? `借款 ${fmtMoney(s.debt)}＋${days} 天利息 ${fmtMoney(r.interest)}` : `借款 ${fmtMoney(s.debt)}`;
   const qText = s.q < 100 ? ` × 認列 ${s.q}%` : '';
-  const under = r.callDrop <= 0;
+  const under = r.called;
   const out = [
     explain({ label: '擔保品現在值多少', value: fmtMoney(summary.value),
       how: summary.rows.map(x => `${named(x.code)}：${x.shares.toLocaleString('en-US')} 股 × ${x.nowPrice} 元＝${fmtMoney(x.value)}`).join('；') + (many ? '，加起來。' : '。'),

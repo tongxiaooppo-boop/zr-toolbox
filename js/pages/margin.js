@@ -115,14 +115,14 @@ function result(s) {
     how: `${fmtMoney(r.debt)} − ${fmtMoney(r.collateral)} ÷ ${s.target}%。還錢讓分母變小。`,
     means: r.repayEnough ? `同樣回到 ${s.target}%，還融資要的錢比補現金少，但融資部位會變小。`
       : `要還的比融資金額 ${fmtMoney(r.loan)} 還多，光還融資補不回去，要補現金或買回融券的股票。` }));
-  if (L) out.push(explain({ label: '融資股票再跌多少會被追繳', value: r.longDrop > 0 ? fmtPct(r.longDrop, 2) : '已經低於追繳線',
-    tone: r.longDrop > 0.1 ? 'ok' : r.longDrop > 0 ? 'warn' : 'bad',
-    how: (r.longDrop > 0 ? `假設融資的股票一起跌${s.kind === 'both' ? '、融券的股票不動' : ''}，維持率碰到 ${s.call}% 的參考價：`
+  if (L) out.push(explain({ label: '融資股票再跌多少會被追繳', value: r.called ? '已經低於追繳線' : r.longDrop >= 1 ? '跌到 0 也不會被追繳' : fmtPct(r.longDrop, 2),
+    tone: r.called ? 'bad' : r.longDrop >= 1 ? 'ok' : r.longDrop > 0.1 ? 'ok' : 'warn',
+    how: r.longDrop >= 1 ? `融券那邊的擔保夠多，融資的股票就算跌到 0，維持率也不會碰到 ${s.call}%。` : (r.longDrop > 0 ? `假設融資的股票一起跌${s.kind === 'both' ? '、融券的股票不動' : ''}，維持率碰到 ${s.call}% 的參考價：`
       : `${s.kind === 'both' ? '融券的股票不動時，' : ''}融資的股票要漲回這個價格以上，維持率才回到 ${s.call}%：`) +
       r.perStock.filter(p => p.side === 'long').map(p => `${named(p.code)} ${p.callPrice.toFixed(2)} 元（比買進價 ${pctSigned(p.vsEntry)}）`).join('；') + '。',
     means: '維持率是券商收盤後才算的，實際看券商通知。融資 6 成時，大約從買進價跌 22% 就碰到 130%。' }));
-  if (S) out.push(explain({ label: '融券股票再漲多少會被追繳', value: r.shortRise > 0 ? fmtPct(r.shortRise, 2) : '已經低於追繳線',
-    tone: r.shortRise > 0.1 ? 'ok' : r.shortRise > 0 ? 'warn' : 'bad',
+  if (S) out.push(explain({ label: '融券股票再漲多少會被追繳', value: r.called ? '已經低於追繳線' : fmtPct(r.shortRise, 2),
+    tone: r.called ? 'bad' : r.shortRise > 0.1 ? 'ok' : 'warn',
     how: (r.shortRise > 0 ? `假設融券的股票一起漲${s.kind === 'both' ? '、融資的股票不動' : ''}，維持率碰到 ${s.call}% 的參考價：`
       : `${s.kind === 'both' ? '融資的股票不動時，' : ''}融券的股票要跌回這個價格以下，維持率才回到 ${s.call}%：`) +
       r.perStock.filter(p => p.side === 'short').map(p => `${named(p.code)} ${p.callPrice.toFixed(2)} 元（比融券賣出價 ${pctSigned(p.vsEntry)}）`).join('；') + '。',

@@ -30,7 +30,7 @@ const PROXY_TEXT = {
   '00757': 'QQQ（Nasdaq-100）還原價×匯率'
 };
 
-const TIMEOUT = { signal: AbortSignal.timeout(60e3) };
+const timeout = () => ({ signal: AbortSignal.timeout(60e3) });
 async function finmind(ds, id) {
   const url = `https://api.finmindtrade.com/api/v4/data?dataset=${ds}&data_id=${id}&start_date=${START}&end_date=${end}`;
   const j = await (await fetch(url, { signal: AbortSignal.timeout(60e3) })).json();
@@ -49,7 +49,7 @@ async function yahoo(sym) {
   return out;
 }
 async function fred() {
-  const text = await (await fetch(`https://fred.stlouisfed.org/graph/fredgraph.csv?id=DEXTAUS&cosd=${START}&coed=${end}`, TIMEOUT)).text();
+  const text = await (await fetch(`https://fred.stlouisfed.org/graph/fredgraph.csv?id=DEXTAUS&cosd=${START}&coed=${end}`, timeout())).text();
   const out = {};
   for (const line of text.trim().split('\n').slice(1)) { const [d, v] = line.split(','); if (Number(v) > 0) out[d] = Number(v); }
   if (Object.keys(out).length < 1000) throw new Error('FRED DEXTAUS 資料太少：' + text.slice(0, 200));
